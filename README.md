@@ -8,19 +8,6 @@ Filter line for current opening file by strings/regular expressions, generating 
 2. Filter line by input regular expression (or not match input regular expression).
 3. Filter line by config file `filterline.json`(or `filterline.eoml`) in corresponding `.vscode` directory.
 
-## Articles
-
-- [Introduce](https://medium.com/@everettjf/vscode-extension-filter-line-ec4250c49a92)
-- [中文介绍](https://everettjf.github.io/2018/07/03/vscode-extension-filter-line/)
-
-## Install
-
-1. [Marketplace](https://marketplace.visualstudio.com/items?itemName=everettjf.filter-line)
-2. Search `Filter Line` in vscode extensions.
-
-![search](img/search.png)
-
-
 ## Usage
 
 ![list](img/commandlist.png)
@@ -75,6 +62,6 @@ There are 3 format types. As they are so simple, I will not describe them here. 
 
 ## Replacement
 
-Command line replacement for this extension : [filterline](https://github.com/everettjf/filterline)
+Command line replacement for this extension : [filterline](https://github.com/liangjunheng/vscode-filter-line)
 
-**Enjoy!**
+**Power by https://github.com/everettjf/filterline**

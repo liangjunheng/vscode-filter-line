@@ -1,9 +1,9 @@
 {
-    "name": "filter-line",
-    "displayName": "Filter Line",
+    "name": "filter-line-pro",
+    "displayName": "Filter Line Pro",
     "description": "Filter line by strings or regular expressions",
     "version": "3.0.1",
-    "publisher": "everettjf, junheng.liang",
+    "publisher": "liangjunheng",
     "license": "MIT",
     "engines": {
         "vscode": "^1.100.0"
@@ -83,9 +83,9 @@
             "properties": {
                 "filter-line.historySize": {
                     "type": "integer",
-                    "default": 10,
+                    "default": 50,
                     "minimum": 1,
-                    "maximum": 50,
+                    "maximum": 500,
                     "scope": "application",
                     "description": "Filter patterns history size"
                 },
@@ -115,14 +115,14 @@
     },
     "icon": "images/icon.png",
     "bugs": {
-        "url": "https://github.com/everettjf/vscode-filter-line/issues",
-        "email": "everettjf@live.com"
+        "url": "https://github.com/liangjunheng/vscode-filter-line/issues",
+        "email": "junheng.liang@outlook.com"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/everettjf/vscode-filter-line.git"
+        "url": "https://github.com/liangjunheng/vscode-filter-line.git"
     },
-    "homepage": "https://github.com/everettjf/vscode-filter-line",
+    "homepage": "https://github.com/liangjunheng/vscode-filter-line",
     "dependencies": {
         "eoml": "^1.0.2"
     }
