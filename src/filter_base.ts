@@ -2,6 +2,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import {debounce} from './util';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
@@ -57,19 +58,24 @@ class FilterLineBase{
         }
 
         let usrChoice: string | undefined = undefined;
-        let picks: Array<string> = [...this.history[key]];
         const quickPick = vscode.window.createQuickPick();
+        let picks: Array<string> = [...this.history[key]];
         quickPick.items = picks.map(h => ({ label: h }));
         quickPick.title = title;
         quickPick.placeholder = description;
         // When the user inputs new content into the QuickPick input box
-        quickPick.onDidChangeValue(value => {
-            console.log("user inputing:", value);
-            // show history
-            quickPick.items = picks
-                .filter(h => h.includes(value))
-                .map(h => ({ label: h }));
-        });
+        quickPick.onDidChangeValue(
+            debounce((value: string) => {
+                console.log("user inputing:", value);
+                let filterHistoryPacks = picks
+                    .filter(h => h.includes(value))
+                    .map(h => ({ label: h }));
+                if (filterHistoryPacks.length > 0 && value && !picks.includes(value) {
+                    filterHistoryPacks.unshift({ label: value });
+                }
+                quickPick.items = filterHistoryPacks;
+            }, 50)
+        );
         usrChoice = await new Promise((resolve) => {
             quickPick.onDidAccept(() => {
                 const selection = quickPick.selectedItems[0];
