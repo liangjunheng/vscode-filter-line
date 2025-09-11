@@ -2,8 +2,8 @@
     "name": "filter-line",
     "displayName": "Filter Line",
     "description": "Filter line by strings or regular expressions",
-    "version": "2.0.1",
-    "publisher": "everettjf",
+    "version": "3.0.1",
+    "publisher": "everettjf, junheng.liang",
     "license": "MIT",
     "engines": {
         "vscode": "^1.100.0"
@@ -46,6 +46,20 @@
             {
                 "command": "extension.filterLineBy",
                 "title": "Filter Line By..."
+            }
+        ],    
+        "keybindings": [
+            {
+                "command": "extension.filterLineByInputRegex",
+                "key": "alt+f",
+                "mac": "alt+f",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.filterLineByNotMatchInputRegex",
+                "key": "alt+shift+f",
+                "mac": "alt+shift+f",
+                "when": "editorTextFocus"
             }
         ],
         "menus": {
