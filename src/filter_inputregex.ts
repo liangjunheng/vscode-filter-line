@@ -19,7 +19,11 @@ class FilterLineByInputRegex extends FilterLineBase{
     }
 
     protected async prepare(callback : (succeed: boolean)=>void){
-        const usrChoice: string = await this.showHistoryPick(this.HIST_KEY);
+        let title = "filter to lines machting(regex)"
+        if(this.notmatch) {
+            title = "filter to lines not machting(regex)"
+        }
+        const usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
 
         const makeRegEx = async (text: string | undefined) => {
             if(text === undefined || text === ''){

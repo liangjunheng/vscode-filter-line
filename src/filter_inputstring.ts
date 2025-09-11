@@ -19,7 +19,11 @@ class FilterLineByInputString extends FilterLineBase{
     }
 
     protected async prepare(callback : (succeed: boolean)=>void){
-        let usrChoice: string = await this.showHistoryPick(this.HIST_KEY);
+        let title = "filter to lines machting(string)"
+        if(this.notcontain) {
+            title = "filter to lines not machting(string)"
+        }
+        let usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
 
         const makeInputStr = (text: string | undefined) => {
             if(text === undefined || text === ''){

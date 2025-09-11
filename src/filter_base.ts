@@ -50,18 +50,41 @@ class FilterLineBase{
         }
     }
 
-    protected async showHistoryPick(key: string) : Promise<string> {
+    protected async showHistoryPick(key: string, title: string, description: string) : Promise<string> {
         if (this.history[key] === undefined) {
             console.warn(`History doesn't contain '${key}' field`);
             return this.NEW_PATTERN_CHOISE;
         }
 
         let usrChoice: string | undefined = undefined;
-        if (this.history[key].length) {
-            let picks: Array<string> = [...this.history[key]];
-            picks.push(this.NEW_PATTERN_CHOISE);
-            usrChoice = await vscode.window.showQuickPick(picks);
-        }
+        let picks: Array<string> = [...this.history[key]];
+        const quickPick = vscode.window.createQuickPick();
+        quickPick.items = picks.map(h => ({ label: h }));
+        quickPick.title = title;
+        quickPick.placeholder = description;
+        // When the user inputs new content into the QuickPick input box
+        quickPick.onDidChangeValue(value => {
+            console.log("user inputing:", value);
+            // show history
+            quickPick.items = picks
+                .filter(h => h.includes(value))
+                .map(h => ({ label: h }));
+        });
+        usrChoice = await new Promise((resolve) => {
+            quickPick.onDidAccept(() => {
+                const selection = quickPick.selectedItems[0];
+                const finalValue = selection ? selection.label : quickPick.value;
+                console.log("user input result:", finalValue);
+                quickPick.hide();
+                resolve(finalValue);
+            });
+
+            quickPick.onDidHide(() => {
+                quickPick.dispose();
+                resolve('');
+            });
+            quickPick.show()
+        });
         return (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice;
     }
 
