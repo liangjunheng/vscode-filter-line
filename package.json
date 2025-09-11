@@ -74,6 +74,12 @@
                     "maximum": 50,
                     "scope": "application",
                     "description": "Filter patterns history size"
+                },
+                "filter-line.enableOverwriteMode": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "application",
+                    "description": "enable reuse the same tab line filter"
                 }
             }
         }

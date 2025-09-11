@@ -28,6 +28,10 @@ class FilterLineBase{
         return vscode.workspace.getConfiguration('filter-line').get('historySize', 10);
     }
 
+    protected isEnableOverwriteMode(): boolean {
+        return vscode.workspace.getConfiguration('filter-line').get('enableOverwriteMode', false);
+    }
+
     protected async addToHistory(key: string, newEl: string) {
         if (this.history[key] === undefined) {
             console.warn(`History doesn't contain '${key}' field`);
@@ -168,8 +172,7 @@ class FilterLineBase{
         let tail = '.filterline' + ext;
 
         // overwrite mode ?
-        let isOverwriteMode = inputPath.indexOf(tail) !== -1;
-
+        let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1);
         let outputPath = '';
         if (isOverwriteMode) {
             outputPath = inputPath;
@@ -193,7 +196,7 @@ class FilterLineBase{
             console.log('after rename');
             inputPath = newInputPath;
         } else {
-            outputPath = inputPath + tail;
+            outputPath = inputPath +'.' + Date.now() + tail;
 
             if(fs.existsSync(outputPath)){
                 console.log('output file already exist, force delete when not under overwrite mode');
@@ -207,7 +210,7 @@ class FilterLineBase{
             }
         }
 
-        console.log('overwrite mode: ' + (isOverwriteMode?'on':'off'));
+        console.log('overwrite mode: ' + ((isOverwriteMode)?'on':'off'));
         console.log('input path: ' + inputPath);
         console.log('output path: ' + outputPath);
 
@@ -241,7 +244,7 @@ class FilterLineBase{
                     console.log(e);
                 }
                 vscode.workspace.openTextDocument(outputPath).then((doc: vscode.TextDocument)=>{
-                    vscode.window.showTextDocument(doc);
+                    vscode.window.showTextDocument(doc, { preview: isOverwriteMode });
                 });
             });
         }).on('error',(e :Error)=>{
