@@ -76,6 +76,14 @@ class FilterLineBase{
         if (filePath_ === undefined) {
             let editor = vscode.window.activeTextEditor;
             if(!editor){
+                // In a 50 MB file, activeTextEditor is null. Try reading the current tab
+                const activeTab  = vscode.window.tabGroups.activeTabGroup.activeTab; 
+                if (activeTab?.input instanceof vscode.TabInputText) {
+                    const filePath = activeTab.input.uri.fsPath
+                    callback(filePath);
+                    return;
+                }
+                // fail
                 this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
                 callback('');
                 return;
