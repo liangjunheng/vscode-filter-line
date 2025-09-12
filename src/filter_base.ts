@@ -51,6 +51,9 @@ class FilterLineBase{
                 this.history[key].pop();
             }
         }
+        // remove duplicate data
+        this.history[key] = this.history[key].filter((item: string) => item !== newEl);
+        // add data
         this.history[key].unshift(newEl);
         await this.ctx.globalState.update('history', this.history);
     }
