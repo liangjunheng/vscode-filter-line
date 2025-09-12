@@ -17,6 +17,14 @@ class FilterLineBase{
         console.log(`History: ${JSON.stringify(this.history)}`);
     }
 
+    protected isEnableOverwriteMode(): boolean {
+        return vscode.workspace.getConfiguration('filter-line').get('enableOverwriteMode', false);
+    }
+
+    protected getHistoryMaxSize(): number {
+        return vscode.workspace.getConfiguration('filter-line').get('historySize', 10);
+    }
+    
     protected getHistory(): any {
         return this.history;
     }
@@ -26,30 +34,20 @@ class FilterLineBase{
         await this.ctx.globalState.update('history', hist);
     }
 
-    protected getHistoryMaxSize(): number {
-        return vscode.workspace.getConfiguration('filter-line').get('historySize', 10);
-    }
-
-    protected isEnableOverwriteMode(): boolean {
-        return vscode.workspace.getConfiguration('filter-line').get('enableOverwriteMode', false);
-    }
-
     protected async addToHistory(key: string, newEl: string) {
         if (this.history[key] === undefined) {
             console.warn(`History doesn't contain '${key}' field`);
             return;
         }
 
-        if (this.history[key].indexOf(newEl) === -1) {
-            const maxSz = this.getHistoryMaxSize();
-            if (this.history[key].length >= maxSz) {
-                for (let i = this.history[key].length; i > maxSz - 1; i--) {
-                    this.history[key].pop();
-                }
+        const maxSz = this.getHistoryMaxSize();
+        if (this.history[key].length >= maxSz) {
+            for (let i = this.history[key].length; i > maxSz - 1; i--) {
+                this.history[key].pop();
             }
-            this.history[key].unshift(newEl);
-            await this.ctx.globalState.update('history', this.history);
         }
+        this.history[key].unshift(newEl);
+        await this.ctx.globalState.update('history', this.history);
     }
 
     protected async showHistoryPick(key: string, title: string, description: string) : Promise<string> {
