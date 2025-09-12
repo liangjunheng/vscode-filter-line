@@ -17,6 +17,10 @@ class FilterLineBase{
         console.log(`History: ${JSON.stringify(this.history)}`);
     }
 
+    protected isEnableSmartCaseInRegex(): boolean {
+        return vscode.workspace.getConfiguration('filter-line').get('enableSmartCaseInRegex', true);
+    }
+
     protected isEnableOverwriteMode(): boolean {
         return vscode.workspace.getConfiguration('filter-line').get('enableOverwriteMode', false);
     }

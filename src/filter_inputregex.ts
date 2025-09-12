@@ -33,7 +33,11 @@ class FilterLineByInputRegex extends FilterLineBase{
             }
             // console.log('input : ' + text);
             try{
-                this._regex = new RegExp(text);
+                if (this.isEnableSmartCaseInRegex() && !/[A-Z]/.test(text)) {
+                    this._regex = new RegExp(text, 'gi');
+                } else {
+                    this._regex = new RegExp(text, 'g');
+                }
             }catch(e){
                 this.showError('Regex incorrect :' + e);
                 callback(false);

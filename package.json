@@ -94,6 +94,12 @@
                     "default": false,
                     "scope": "application",
                     "description": "enable reuse the same tab line filter"
+                },
+                "filter-line.enableSmartCaseInRegex": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "ignore case when all lowercase"
                 }
             }
         }
