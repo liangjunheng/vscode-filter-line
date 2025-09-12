@@ -40,6 +40,11 @@ class FilterLineBase{
             return;
         }
 
+        // deduplication
+        if(this.history[key].indexOf(newEl) === 0) {
+            return
+        }
+
         const maxSz = this.getHistoryMaxSize();
         if (this.history[key].length >= maxSz) {
             for (let i = this.history[key].length; i > maxSz - 1; i--) {
