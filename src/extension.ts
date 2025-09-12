@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
+import {deleteFileWhenTabClose} from './tab';
 
 
 // this method is called when your extension is activated
@@ -14,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "filter-line" is now active!');
-
+    deleteFileWhenTabClose()
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand

@@ -195,7 +195,7 @@ class FilterLineBase{
 
         // special path tail
         let ext = path.extname(inputPath);
-        let tail = '.filterline' + ext;
+        let tail = ext + '.filterline';
 
         // overwrite mode ?
         let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1);
