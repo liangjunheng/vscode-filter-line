@@ -270,7 +270,7 @@ class FilterLineBase{
                     writeStream.write(fixedline + '\n');
                 }
             }).on('close',()=>{
-                this.showInfo('Filter completed :)');
+                vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
                 writeStream.close();
 
                 try{
