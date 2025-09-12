@@ -199,99 +199,102 @@ class FilterLineBase{
 
     }
 
-    protected filterFile(filePath: string){
-        const readline = require('readline');
-        const fs = require('fs');
-        var path = require('path');
+    protected filterFile(filePath: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            const readline = require('readline');
+            const fs = require('fs');
+            var path = require('path');
 
-        let inputPath = filePath;
+            let inputPath = filePath;
 
-        // special path tail
-        let inputFileDir = path.dirname(inputPath);
-        let ext = path.extname(inputPath);
-        let tail = ext + '.filterline';
+            // special path tail
+            let inputFileDir = path.dirname(inputPath);
+            let ext = path.extname(inputPath);
+            let tail = ext + '.filterline';
 
-        // overwrite mode ?
-        let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1);
-        let outputPath = '';
-        if (isOverwriteMode) {
-            outputPath = inputPath;
+            // overwrite mode ?
+            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1);
+            let outputPath = '';
+            if (isOverwriteMode) {
+                outputPath = inputPath;
 
-            // change input path
-            let newInputPath = inputPath + Math.floor(Date.now()/1000) + ext;
-            try{
-                if(fs.existsSync(newInputPath)){
-                    fs.unlinkSync(newInputPath);
-                }
-            }catch(e){
-                this.showError('unlink error : ' + e);
-                return;
-            }
-            try{
-                fs.renameSync(inputPath, newInputPath);
-            }catch(e){
-                this.showError('rename error : ' + e);
-                return;
-            }
-            console.log('after rename');
-            inputPath = newInputPath;
-        } else {
-            let fileName = getValiadFileName(this.currentMatchRule)
-            outputPath = path.join(inputFileDir, '[' + fileName + ']' + '.' + Date.now() + tail);
-
-            if(fs.existsSync(outputPath)){
-                console.log('output file already exist, force delete when not under overwrite mode');
-                let tmpPath = outputPath + Math.floor(Date.now()/1000) + ext;
-                try{
-                    fs.renameSync(outputPath, tmpPath);
-                    fs.unlinkSync(tmpPath);
-                }catch(e){
-                    console.log('remove error : ' + e);
-                }
-            }
-        }
-
-        console.log('overwrite mode: ' + ((isOverwriteMode)?'on':'off'));
-        console.log('input path: ' + inputPath);
-        console.log('output path: ' + outputPath);
-
-
-        // open write file
-        let writeStream = fs.createWriteStream(outputPath);
-        writeStream.on('open', ()=>{
-            console.log('write stream opened');
-
-            // open read file
-            const readLine = readline.createInterface({
-                input: fs.createReadStream(inputPath)
-            });
-
-            // filter line by line
-            readLine.on('line', (line: string)=>{
-                // console.log('line ', line);
-                let fixedline = this.matchLine(line);
-                if(fixedline !== undefined){
-                    writeStream.write(fixedline + '\n');
-                }
-            }).on('close',()=>{
-                vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
-                writeStream.close();
-
-                try{
-                    if(isOverwriteMode){
-                        fs.unlinkSync(inputPath);
+                // change input path
+                let newInputPath = inputPath + Math.floor(Date.now() / 1000) + ext;
+                try {
+                    if (fs.existsSync(newInputPath)) {
+                        fs.unlinkSync(newInputPath);
                     }
-                }catch(e){
-                    console.log(e);
+                } catch (e) {
+                    this.showError('unlink error : ' + e);
+                    return;
                 }
-                vscode.workspace.openTextDocument(outputPath).then((doc: vscode.TextDocument)=>{
-                    vscode.window.showTextDocument(doc, { preview: isOverwriteMode });
+                try {
+                    fs.renameSync(inputPath, newInputPath);
+                } catch (e) {
+                    this.showError('rename error : ' + e);
+                    return;
+                }
+                console.log('after rename');
+                inputPath = newInputPath;
+            } else {
+                let fileName = getValiadFileName(this.currentMatchRule)
+                outputPath = path.join(inputFileDir, '[' + fileName + ']' + '.' + Date.now() + tail);
+
+                if (fs.existsSync(outputPath)) {
+                    console.log('output file already exist, force delete when not under overwrite mode');
+                    let tmpPath = outputPath + Math.floor(Date.now() / 1000) + ext;
+                    try {
+                        fs.renameSync(outputPath, tmpPath);
+                        fs.unlinkSync(tmpPath);
+                    } catch (e) {
+                        console.log('remove error : ' + e);
+                    }
+                }
+            }
+
+            console.log('overwrite mode: ' + ((isOverwriteMode) ? 'on' : 'off'));
+            console.log('input path: ' + inputPath);
+            console.log('output path: ' + outputPath);
+
+
+            // open write file
+            let writeStream = fs.createWriteStream(outputPath);
+            writeStream.on('open', () => {
+                console.log('write stream opened');
+
+                // open read file
+                const readLine = readline.createInterface({
+                    input: fs.createReadStream(inputPath)
                 });
+
+                // filter line by line
+                readLine.on('line', (line: string) => {
+                    // console.log('line ', line);
+                    let fixedline = this.matchLine(line);
+                    if (fixedline !== undefined) {
+                        writeStream.write(fixedline + '\n');
+                    }
+                }).on('close', () => {
+                    vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
+                    writeStream.close();
+
+                    try {
+                        if (isOverwriteMode) {
+                            fs.unlinkSync(inputPath);
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+                    vscode.workspace.openTextDocument(outputPath).then((doc: vscode.TextDocument) => {
+                        vscode.window.showTextDocument(doc, { preview: isOverwriteMode });
+                        resolve(true);
+                    });
+                });
+            }).on('error', (e: Error) => {
+                console.log('can not open write stream : ' + e);
+            }).on('close', () => {
+                console.log('closed');
             });
-        }).on('error',(e :Error)=>{
-            console.log('can not open write stream : ' + e);
-        }).on('close', ()=>{
-            console.log('closed');
         });
     }
 
@@ -315,8 +318,16 @@ class FilterLineBase{
                 if(!succeed){
                     return;
                 }
-
-                this.filterFile(docPath);
+                vscode.window.withProgress(
+                    {
+                        location: vscode.ProgressLocation.Notification,
+                        title: "Filtering lines, please wait...",
+                        cancellable: false
+                    },
+                    async (progress) => {
+                        await this.filterFile(docPath);
+                    }
+                );
             });
         }, filePath);
     }
