@@ -2,11 +2,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import {getValiadFileName} from './util';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
     private history: any;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
+    private currentMatchRule: string = ''
 
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
@@ -88,7 +90,8 @@ class FilterLineBase{
             });
             quickPick.show()
         });
-        return (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice;
+        this.currentMatchRule = (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice
+        return this.currentMatchRule;
     }
 
     protected showInfo(text: string){
@@ -194,6 +197,7 @@ class FilterLineBase{
         let inputPath = filePath;
 
         // special path tail
+        let inputFileDir = path.dirname(inputPath);
         let ext = path.extname(inputPath);
         let tail = ext + '.filterline';
 
@@ -222,7 +226,8 @@ class FilterLineBase{
             console.log('after rename');
             inputPath = newInputPath;
         } else {
-            outputPath = inputPath +'.' + Date.now() + tail;
+            let fileName = getValiadFileName(this.currentMatchRule)
+            outputPath = path.join(inputFileDir, '[' + fileName + ']' + '.' + Date.now() + tail);
 
             if(fs.existsSync(outputPath)){
                 console.log('output file already exist, force delete when not under overwrite mode');

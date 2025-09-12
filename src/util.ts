@@ -38,4 +38,10 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
     };
 }
 
-export {padWithBlank, readJsonFile, debounce};
+function getValiadFileName(input: string): string {
+    const first30 = input.slice(0, 30);
+    // Replace all non-alphanumeric characters with "#"
+    return first30.replace(/[^a-zA-Z0-9_!#$%&'()\-\@^`{}~+,;=$$$$.]/g, '#');
+}
+
+export {padWithBlank, readJsonFile, debounce, getValiadFileName};
