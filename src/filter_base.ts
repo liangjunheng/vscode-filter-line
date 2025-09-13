@@ -3,18 +3,18 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {getValiadFileName} from './util';
+import {HistoryCommand} from './history_command';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
-    private history: any;
+    protected readonly historyCommand: HistoryCommand;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
     private currentMatchRule: string = ''
 
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
-
-        this.history = this.ctx.globalState.get('history', {});
-        console.log(`History: ${JSON.stringify(this.history)}`);
+        this.historyCommand = new HistoryCommand(this.ctx.globalState);
+        console.log(`History: ${JSON.stringify(this.historyCommand.getAllHistory())}`);
     }
 
     protected isEnableSmartCaseInRegex(): boolean {
@@ -26,51 +26,19 @@ class FilterLineBase{
     }
 
     protected getHistoryMaxSize(): number {
-        return vscode.workspace.getConfiguration('filter-line').get('historySize', 10);
-    }
-    
-    protected getHistory(): any {
-        return this.history;
-    }
-
-    protected async updateHistory(hist: any) {
-        this.history = hist;
-        await this.ctx.globalState.update('history', hist);
-    }
-
-    protected async addToHistory(key: string, newEl: string) {
-        if (this.history[key] === undefined) {
-            console.warn(`History doesn't contain '${key}' field`);
-            return;
-        }
-
-        // deduplication
-        if(this.history[key].indexOf(newEl) === 0) {
-            return
-        }
-
-        const maxSz = this.getHistoryMaxSize();
-        if (this.history[key].length >= maxSz) {
-            for (let i = this.history[key].length; i > maxSz - 1; i--) {
-                this.history[key].pop();
-            }
-        }
-        // remove duplicate data
-        this.history[key] = this.history[key].filter((item: string) => item !== newEl);
-        // add data
-        this.history[key].unshift(newEl);
-        await this.ctx.globalState.update('history', this.history);
+        return this.historyCommand.getHistoryMaxSizeConfig();
     }
 
     protected async showHistoryPick(key: string, title: string, description: string) : Promise<string> {
-        if (this.history[key] === undefined) {
+        const history = this.historyCommand.getAllHistory()
+        if (history[key] === undefined) {
             console.warn(`History doesn't contain '${key}' field`);
             return this.NEW_PATTERN_CHOISE;
         }
 
         let usrChoice: string | undefined = undefined;
         const quickPick = vscode.window.createQuickPick();
-        let picks: Array<string> = [...this.history[key]];
+        let picks: Array<string> = [...history[key]];
         quickPick.items = picks.map(h => ({ label: h }));
         quickPick.title = title;
         quickPick.placeholder = description;

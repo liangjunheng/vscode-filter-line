@@ -11,10 +11,10 @@ class FilterLineByInputString extends FilterLineBase{
     constructor(context: vscode.ExtensionContext) {
         super(context);
 
-        let history = this.getHistory();
+        let history = this.historyCommand.getAllHistory();
         if (history[this.HIST_KEY] === undefined) {
             history[this.HIST_KEY] = [];
-            this.updateHistory(history);
+            this.historyCommand.updateHistory(history);
         }
     }
 
@@ -25,16 +25,15 @@ class FilterLineByInputString extends FilterLineBase{
         }
         let usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
 
-        const makeInputStr = (text: string | undefined) => {
+        const makeInputStr = async (text: string | undefined) => {
             if(text === undefined || text === ''){
                 console.log('No input');
                 callback(false);
                 return;
             }
             console.log('input : ' + text);
-            this.addToHistory(this.HIST_KEY, text);
-
             this._inputstring = text;
+            await this.historyCommand.addToHistory(this.HIST_KEY, text);
             callback(true);
         };
 

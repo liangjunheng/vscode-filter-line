@@ -11,10 +11,10 @@ class FilterLineByInputRegex extends FilterLineBase{
     constructor(context: vscode.ExtensionContext) {
         super(context);
 
-        let history = this.getHistory();
+        let history = this.historyCommand.getAllHistory();
         if (history[this.HIST_KEY] === undefined) {
             history[this.HIST_KEY] = [];
-            this.updateHistory(history);
+            this.historyCommand.updateHistory(history);
         }
     }
 
@@ -43,7 +43,7 @@ class FilterLineByInputRegex extends FilterLineBase{
                 callback(false);
                 return;
             }
-            await this.addToHistory(this.HIST_KEY, text);
+            await this.historyCommand.addToHistory(this.HIST_KEY, text);
             callback(true);
         };
 
