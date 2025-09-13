@@ -14,13 +14,13 @@ class HistoryCommand {
         return vscode.workspace.getConfiguration('filter-line').get('historySize', 10);
     }
 
-    getAllHistory(): any {
-        return this.mHistory;
+    getHistory(key: string): string[] {
+        return this.mHistory[key];
     }
 
-    async updateHistory(hist: any) {
-        this.mHistory = hist;
-        await this.mGlobalState.update('history', hist);
+    async updateHistory(key: string, hist: string[]) {
+        this.mHistory[key] = hist;
+        await this.mGlobalState.update('history', this.mHistory);
     }
 
     async addToHistory(key: string, newEl: string) {

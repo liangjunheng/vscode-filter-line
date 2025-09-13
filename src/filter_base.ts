@@ -14,7 +14,6 @@ class FilterLineBase{
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
         this.historyCommand = new HistoryCommand(this.ctx.globalState);
-        console.log(`History: ${JSON.stringify(this.historyCommand.getAllHistory())}`);
     }
 
     protected isEnableSmartCaseInRegex(): boolean {
@@ -30,10 +29,12 @@ class FilterLineBase{
     }
     
     protected async showHistoryPick(key: string, title: string, description: string) : Promise<string> {
-        const historyAll = this.historyCommand.getAllHistory()
+        const history = this.historyCommand.getHistory(key)
+        console.log(`History: ${JSON.stringify(history)}`);
+
         // create QuickPick
         const quickPick = vscode.window.createQuickPick();
-        let picks: Array<string> = [...historyAll[key]];
+        let picks: Array<string> = [...history];
         quickPick.ignoreFocusOut = true;
         quickPick.title = title;
         quickPick.placeholder = description;
@@ -67,9 +68,8 @@ class FilterLineBase{
                 quickPick.value = e.item.label;
             }
             if(e.button.tooltip === "Delete") {
-                picks = picks.filter(item => item !== e.item.label);
-                historyAll[key] = picks
-                this.historyCommand.updateHistory(historyAll)
+                const newHistory = history.filter(item => item !== e.item.label);
+                this.historyCommand.updateHistory(key, newHistory)
                 quickPick.items = quickPick.items.filter(item => item.label !== e.item.label);
             }
         });
