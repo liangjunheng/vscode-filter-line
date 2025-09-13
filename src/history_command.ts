@@ -18,10 +18,6 @@ class HistoryCommand {
         return this.mHistory;
     }
 
-    getHistory(key: string): any {
-        return this.mHistory[key];
-    }
-
     async updateHistory(hist: any) {
         this.mHistory = hist;
         await this.mGlobalState.update('history', hist);

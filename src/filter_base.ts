@@ -28,32 +28,66 @@ class FilterLineBase{
     protected getHistoryMaxSize(): number {
         return this.historyCommand.getHistoryMaxSizeConfig();
     }
-
+    
     protected async showHistoryPick(key: string, title: string, description: string) : Promise<string> {
-        const history = this.historyCommand.getAllHistory()
-        if (history[key] === undefined) {
-            console.warn(`History doesn't contain '${key}' field`);
-            return this.NEW_PATTERN_CHOISE;
-        }
-
-        let usrChoice: string | undefined = undefined;
+        const historyAll = this.historyCommand.getAllHistory()
+        // create QuickPick
         const quickPick = vscode.window.createQuickPick();
-        let picks: Array<string> = [...history[key]];
-        quickPick.items = picks.map(h => ({ label: h }));
+        let picks: Array<string> = [...historyAll[key]];
+        quickPick.ignoreFocusOut = true;
         quickPick.title = title;
         quickPick.placeholder = description;
+
+        // close QuickPick Botton
+        const closeButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('close'),
+            tooltip: 'Close QuickPick',
+        };
+        quickPick.buttons = [closeButton]
+        quickPick.onDidTriggerButton(button => {
+            if (button === closeButton) {
+                quickPick.hide();
+            }
+        });
+
+        // add items and button event
+        const itemChooseButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('reply'),
+            tooltip: 'Choose',
+        };
+        const itemDeleteButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('trash'),
+            tooltip: 'Delete',
+        };
+        const quickPickItems = picks.map(h => ({ label: h, buttons: [itemChooseButton, itemDeleteButton] }));
+        quickPick.items = quickPickItems;
+        quickPick.onDidTriggerItemButton(e => {
+            console.log("onDidTriggerItemButton:", `click: ${e.button.tooltip}：${e.item.label}`);
+            if(e.button.tooltip === "Choose") {
+                quickPick.value = e.item.label;
+            }
+            if(e.button.tooltip === "Delete") {
+                picks = picks.filter(item => item !== e.item.label);
+                historyAll[key] = picks
+                this.historyCommand.updateHistory(historyAll)
+                quickPick.items = quickPick.items.filter(item => item.label !== e.item.label);
+            }
+        });
+
         // When the user inputs new content into the QuickPick input box
         quickPick.onDidChangeValue((value: string) => {
-            console.log("user inputing:", value);
+            console.log("onDidChangeValue, user inputing:", value);
             let filterHistoryPacks = picks
                 .filter(h => h.includes(value))
-                .map(h => ({ label: h }));
+                .map(h => ({ label: h, buttons: [itemChooseButton, itemDeleteButton] }));
             if (filterHistoryPacks.length > 0 && value && !picks.includes(value)) {
-                filterHistoryPacks.unshift({ label: value });
+                filterHistoryPacks.unshift({ label: value, buttons: [] });
             }
             quickPick.items = filterHistoryPacks;
         });
-        usrChoice = await new Promise((resolve) => {
+
+        // await input complie
+        let usrChoice: string = await new Promise((resolve) => {
             quickPick.onDidAccept(() => {
                 const selection = quickPick.selectedItems[0];
                 const finalValue = selection ? selection.label : quickPick.value;
@@ -66,8 +100,10 @@ class FilterLineBase{
                 quickPick.dispose();
                 resolve('');
             });
+            // show quickPick
             quickPick.show()
         });
+        
         this.currentMatchRule = (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice
         return this.currentMatchRule;
     }
