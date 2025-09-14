@@ -2,6 +2,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as readline from 'readline';
+import * as path from 'path';
+import * as fs from 'fs';
 import * as os from 'os';
 import {getValiadFileName} from './util';
 import {HistoryCommand} from './history_command';
@@ -120,7 +123,7 @@ class FilterLineBase{
 
     protected getDocumentPathToBeFilter(callback : (docPath: string)=>void, filePath_?: string){
         let filePath = filePath_;
-        console.log('filepath = ' + filePath_);
+        console.log('getDocumentPathToBeFilter, filepath = ' + filePath_);
         
         if (filePath_ === undefined) {
             let editor = vscode.window.activeTextEditor;
@@ -129,32 +132,34 @@ class FilterLineBase{
                 const activeTab  = vscode.window.tabGroups.activeTabGroup.activeTab; 
                 if (activeTab?.input instanceof vscode.TabInputText) {
                     const filePath = activeTab.input.uri.fsPath
+                    console.log("getDocumentPathToBeFilter, tabUri： " + filePath);
                     callback(filePath);
                     return;
                 }
                 // fail
                 this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
+                console.log("getDocumentPathToBeFilter, No file selected (Or file is too large. For how to filter large file, please visit README)");
                 callback('');
                 return;
             }
 
             let doc = editor.document;
-            if(doc.isDirty){
-                this.showError('Save before filter line');
+            if(doc.isDirty || doc.isUntitled){
+                // this.showError('Save before filter line');
+                console.warn('getDocumentPathToBeFilter, doc.isDirty || doc.isUntitled');
                 callback('');
                 return;
             }
-
             filePath = doc.fileName;
         }
 
-        if (filePath === undefined) {
-            this.showError('Can not get valid file path');
+        if (filePath === undefined || filePath === '') {
+            // this.showError('Can not get valid file path');
+            console.warn('Can not get valid file path');
             callback('');
             return;
         }
 
-        const fs = require('fs');
         let stats = fs.statSync(filePath);
         if (!stats.isFile()) {
             this.showError('Can only filter file');
@@ -207,11 +212,21 @@ class FilterLineBase{
 
     protected filterFile(filePath: string): Promise<boolean> {
         return new Promise((resolve) => {
-            const readline = require('readline');
-            const fs = require('fs');
-            var path = require('path');
-
             let inputPath = filePath;
+            if (filePath === undefined || filePath === '') {
+                let editor = vscode.window.activeTextEditor
+                if (editor) {
+                    // Write cache data to a file
+                    inputPath = path.join(os.tmpdir(), 'vscode', 'filter-line-pro', `${Date.now()}`, 'TabBuffer.txt');
+                    fs.mkdirSync(path.dirname(inputPath), { recursive: true });
+                    const writeStream = fs.createWriteStream(inputPath);
+                    for (let lineno = 0; lineno < editor.document.lineCount; ++lineno) {
+                        const lineText = editor.document.lineAt(lineno).text;
+                        writeStream.write(lineText + '\n');
+                    }
+                    writeStream.end();
+                }
+            }
 
             // special path tail
             let ext = path.extname(inputPath);
@@ -230,12 +245,14 @@ class FilterLineBase{
                     }
                 } catch (e) {
                     this.showError('unlink error : ' + e);
+                    resolve(false);
                     return;
                 }
                 try {
                     fs.renameSync(inputPath, newInputPath);
                 } catch (e) {
                     this.showError('rename error : ' + e);
+                    resolve(false);
                     return;
                 }
                 console.log('after rename');
@@ -314,13 +331,9 @@ class FilterLineBase{
     }
 
     public filter(filePath?: string){
+        console.log('filter :' + filePath);
         this.getDocumentPathToBeFilter((docPath) => {
-            if (docPath === '') {
-                return;
-            }
-
             console.log('will filter file :' + docPath);
-
             this.prepare((succeed)=>{
                 if(!succeed){
                     return;
@@ -329,7 +342,7 @@ class FilterLineBase{
                     {
                         location: vscode.ProgressLocation.Notification,
                         title: "Filtering lines, please wait...",
-                        cancellable: false
+                        cancellable: true
                     },
                     async (progress) => {
                         await this.filterFile(docPath);
