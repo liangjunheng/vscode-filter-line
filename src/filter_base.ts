@@ -230,9 +230,10 @@ class FilterLineBase{
 
             // special path tail
             let ext = path.extname(inputPath);
+            let tail = '.filterlines';
 
             // overwrite mode ?
-            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(path.join('vscode', 'filter-line-pro')) !== -1);
+            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1);
             let outputPath = '';
             if (isOverwriteMode) {
                 outputPath = inputPath;
@@ -263,7 +264,7 @@ class FilterLineBase{
                 if(!this.isInverseMatchMode) {
                     inverseMatchSymbol = "";
                 }
-                outputPath = path.join(os.tmpdir(), 'vscode', 'filter-line-pro', `${Date.now()}`, inverseMatchSymbol + '[' + fileName + ']');
+                outputPath = path.join(os.tmpdir(), 'vscode', 'filter-line-pro', `${Date.now()}`, inverseMatchSymbol + '[' + fileName + ']' + tail);
                 fs.mkdirSync(path.dirname(outputPath), { recursive: true })
                 if (fs.existsSync(outputPath)) {
                     console.log('output file already exist, force delete when not under overwrite mode');
