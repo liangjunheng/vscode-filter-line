@@ -6,8 +6,6 @@ class FilterLineByInputRegex extends FilterLineBase{
     private _regex?: RegExp;
     private readonly HIST_KEY = 'inputRegex';
 
-    public notmatch: boolean = false;
-
     constructor(context: vscode.ExtensionContext) {
         super(context);
 
@@ -20,7 +18,7 @@ class FilterLineByInputRegex extends FilterLineBase{
 
     protected async prepare(callback : (succeed: boolean)=>void){
         let title = "filter to lines machting(regex)"
-        if(this.notmatch) {
+        if(this.isInverseMatchMode) {
             title = "filter to lines not machting(regex)"
         }
         const usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
@@ -58,7 +56,7 @@ class FilterLineByInputRegex extends FilterLineBase{
         if(this._regex === undefined){
             return undefined;
         }
-        if(this.notmatch){
+        if(this.isInverseMatchMode){
             if(line.match(this._regex) === null){
                 return line;
             }

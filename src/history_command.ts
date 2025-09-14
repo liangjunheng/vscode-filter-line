@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
-import { Memento } from 'vscode';
 
 class HistoryCommand {
     private mHistory: any;
-    private mGlobalState: Memento;
+    private ctx: vscode.ExtensionContext;
 
-    constructor(globalState: Memento) {
-        this.mGlobalState = globalState
-        this.mHistory = globalState.get('history', {});
+    constructor(ctx: vscode.ExtensionContext) {
+        this.ctx = ctx
+        this.mHistory = ctx.globalState.get('history', {});
     }
 
     getHistoryMaxSizeConfig(): number {
@@ -20,7 +19,7 @@ class HistoryCommand {
 
     async updateHistory(key: string, hist: string[]) {
         this.mHistory[key] = hist;
-        await this.mGlobalState.update('history', this.mHistory);
+        await this.ctx.globalState.update('history', this.mHistory);
     }
 
     async addToHistory(key: string, newEl: string) {
@@ -44,7 +43,7 @@ class HistoryCommand {
         this.mHistory[key] = this.mHistory[key].filter((item: string) => item !== newEl);
         // add data
         this.mHistory[key].unshift(newEl);
-        await this.mGlobalState.update('history', this.mHistory);
+        await this.ctx.globalState.update('history', this.mHistory);
     }
 }
 export { HistoryCommand };

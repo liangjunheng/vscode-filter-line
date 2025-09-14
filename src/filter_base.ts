@@ -2,10 +2,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as os from 'os';
 import {getValiadFileName} from './util';
 import {HistoryCommand} from './history_command';
 
 class FilterLineBase{
+    public isInverseMatchMode: boolean = false;
     protected ctx: vscode.ExtensionContext;
     protected readonly historyCommand: HistoryCommand;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
@@ -13,7 +15,7 @@ class FilterLineBase{
 
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
-        this.historyCommand = new HistoryCommand(this.ctx.globalState);
+        this.historyCommand = new HistoryCommand(this.ctx);
     }
 
     protected isEnableSmartCaseInRegex(): boolean {
@@ -212,7 +214,6 @@ class FilterLineBase{
             let inputPath = filePath;
 
             // special path tail
-            let inputFileDir = path.dirname(inputPath);
             let ext = path.extname(inputPath);
             let tail = ext + '.filterline';
 
@@ -241,9 +242,13 @@ class FilterLineBase{
                 console.log('after rename');
                 inputPath = newInputPath;
             } else {
-                let fileName = getValiadFileName(this.currentMatchRule)
-                outputPath = path.join(inputFileDir, '[' + fileName + ']' + '.' + Date.now() + tail);
-
+                const fileName = getValiadFileName(this.currentMatchRule)
+                let inverseMatchSymbol = "!";
+                if(!this.isInverseMatchMode) {
+                    inverseMatchSymbol = "";
+                }
+                outputPath = path.join(os.tmpdir(), 'vscode', 'filter-line-pro', `${Date.now()}`, inverseMatchSymbol + '[' + fileName + ']');
+                fs.mkdirSync(path.dirname(outputPath), { recursive: true })
                 if (fs.existsSync(outputPath)) {
                     console.log('output file already exist, force delete when not under overwrite mode');
                     let tmpPath = outputPath + Math.floor(Date.now() / 1000) + ext;
@@ -259,7 +264,6 @@ class FilterLineBase{
             console.log('overwrite mode: ' + ((isOverwriteMode) ? 'on' : 'off'));
             console.log('input path: ' + inputPath);
             console.log('output path: ' + outputPath);
-
 
             // open write file
             let writeStream = fs.createWriteStream(outputPath);

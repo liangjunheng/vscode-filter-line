@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
-import {deleteFileWhenTabClose} from './tab';
+import {deleteInvalidFileWhenNotInTab} from './file_manager';
 
 
 // this method is called when your extension is activated
@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "filter-line" is now active!');
-    deleteFileWhenTabClose()
+    deleteInvalidFileWhenNotInTab(context)
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
@@ -64,14 +64,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     let disposable_notcontaininputstring = vscode.commands.registerCommand('extension.filterLineByNotContainInputString', (path) => {
         let filter = new FilterLineByInputString(context);
-        filter.notcontain = true;
+        filter.isInverseMatchMode = true;
         filter.filter(path);
         context.subscriptions.push(filter);
     });
 
     let disposable_notmatchinputregex = vscode.commands.registerCommand('extension.filterLineByNotMatchInputRegex', (path) => {
         let filter = new FilterLineByInputRegex(context);
-        filter.notmatch = true;
+        filter.isInverseMatchMode = true;
         filter.filter(path);
         context.subscriptions.push(filter);
     });

@@ -6,8 +6,6 @@ class FilterLineByInputString extends FilterLineBase{
     private _inputstring?: string;
     private readonly HIST_KEY = 'inputStr';
 
-    public notcontain: boolean = false;
-
     constructor(context: vscode.ExtensionContext) {
         super(context);
 
@@ -20,7 +18,7 @@ class FilterLineByInputString extends FilterLineBase{
 
     protected async prepare(callback : (succeed: boolean)=>void){
         let title = "filter to lines machting(string)"
-        if(this.notcontain) {
+        if(this.isInverseMatchMode) {
             title = "filter to lines not machting(string)"
         }
         let usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
@@ -48,7 +46,7 @@ class FilterLineByInputString extends FilterLineBase{
         if(this._inputstring === undefined){
             return undefined;
         }
-        if(this.notcontain){
+        if(this.isInverseMatchMode){
             if(line.indexOf(this._inputstring) === -1){
                 return line;
             }
