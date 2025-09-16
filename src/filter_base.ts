@@ -233,7 +233,7 @@ class FilterLineBase{
             let tail = '.filter';
 
             // overwrite mode ?
-            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1);
+            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1) && (inputPath.indexOf(path.join('vscode', 'filter-line-pro')) !== -1);
             let outputPath = '';
             if (isOverwriteMode) {
                 outputPath = inputPath;
