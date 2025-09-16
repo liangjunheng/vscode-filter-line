@@ -43,6 +43,7 @@ class FilterLineBase{
         quickPick.ignoreFocusOut = true;
         quickPick.title = title;
         quickPick.placeholder = description;
+        quickPick.keepScrollPosition = true;
 
         // close QuickPick Botton
         const closeButton: vscode.QuickInputButton = {
