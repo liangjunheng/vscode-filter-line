@@ -230,7 +230,7 @@ class FilterLineBase{
 
             // special path tail
             let ext = path.extname(inputPath);
-            let tail = '.filterlines';
+            let tail = '.filter';
 
             // overwrite mode ?
             let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1);
@@ -343,7 +343,7 @@ class FilterLineBase{
                     {
                         location: vscode.ProgressLocation.Notification,
                         title: "Filtering lines, please wait...",
-                        cancellable: true
+                        cancellable: false,
                     },
                     async (progress) => {
                         await this.filterFile(docPath);
