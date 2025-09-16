@@ -317,6 +317,7 @@ class FilterLineBase{
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
+                resolve(false);
             }).on('close', () => {
                 console.log('closed');
             });
