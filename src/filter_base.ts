@@ -211,7 +211,7 @@ class FilterLineBase{
     }
 
     protected filterFile(filePath: string): Promise<boolean> {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             let inputPath = filePath;
             if (filePath === undefined || filePath === '') {
                 let editor = vscode.window.activeTextEditor
@@ -225,6 +225,9 @@ class FilterLineBase{
                         writeStream.write(lineText + '\n');
                     }
                     writeStream.end();
+                    // await write end
+                    const { finished } = require('stream/promises');
+                    await finished(writeStream)
                 }
             }
 
