@@ -85,7 +85,7 @@ class FilterLineBase{
             let filterHistoryPacks = picks
                 .filter(h => h.includes(value))
                 .map(h => ({ label: h, buttons: [itemChooseButton, itemDeleteButton] }));
-            if (filterHistoryPacks.length > 0 && value && !picks.includes(value)) {
+            if (value && !picks.includes(value)) {
                 filterHistoryPacks.unshift({ label: value, buttons: [] });
             }
             quickPick.items = filterHistoryPacks;
