@@ -40,7 +40,8 @@ class FilterLineBase{
         // create QuickPick
         const quickPick = vscode.window.createQuickPick();
         let picks: Array<string> = [...history];
-        quickPick.ignoreFocusOut = true;
+        // quickPick.ignoreFocusOut = true;
+        quickPick.value = this.ctx.globalState.get("lastInputValue", "");
         quickPick.title = title;
         quickPick.placeholder = description;
         quickPick.keepScrollPosition = true;
@@ -83,6 +84,8 @@ class FilterLineBase{
         // When the user inputs new content into the QuickPick input box
         quickPick.onDidChangeValue((value: string) => {
             console.log("onDidChangeValue, user inputing:", value);
+            this.ctx.globalState.update("lastInputValue", value);
+            
             let filterHistoryPacks = picks
                 .filter(h => h.includes(value))
                 .map(h => ({ label: h, buttons: [itemChooseButton, itemDeleteButton] }));
