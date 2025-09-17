@@ -41,7 +41,6 @@ class FilterLineBase{
         const quickPick = vscode.window.createQuickPick();
         let picks: Array<string> = [...history];
         // quickPick.ignoreFocusOut = true;
-        quickPick.value = this.ctx.globalState.get("lastInputValue", "");
         quickPick.title = title;
         quickPick.placeholder = description;
         quickPick.keepScrollPosition = true;
@@ -111,6 +110,7 @@ class FilterLineBase{
             });
             // show quickPick
             quickPick.show()
+            quickPick.value = this.ctx.globalState.get("lastInputValue", "");
         });
         
         this.currentMatchRule = (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice
