@@ -66,19 +66,23 @@ class FilterLineBase{
             iconPath: new vscode.ThemeIcon('trash'),
             tooltip: 'Delete',
         };
-        const quickPickItems = picks.map(h => ({ label: h, buttons: [itemChooseButton, itemDeleteButton] }));
-        quickPick.items = quickPickItems;
-        quickPick.onDidTriggerItemButton(e => {
-            console.log("onDidTriggerItemButton:", `click: ${e.button.tooltip}：${e.item.label}`);
-            if(e.button.tooltip === "Choose") {
-                quickPick.value = e.item.label;
-            }
-            if(e.button.tooltip === "Delete") {
-                const newHistory = history.filter(item => item !== e.item.label);
-                this.historyCommand.updateHistory(key, newHistory)
-                quickPick.items = quickPick.items.filter(item => item.label !== e.item.label);
-            }
-        });
+
+        // When the input is empty, fill in all historical data
+        if (quickPick.value === '' || quickPick.value == undefined) {
+            const quickPickItems = picks.map(h => ({ label: h, buttons: [itemChooseButton, itemDeleteButton] }));
+            quickPick.items = quickPickItems;
+            quickPick.onDidTriggerItemButton(e => {
+                console.log("onDidTriggerItemButton:", `click: ${e.button.tooltip}：${e.item.label}`);
+                if (e.button.tooltip === "Choose") {
+                    quickPick.value = e.item.label;
+                }
+                if (e.button.tooltip === "Delete") {
+                    const newHistory = history.filter(item => item !== e.item.label);
+                    this.historyCommand.updateHistory(key, newHistory)
+                    quickPick.items = quickPick.items.filter(item => item.label !== e.item.label);
+                }
+            });
+        }
 
         // When the user inputs new content into the QuickPick input box
         quickPick.onDidChangeValue((value: string) => {
@@ -97,6 +101,7 @@ class FilterLineBase{
         // await input complie
         let usrChoice: string = await new Promise((resolve) => {
             quickPick.onDidAccept(() => {
+                this.ctx.globalState.update("lastInputValue", "");
                 const selection = quickPick.selectedItems[0];
                 const finalValue = selection ? selection.label : quickPick.value;
                 console.log("user input result:", finalValue);
