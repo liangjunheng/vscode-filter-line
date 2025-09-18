@@ -34,7 +34,7 @@ class FilterLineBase{
     }
     
     protected async showHistoryPick(key: string, title: string, description: string) : Promise<string> {
-        const history = this.historyCommand.getHistory(key)
+        let history = this.historyCommand.getHistory(key)
         console.log(`History: ${JSON.stringify(history)}`);
 
         // create QuickPick
@@ -72,8 +72,8 @@ class FilterLineBase{
                 quickPick.value = e.item.label;
             }
             if (e.button.tooltip === "Delete") {
-                const newHistory = history.filter(item => item !== e.item.label);
-                this.historyCommand.updateHistory(key, newHistory)
+                history = history.filter(item => item !== e.item.label);
+                this.historyCommand.updateHistory(key, history)
                 quickPick.items = quickPick.items.filter(item => item.label !== e.item.label);
             }
         });
