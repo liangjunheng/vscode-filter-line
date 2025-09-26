@@ -294,12 +294,18 @@ class FilterLineBase{
             console.log('input path: ' + inputPath);
             console.log('output path: ' + outputPath);
 
-            // open write file
+            // open file
+            vscode.workspace.openTextDocument(outputPath)
+                .then((doc: vscode.TextDocument) => {
+                    vscode.window.showTextDocument(doc, { preview: isOverwriteMode });
+                });
+
+            // open write stream
             let writeStream = fs.createWriteStream(outputPath);
             writeStream.on('open', () => {
                 console.log('write stream opened');
 
-                // open read file
+                // open read stream
                 const readLine = readline.createInterface({
                     input: fs.createReadStream(inputPath)
                 });
@@ -312,9 +318,7 @@ class FilterLineBase{
                         writeStream.write(fixedline + '\n');
                     }
                 }).on('close', () => {
-                    vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
                     writeStream.close();
-
                     try {
                         if (isOverwriteMode) {
                             fs.unlinkSync(inputPath);
@@ -322,16 +326,14 @@ class FilterLineBase{
                     } catch (e) {
                         console.log(e);
                     }
-                    vscode.workspace.openTextDocument(outputPath).then((doc: vscode.TextDocument) => {
-                        vscode.window.showTextDocument(doc, { preview: isOverwriteMode });
-                        resolve(true);
-                    });
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
+                resolve(true);
+                vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
             });
         });
     }
