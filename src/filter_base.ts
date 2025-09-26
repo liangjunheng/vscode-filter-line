@@ -162,7 +162,7 @@ class FilterLineBase{
             filePath = doc.fileName;
         }
 
-        if (filePath === undefined || filePath === '') {
+        if (filePath === undefined || filePath === '' || !fs.existsSync(filePath)) {
             // this.showError('Can not get valid file path');
             console.warn('Can not get valid file path');
             callback('');
@@ -222,7 +222,7 @@ class FilterLineBase{
     protected filterFile(filePath: string): Promise<boolean> {
         return new Promise(async (resolve) => {
             let inputPath = filePath;
-            if (filePath === undefined || filePath === '') {
+            if (filePath === undefined || filePath === '' || !fs.existsSync(filePath)) {
                 let editor = vscode.window.activeTextEditor
                 if (editor) {
                     // Write cache data to a file
@@ -285,7 +285,7 @@ class FilterLineBase{
                         fs.renameSync(outputPath, tmpPath);
                         fs.unlinkSync(tmpPath);
                     } catch (e) {
-                        console.log('remove error : ' + e);
+                        console.log('remove error: ' + e);
                     }
                 }
             }
@@ -347,7 +347,7 @@ class FilterLineBase{
     }
 
     public filter(filePath?: string){
-        console.log('filter :' + filePath);
+        console.log('filter:' + filePath);
         this.getDocumentPathToBeFilter((docPath) => {
             console.log('will filter file :' + docPath);
             this.prepare((succeed)=>{
