@@ -227,16 +227,9 @@ class FilterLineBase{
                 if (editor) {
                     // Write cache data to a file
                     inputPath = path.join(os.tmpdir(), 'vscode', 'filter-line-pro', `${Date.now()}`, 'TabBuffer.txt');
+                    const allText = editor.document.getText();
                     fs.mkdirSync(path.dirname(inputPath), { recursive: true });
-                    const writeStream = fs.createWriteStream(inputPath);
-                    for (let lineno = 0; lineno < editor.document.lineCount; ++lineno) {
-                        const lineText = editor.document.lineAt(lineno).text;
-                        writeStream.write(lineText + '\n');
-                    }
-                    writeStream.end();
-                    // await write end
-                    const { finished } = require('stream/promises');
-                    await finished(writeStream)
+                    fs.writeFileSync(inputPath, allText);
                 }
             }
 
@@ -295,10 +288,7 @@ class FilterLineBase{
             console.log('output path: ' + outputPath);
 
             // open file
-            vscode.workspace.openTextDocument(outputPath)
-                .then((doc: vscode.TextDocument) => {
-                    vscode.window.showTextDocument(doc, { preview: isOverwriteMode });
-                });
+            let docPromise  = vscode.workspace.openTextDocument(outputPath);
 
             // open write stream
             let writeStream = fs.createWriteStream(outputPath);
@@ -326,6 +316,9 @@ class FilterLineBase{
                     } catch (e) {
                         console.log(e);
                     }
+                    docPromise.then(doc => {
+                        vscode.window.showTextDocument(doc, { preview: isOverwriteMode })
+                    });
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
@@ -346,14 +339,14 @@ class FilterLineBase{
 
     }
 
-    public filter(filePath?: string){
+    public filter(filePath?: string) {
         console.log('filter:' + filePath);
-        this.getDocumentPathToBeFilter((docPath) => {
-            console.log('will filter file :' + docPath);
-            this.prepare((succeed)=>{
-                if(!succeed){
-                    return;
-                }
+        this.prepare((succeed) => {
+            if (!succeed) {
+                return;
+            }
+            this.getDocumentPathToBeFilter((docPath) => {
+                console.log('will filter file :' + docPath);
                 vscode.window.withProgress(
                     {
                         location: vscode.ProgressLocation.Notification,
@@ -364,8 +357,8 @@ class FilterLineBase{
                         await this.filterFile(docPath);
                     }
                 );
-            });
-        }, filePath);
+            }, filePath);
+        });
     }
 }
 
