@@ -280,6 +280,9 @@ class FilterLineBase{
                     } catch (e) {
                         console.log('remove error: ' + e);
                     }
+                } else {
+                    // create file
+                    fs.writeFileSync(outputPath, '');
                 }
             }
 
@@ -288,7 +291,7 @@ class FilterLineBase{
             console.log('output path: ' + outputPath);
 
             // open file
-            let docPromise  = vscode.workspace.openTextDocument(outputPath);
+            let doc = await vscode.workspace.openTextDocument(outputPath);
 
             // open write stream
             let writeStream = fs.createWriteStream(outputPath);
@@ -308,7 +311,7 @@ class FilterLineBase{
                         writeStream.write(fixedline + '\n');
                     }
                 }).on('close', () => {
-                    writeStream.close();
+                    writeStream.end();
                     try {
                         if (isOverwriteMode) {
                             fs.unlinkSync(inputPath);
@@ -316,9 +319,7 @@ class FilterLineBase{
                     } catch (e) {
                         console.log(e);
                     }
-                    docPromise.then(doc => {
-                        vscode.window.showTextDocument(doc, { preview: isOverwriteMode })
-                    });
+                    vscode.window.showTextDocument(doc, { preview: isOverwriteMode })
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
