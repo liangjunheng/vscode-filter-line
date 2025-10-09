@@ -4,6 +4,7 @@ import {FilterLineBase} from './filter_base';
 
 class FilterLineByInputRegex extends FilterLineBase{
     private _regex?: RegExp;
+    private _rawRegexString: string = "";
     private readonly HIST_KEY = 'inputRegex';
 
     constructor(context: vscode.ExtensionContext) {
@@ -31,6 +32,7 @@ class FilterLineByInputRegex extends FilterLineBase{
             }
             // console.log('input : ' + text);
             try{
+                this._rawRegexString = text
                 if (this.isEnableSmartCaseInRegex() && !/[A-Z]/.test(text)) {
                     this._regex = new RegExp(text, 'gi');
                 } else {
@@ -57,11 +59,11 @@ class FilterLineByInputRegex extends FilterLineBase{
             return undefined;
         }
         if(this.isInverseMatchMode){
-            if(line.match(this._regex) === null){
+            if(line.match(this._regex) === null && line.indexOf(this._rawRegexString) === -1){
                 return line;
             }
         }else{
-            if(line.match(this._regex) !== null){
+            if(line.match(this._regex) !== null || line.indexOf(this._rawRegexString) !== -1){
                 return line;
             }
         }

@@ -58,7 +58,7 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
    */
   getVirtureFileFromRealFile(realFilePath: string, scheme: string, filename: string): vscode.Uri {
     // create virtual file path
-    const virtualFileUri = vscode.Uri.parse(`${scheme}:/${Date.now()}/${filename}`);
+    const virtualFileUri = vscode.Uri.parse(`${scheme}:/${Date.now()}/${encodeURIComponent(filename)}`);
     this.realFileMap.set(virtualFileUri.toString(), realFilePath)
     console.log("realFileToVirtureFile, virtualFileUri " + virtualFileUri + ", realFilePath " + realFilePath)
     return virtualFileUri
