@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import {getValiadFileName} from './util';
 import {HistoryCommand} from './history_command';
+import {fileProvider, scheme} from './extension';
 
 class FilterLineBase{
     public isInverseMatchMode: boolean = false;
@@ -291,7 +292,8 @@ class FilterLineBase{
             console.log('output path: ' + outputPath);
 
             // open file
-            let doc = await vscode.workspace.openTextDocument(outputPath);
+            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(outputPath, scheme, this.currentMatchRule)
+            let doc = await vscode.workspace.openTextDocument(virtualFileUri);
 
             // open write stream
             let writeStream = fs.createWriteStream(outputPath);
