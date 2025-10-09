@@ -6,6 +6,7 @@ Filter line for current opening file by strings/regular expressions, generating 
 1. Alt + F: filter to lines machting(regex)
 2. Alt + Shift + F： filter to lines not machting(regex)
 3. More：
+
 ![list](img/commandlist.png)
 
 ## Features
