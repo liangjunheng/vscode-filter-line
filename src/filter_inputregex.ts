@@ -59,11 +59,17 @@ class FilterLineByInputRegex extends FilterLineBase{
             return undefined;
         }
         if(this.isInverseMatchMode){
-            if(line.match(this._regex) === null && line.indexOf(this._rawRegexString) === -1){
+            if(this.isEnableStringMatchInRegex() && line.indexOf(this._rawRegexString) === -1){
+                return line;
+            }
+            if(line.match(this._regex) === null){
                 return line;
             }
         }else{
-            if(line.match(this._regex) !== null || line.indexOf(this._rawRegexString) !== -1){
+            if(this.isEnableStringMatchInRegex() && line.indexOf(this._rawRegexString) !== -1){
+                return line;
+            }
+            if(line.match(this._regex) !== null){
                 return line;
             }
         }

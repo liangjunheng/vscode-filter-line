@@ -100,6 +100,12 @@
                     "default": true,
                     "scope": "application",
                     "description": "ignore case when all lowercase"
+                },
+                "filter-line.enableStringMatchInRegex": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "matches the input string in regex mode"
                 }
             }
         }

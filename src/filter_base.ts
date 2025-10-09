@@ -26,6 +26,10 @@ class FilterLineBase{
         return vscode.workspace.getConfiguration('filter-line').get('enableSmartCaseInRegex', true);
     }
 
+    protected isEnableStringMatchInRegex(): boolean {
+        return vscode.workspace.getConfiguration('filter-line').get('enableStringMatchInRegex', true);
+    }
+
     protected isEnableOverwriteMode(): boolean {
         return vscode.workspace.getConfiguration('filter-line').get('enableOverwriteMode', false);
     }
@@ -292,7 +296,8 @@ class FilterLineBase{
             console.log('output path: ' + outputPath);
 
             // open file
-            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(outputPath, scheme, this.currentMatchRule)
+            const matchMode = this.isInverseMatchMode ? "➖" : "➕"
+            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(outputPath, scheme, matchMode + this.currentMatchRule)
             let doc = await vscode.workspace.openTextDocument(virtualFileUri);
 
             // open write stream
