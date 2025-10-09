@@ -2,15 +2,17 @@
 
 Filter line for current opening file by strings/regular expressions, generating the result in a new file.
 
+## Usage
+1. Alt + F: filter to lines machting(regex)
+2. Alt + Shift + F： filter to lines not machting(regex)
+3. More：
+![list](img/commandlist.png)
+
 ## Features
 
 1. Filter line by input string (or not contain input string).
 2. Filter line by input regular expression (or not match input regular expression).
 3. Filter line by config file `filterline.json`(or `filterline.eoml`) in corresponding `.vscode` directory.
-
-## Usage
-
-![list](img/commandlist.png)
 
 ### Filter line by input string.
 
@@ -64,4 +66,3 @@ There are 3 format types. As they are so simple, I will not describe them here. 
 
 Command line replacement for this extension : [filterline](https://github.com/liangjunheng/vscode-filter-line)
 
-**Power by https://github.com/everettjf/filterline**
