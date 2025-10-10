@@ -39,9 +39,9 @@ class FilterLineByInputRegex extends FilterLineBase{
             try{
                 this._rawRegexString = text
                 if (this.isEnableSmartCaseInRegex() && !/[A-Z]/.test(text)) {
-                    this._regex = new RegExp(text, 'gi');
+                    this._regex = new RegExp(text, 'i');
                 } else {
-                    this._regex = new RegExp(text, 'g');
+                    this._regex = new RegExp(text);
                 }
             }catch(e){
                 this.showError('Regex incorrect :' + e);
@@ -64,8 +64,9 @@ class FilterLineByInputRegex extends FilterLineBase{
             return undefined;
         }
         if(this.isInverseMatchMode){
-            if(this.isEnableStringMatchInRegexMode && line.indexOf(this._rawRegexString) === -1){
-                return line;
+            if(this.isEnableStringMatchInRegexMode && line.indexOf(this._rawRegexString) !== -1){
+                // matched return null
+                return undefined;
             }
             if(line.match(this._regex) === null){
                 return line;
