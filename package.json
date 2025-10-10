@@ -13,6 +13,7 @@
         "Other"
     ],
     "activationEvents": [
+        "onStartupFinished",
         "onCommand:extension.filterLineByInputString",
         "onCommand:extension.filterLineByInputRegex",
         "onCommand:extension.filterLineByNotContainInputString",

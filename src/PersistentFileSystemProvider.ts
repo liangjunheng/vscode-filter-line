@@ -8,7 +8,7 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
   private _emitter: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 
   constructor(context: vscode.ExtensionContext) {
-    this.storagePath = path.join(context.globalStorageUri.fsPath, 'virtual-files');
+    this.storagePath = path.join(context.globalStorageUri.fsPath, 'cache', 'virtual-files');
     fs.mkdirSync(this.storagePath, { recursive: true });
 
     this._emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
@@ -37,7 +37,7 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
 
   readFile(uri: vscode.Uri): Uint8Array {
     // first, get realPath
-    const realFilePath = this.realFileMap.get(uri.toString())
+    const realFilePath = this.realFileMap.get(uri.toString());
     console.log("readFile, virtualFileUri " + uri + ", realFilePath " + realFilePath)
     if(realFilePath && fs.existsSync(realFilePath)) {
       console.log("readFile, get realFilePath success!")
@@ -62,6 +62,10 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
     this.realFileMap.set(virtualFileUri.toString(), realFilePath)
     console.log("realFileToVirtureFile, virtualFileUri " + virtualFileUri + ", realFilePath " + realFilePath)
     return virtualFileUri
+  }
+
+  getRealFileFromVirtureFile(uri: vscode.Uri): string {
+    return this.realFileMap.get(uri.toString()) ?? '';
   }
 
   writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): void {

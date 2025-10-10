@@ -5,16 +5,18 @@ import * as vscode from 'vscode';
 import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
-import {deleteInvalidFileWhenNotInTab} from './file_manager';
+import {clearCacheFiles} from './file_manager';
 import {PersistentFileSystemProvider} from './PersistentFileSystemProvider';
 
 
 export const scheme = 'filter-line-pro';
 export let fileProvider: PersistentFileSystemProvider;
+export let ctx: vscode.ExtensionContext;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+    ctx = context
     fileProvider = new PersistentFileSystemProvider(context);
     context.subscriptions.push(
         vscode.workspace.registerFileSystemProvider(scheme, fileProvider, { isReadonly: false })
@@ -23,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "filter-line" is now active!');
-    deleteInvalidFileWhenNotInTab(context)
+    clearCacheFiles()
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
@@ -100,4 +102,5 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
+    clearCacheFiles()
 }
