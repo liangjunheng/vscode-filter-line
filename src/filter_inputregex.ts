@@ -6,6 +6,7 @@ class FilterLineByInputRegex extends FilterLineBase{
     private _regex?: RegExp;
     private _rawRegexString: string = "";
     private readonly HIST_KEY = 'inputRegex';
+    private isEnableStringMatchInRegexMode = true
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
@@ -18,6 +19,10 @@ class FilterLineByInputRegex extends FilterLineBase{
     }
 
     protected async prepare(callback : (succeed: boolean)=>void){
+        // Match the regular expression pattern itself
+        this.isEnableStringMatchInRegexMode = this.isEnableStringMatchInRegex()
+        console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
+
         let title = "filter to lines machting(regex)"
         if(this.isInverseMatchMode) {
             title = "filter to lines not machting(regex)"
@@ -59,14 +64,14 @@ class FilterLineByInputRegex extends FilterLineBase{
             return undefined;
         }
         if(this.isInverseMatchMode){
-            if(this.isEnableStringMatchInRegex() && line.indexOf(this._rawRegexString) === -1){
+            if(this.isEnableStringMatchInRegexMode && line.indexOf(this._rawRegexString) === -1){
                 return line;
             }
             if(line.match(this._regex) === null){
                 return line;
             }
         }else{
-            if(this.isEnableStringMatchInRegex() && line.indexOf(this._rawRegexString) !== -1){
+            if(this.isEnableStringMatchInRegexMode && line.indexOf(this._rawRegexString) !== -1){
                 return line;
             }
             if(line.match(this._regex) !== null){
