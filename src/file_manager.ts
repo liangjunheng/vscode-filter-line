@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { scheme, ctx } from './extension';
+import { scheme, ctx, fileProvider } from './extension';
 
 async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {
     const fileList: string[] = [];
@@ -27,25 +27,25 @@ async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {
 /**
  * remove .filterline files when a tab is closed.
  */
-async function deleteInvalidFileWhenNotInTab(ctx: vscode.ExtensionContext) {
-    // vscode.window.tabGroups.onDidChangeTabs(({ closed }) => {
-    //     closed.forEach(tab => {
-    //         const uri = (tab.input as any)?.uri;
-    //         if(uri && uri.fsPath.indexOf(path.join(ctx.globalStorageUri.fsPath, 'cache', 'real-files') !== -1)) {
-    //             vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(uri)), { recursive: true });
-    //         }
-    //     });
-    // });
-    
+async function deleteInvalidRealFileWhenCloseTab() {
+    vscode.window.tabGroups.onDidChangeTabs(({ closed }) => {
+        closed.forEach(tab => {
+            const uri = (tab.input as any)?.uri;
+            console.log("deleteInvalidRealFileWhenCloseTab, uri: " + uri);
+            if (uri && uri.scheme === scheme) {
+                const realFilePath = fileProvider.getRealFileFromVirtureFile(uri);
+                console.log("deleteInvalidRealFileWhenCloseTab, deleteRealFilePath: " + realFilePath);
+                vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(realFilePath)), { recursive: true });
+            }
+        })
+    });
+
     const fsTabPathSet = new Set<string>();
     for (const group of vscode.window.tabGroups.all) {
         for (const tab of group.tabs) {
             const input = tab.input;
-            if (input instanceof vscode.TabInputText) {
-                fsTabPathSet.add(input.uri.fsPath);
-            } else if (input instanceof vscode.TabInputTextDiff) {
-                fsTabPathSet.add(input.original.fsPath);
-                fsTabPathSet.add(input.modified.fsPath);
+            if (input instanceof vscode.TabInputText && input.uri.scheme === scheme) {
+                fsTabPathSet.add(fileProvider.getRealFileFromVirtureFile(input.uri));
             }
         }
     }
@@ -62,19 +62,19 @@ async function deleteInvalidFileWhenNotInTab(ctx: vscode.ExtensionContext) {
 async function clearCacheFiles() {
     vscode.workspace.fs.delete(vscode.Uri.file(path.join(ctx.globalStorageUri.fsPath, 'cache', 'real-files')), { recursive: true });
     vscode.workspace.fs.delete(vscode.Uri.file(path.join(ctx.globalStorageUri.fsPath, 'cache', 'virtual-files')), { recursive: true });
-    const currentActiveTab = vscode.window.activeTextEditor?.document.fileName ?? ''
-    for (const group of vscode.window.tabGroups.all) {
-        for (const tab of group.tabs) {
-            const uri = (tab.input as any)?.uri;
-            console.log("clearCacheFiles, uri: " + uri);
-            if (uri && uri.scheme === scheme) {
-                await vscode.window.showTextDocument(uri)
-                await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
-            }
-        }
-    }
-    vscode.window.showTextDocument(vscode.Uri.parse(currentActiveTab))
+    // const currentActiveTab = vscode.window.activeTextEditor?.document.fileName ?? ''
+    // for (const group of vscode.window.tabGroups.all) {
+    //     for (const tab of group.tabs) {
+    //         const uri = (tab.input as any)?.uri;
+    //         console.log("clearCacheFiles, uri: " + uri);
+    //         if (uri && uri.scheme === scheme) {
+    //             await vscode.window.showTextDocument(uri)
+    //             await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
+    //         }
+    //     }
+    // }
+    // vscode.window.showTextDocument(vscode.Uri.parse(currentActiveTab))
 }
 
-export { deleteInvalidFileWhenNotInTab, clearCacheFiles }
+export { deleteInvalidRealFileWhenCloseTab, clearCacheFiles }
 

@@ -14,6 +14,7 @@
     ],
     "activationEvents": [
         "onStartupFinished",
+        "onFileSystem:filter-line-pro",
         "onCommand:extension.filterLineByInputString",
         "onCommand:extension.filterLineByInputRegex",
         "onCommand:extension.filterLineByNotContainInputString",
@@ -84,9 +85,9 @@
             "properties": {
                 "filter-line.historySize": {
                     "type": "integer",
-                    "default": 50,
+                    "default": 30,
                     "minimum": 1,
-                    "maximum": 500,
+                    "maximum": 300,
                     "scope": "application",
                     "description": "Filter patterns history size"
                 },

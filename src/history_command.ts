@@ -10,7 +10,7 @@ class HistoryCommand {
     }
 
     getHistoryMaxSizeConfig(): number {
-        return vscode.workspace.getConfiguration('filter-line').get('historySize', 10);
+        return vscode.workspace.getConfiguration('filter-line').get('historySize', 30);
     }
 
     getHistory(key: string): string[] {

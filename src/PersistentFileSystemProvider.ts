@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
-  private realFileMap: Map<string, string> = new Map();
   private storagePath: string;
   private _emitter: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 
@@ -37,13 +36,13 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
 
   readFile(uri: vscode.Uri): Uint8Array {
     // first, get realPath
-    const realFilePath = this.realFileMap.get(uri.toString());
+    const realFilePath = this.getRealFileFromVirtureFile(uri);
     console.log("readFile, virtualFileUri " + uri + ", realFilePath " + realFilePath)
-    if(realFilePath && fs.existsSync(realFilePath)) {
+    if (realFilePath && fs.existsSync(realFilePath)) {
       console.log("readFile, get realFilePath success!")
       return fs.readFileSync(realFilePath);
     }
-    
+
     // fail, get virtual file content
     const filePath = this.getFilePath(uri);
     if (fs.existsSync(filePath)) {
@@ -58,14 +57,14 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
    */
   getVirtureFileFromRealFile(realFilePath: string, scheme: string, filename: string): vscode.Uri {
     // create virtual file path
-    const virtualFileUri = vscode.Uri.parse(`${scheme}:/${Date.now()}/${encodeURIComponent(filename)}`);
-    this.realFileMap.set(virtualFileUri.toString(), realFilePath)
+    const virtualFileUri = vscode.Uri.parse(`${scheme}:/${Date.now()}/${encodeURIComponent(filename)}?realFilePath=${encodeURIComponent(realFilePath)}`);
     console.log("realFileToVirtureFile, virtualFileUri " + virtualFileUri + ", realFilePath " + realFilePath)
     return virtualFileUri
   }
 
   getRealFileFromVirtureFile(uri: vscode.Uri): string {
-    return this.realFileMap.get(uri.toString()) ?? '';
+    const params = new URLSearchParams(uri.query);
+    return decodeURIComponent(params.get('realFilePath') ?? "");
   }
 
   writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): void {
