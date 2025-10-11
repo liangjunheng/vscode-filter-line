@@ -68,6 +68,7 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
   }
 
   readFile(uri: vscode.Uri): Uint8Array {
+    console.log("readFile, uri： " + uri);
     // fail, get virtual file content
     const filePath = this.getFilePath(uri);
     if (fs.existsSync(filePath)) {

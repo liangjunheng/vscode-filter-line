@@ -5,10 +5,9 @@ import * as vscode from 'vscode';
 import * as readline from 'readline';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as os from 'os';
 import {getValiadFileName} from './util';
 import {HistoryCommand} from './history_command';
-import {fileProvider, scheme} from './extension';
+import {fileProvider, VITUAL_FILE_SCHEME} from './extension';
 
 class FilterLineBase{
     public isInverseMatchMode: boolean = false;
@@ -135,107 +134,108 @@ class FilterLineBase{
         vscode.window.showErrorMessage(text);
     }
 
-    protected getDocumentPathToBeFilter(callback : (docPath: string)=>void, filePath_?: string){
-        let filePath = filePath_;
-        console.log('getDocumentPathToBeFilter, filepath = ' + filePath_);
-        
-        if (filePath_ === undefined) {
-            let editor = vscode.window.activeTextEditor;
-            if(!editor){
-                // In a 50 MB file, activeTextEditor is null. Try reading the current tab
-                const activeTab  = vscode.window.tabGroups.activeTabGroup.activeTab; 
-                if (activeTab?.input instanceof vscode.TabInputText) {
-                    const filePath = activeTab.input.uri.fsPath
-                    console.log("getDocumentPathToBeFilter, tabUri： " + filePath);
-                    callback(filePath);
-                    return;
+    protected getDocumentPathToBeFilter(filePath_?: string): Promise<string> {
+        return new Promise<string>(async (resolve) => {
+            let filePath = filePath_;
+            console.log('getDocumentPathToBeFilter, filepath = ' + filePath_);
+
+            if (filePath_ === undefined) {
+                const editor = vscode.window.activeTextEditor;
+                filePath = vscode.window.activeTextEditor?.document?.uri?.fsPath;
+                // first, save file
+                if(editor?.document.isDirty === true && !editor.document.isUntitled) {
+                    await editor?.document?.save()
                 }
-                // fail
-                this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
-                console.log("getDocumentPathToBeFilter, No file selected (Or file is too large. For how to filter large file, please visit README)");
-                callback('');
+
+                if (!fs.existsSync(filePath ?? "")) {
+                    // In a 50 MB file, activeTextEditor is null. Try reading the current tab
+                    const activeTabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
+                    if (activeTabInput instanceof vscode.TabInputText) {
+                        if (activeTabInput.uri.scheme == VITUAL_FILE_SCHEME) {
+                            filePath = fileProvider.getRealFileFromVirtureFile(activeTabInput.uri);
+                        } else {
+                            filePath = activeTabInput.uri.fsPath;
+                        }
+                    }
+                }
+
+
+                if (!fs.existsSync(filePath ?? "") && editor?.document) {
+                    // Write cache data to a file
+                    filePath = path.join(this.ctx.globalStorageUri.fsPath, 'cache', 'real-files', `${Date.now()}`, 'TabBuffer.txt');
+                    const allText = editor.document.getText();
+                    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+                    fs.writeFileSync(filePath, allText);
+                }
+            }
+
+            if (filePath === undefined || !fs.existsSync(filePath)) {
+                // this.showError('Can not get valid file path');
+                // this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
+                console.warn('Can not get valid file path');
+                resolve('');
                 return;
             }
 
-            let doc = editor.document;
-            if(doc.isDirty || doc.isUntitled){
-                // this.showError('Save before filter line');
-                console.warn('getDocumentPathToBeFilter, doc.isDirty || doc.isUntitled');
-                callback('');
+            let stats = fs.statSync(filePath);
+            if (!stats.isFile()) {
+                this.showError('Can only filter file');
+                resolve('');
                 return;
             }
-            filePath = doc.fileName;
-        }
 
-        if (filePath === undefined || filePath === '' || !fs.existsSync(filePath)) {
-            // this.showError('Can not get valid file path');
-            console.warn('Can not get valid file path');
-            callback('');
-            return;
-        }
+            let fileName = filePath.replace(/^.*[\\\/]/, '');
+            let fileDir = filePath.substring(0, filePath.length - fileName.length);
+            console.log("filePath=" + filePath);
+            console.log("fileName=" + fileName);
+            console.log("fileDir=" + fileDir);
 
-        let stats = fs.statSync(filePath);
-        if (!stats.isFile()) {
-            this.showError('Can only filter file');
-            callback('');
-            return;
-        }
+            if (fileName !== 'filterline') {
+                resolve(filePath);
+                return;
+            }
 
-        let fileName = filePath.replace(/^.*[\\\/]/, '');
-        let fileDir = filePath.substring(0, filePath.length - fileName.length);
-        console.log("filePath=" + filePath);
-        console.log("fileName=" + fileName);
-        console.log("fileDir=" + fileDir);
+            console.log('large file mode');
 
-        if (fileName !== 'filterline') {
-            callback(filePath);
-            return;
-        }
+            fs.readdir(fileDir, (err: any, files: any) => {
 
-        console.log('large file mode');
+                let pickableFiles: string[] = [];
+                files.forEach((file: any) => {
+                    console.log(file);
 
-        fs.readdir(fileDir, (err : any,files : any) => {
+                    if (fs.lstatSync(fileDir + file).isDirectory()) {
+                        resolve('');
+                        return;
+                    }
+                    if (file === '.DS_Store' || file === 'filterline') {
+                        resolve('');
+                        return;
+                    }
 
-            let pickableFiles:string[] = [];
-            files.forEach((file : any) => {
-                console.log(file);
+                    pickableFiles.push(file);
+                });
 
-                if (fs.lstatSync(fileDir + file).isDirectory()) {
-                    return;
-                }
-                if (file === '.DS_Store' || file === 'filterline') {
-                    return;
-                }
+                pickableFiles.sort();
 
-                pickableFiles.push(file);
-            });
-
-            pickableFiles.sort();
-
-            vscode.window.showQuickPick(pickableFiles).then((pickedFile:string|undefined) => {
-                if (pickedFile === undefined) {
-                    return;
-                }
-                let largeFilePath = fileDir + pickedFile;
-                console.log(largeFilePath);
-                callback(largeFilePath);
+                vscode.window.showQuickPick(pickableFiles).then((pickedFile: string | undefined) => {
+                    if (pickedFile === undefined) {
+                        resolve('');
+                        return;
+                    }
+                    let largeFilePath = fileDir + pickedFile;
+                    console.log(largeFilePath);
+                    resolve(largeFilePath);
+                });
             });
         });
-
     }
 
     protected filterFile(filePath: string): Promise<boolean> {
         return new Promise(async (resolve) => {
             let inputPath = filePath;
-            if (filePath === undefined || filePath === '' || !fs.existsSync(filePath)) {
-                let editor = vscode.window.activeTextEditor
-                if (editor) {
-                    // Write cache data to a file
-                    inputPath = path.join(os.tmpdir(), 'vscode', 'filter-line-pro', `${Date.now()}`, 'TabBuffer.txt');
-                    const allText = editor.document.getText();
-                    fs.mkdirSync(path.dirname(inputPath), { recursive: true });
-                    fs.writeFileSync(inputPath, allText);
-                }
+            if (inputPath === undefined || !fs.existsSync(inputPath)) {
+                this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
+                return
             }
 
             // special path tail
@@ -297,7 +297,7 @@ class FilterLineBase{
 
             // open file
             const matchMode = this.isInverseMatchMode ? "➖" : "➕"
-            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(outputPath, scheme, matchMode + this.currentMatchRule)
+            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(outputPath, VITUAL_FILE_SCHEME, matchMode + this.currentMatchRule)
             let doc = await vscode.workspace.openTextDocument(virtualFileUri);
 
             // open write stream
@@ -353,19 +353,17 @@ class FilterLineBase{
             if (!succeed) {
                 return;
             }
-            this.getDocumentPathToBeFilter((docPath) => {
-                console.log('will filter file :' + docPath);
-                vscode.window.withProgress(
-                    {
-                        location: vscode.ProgressLocation.Notification,
-                        title: `Filtering by rule: ${this.currentMatchRule}`,
-                        cancellable: false,
-                    },
-                    async (progress) => {
-                        await this.filterFile(docPath);
-                    }
-                );
-            }, filePath);
+            vscode.window.withProgress(
+                {
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Filtering by rule: ${this.currentMatchRule}`,
+                    cancellable: false,
+                },
+                async (progress) => {
+                    const docPath = await this.getDocumentPathToBeFilter(filePath)
+                    await this.filterFile(docPath);
+                }
+            );
         });
     }
 }

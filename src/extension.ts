@@ -9,7 +9,7 @@ import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles} from './file_manager
 import {PersistentFileSystemProvider} from './PersistentFileSystemProvider';
 
 
-export const scheme = 'filter-line-pro';
+export const VITUAL_FILE_SCHEME = 'filter-line-pro';
 export let fileProvider: PersistentFileSystemProvider;
 export let ctx: vscode.ExtensionContext;
 
@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
     fileProvider = new PersistentFileSystemProvider(context);
 
     context.subscriptions.push(
-        vscode.workspace.registerFileSystemProvider(scheme, fileProvider, { isReadonly: false })
+        vscode.workspace.registerFileSystemProvider(VITUAL_FILE_SCHEME, fileProvider, { isReadonly: false })
     );
 
     context.subscriptions.push({
