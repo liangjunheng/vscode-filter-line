@@ -85,7 +85,7 @@
             "properties": {
                 "filter-line.historySize": {
                     "type": "integer",
-                    "default": 30,
+                    "default": 50,
                     "minimum": 1,
                     "maximum": 300,
                     "scope": "application",

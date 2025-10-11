@@ -18,7 +18,28 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
   }
 
   private getFilePath(uri: vscode.Uri): string {
+    const realFilePath = this.getRealFileFromVirtureFile(uri);
+    if (realFilePath && fs.existsSync(realFilePath)) {
+      console.log("getFilePath, isRealFilePath: true")
+      return realFilePath;
+    }
     return path.join(this.storagePath, encodeURIComponent(uri.path));
+  }
+
+  /**
+   * realpath convert to virtualpath.
+   * In order to change the tab label.
+   */
+  getVirtureFileFromRealFile(realFilePath: string, scheme: string, filename: string): vscode.Uri {
+    // create virtual file path
+    const virtualFileUri = vscode.Uri.parse(`${scheme}:/${Date.now()}/${encodeURIComponent(filename)}?realFilePath=${encodeURIComponent(realFilePath)}`);
+    console.log("realFileToVirtureFile, virtualFileUri " + virtualFileUri + ", realFilePath " + realFilePath)
+    return virtualFileUri
+  }
+
+  getRealFileFromVirtureFile(uri: vscode.Uri): string {
+    const params = new URLSearchParams(uri.query);
+    return decodeURIComponent(params.get('realFilePath') ?? "");
   }
 
   public exists(uri: vscode.Uri): boolean {
@@ -26,10 +47,10 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
   }
 
   stat(uri: vscode.Uri): vscode.FileStat {
-    const realFilePath = this.getRealFileFromVirtureFile(uri);
-    if (realFilePath && fs.existsSync(realFilePath)) {
-      console.log("stat, get realFilePath stat success!");
-      const realFileStat = fs.statSync(realFilePath);
+    const filePath = this.getFilePath(uri);
+    if (fs.existsSync(filePath)) {
+      console.log("stat, get filePath stat success!");
+      const realFileStat = fs.statSync(filePath);
       return {
         type: vscode.FileType.File,
         ctime: realFileStat.ctimeMs,
@@ -47,36 +68,12 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
   }
 
   readFile(uri: vscode.Uri): Uint8Array {
-    // first, get realPath
-    const realFilePath = this.getRealFileFromVirtureFile(uri);
-    console.log("readFile, virtualFileUri " + uri + ", realFilePath " + realFilePath)
-    if (realFilePath && fs.existsSync(realFilePath)) {
-      console.log("readFile, get realFilePath success!")
-      return fs.readFileSync(realFilePath);
-    }
-
     // fail, get virtual file content
     const filePath = this.getFilePath(uri);
     if (fs.existsSync(filePath)) {
       return fs.readFileSync(filePath);
     }
     return Buffer.from('');
-  }
-
-  /**
-   * realpath convert to virtualpath.
-   * In order to change the tab label.
-   */
-  getVirtureFileFromRealFile(realFilePath: string, scheme: string, filename: string): vscode.Uri {
-    // create virtual file path
-    const virtualFileUri = vscode.Uri.parse(`${scheme}:/${Date.now()}/${encodeURIComponent(filename)}?realFilePath=${encodeURIComponent(realFilePath)}`);
-    console.log("realFileToVirtureFile, virtualFileUri " + virtualFileUri + ", realFilePath " + realFilePath)
-    return virtualFileUri
-  }
-
-  getRealFileFromVirtureFile(uri: vscode.Uri): string {
-    const params = new URLSearchParams(uri.query);
-    return decodeURIComponent(params.get('realFilePath') ?? "");
   }
 
   writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): void {

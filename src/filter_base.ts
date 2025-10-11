@@ -358,7 +358,7 @@ class FilterLineBase{
                 vscode.window.withProgress(
                     {
                         location: vscode.ProgressLocation.Notification,
-                        title: "Filtering lines, please wait...",
+                        title: `Filtering by rule: ${this.currentMatchRule}`,
                         cancellable: false,
                     },
                     async (progress) => {
