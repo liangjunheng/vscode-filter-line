@@ -26,6 +26,18 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
   }
 
   stat(uri: vscode.Uri): vscode.FileStat {
+    const realFilePath = this.getRealFileFromVirtureFile(uri);
+    if (realFilePath && fs.existsSync(realFilePath)) {
+      console.log("stat, get realFilePath stat success!");
+      const realFileStat = fs.statSync(realFilePath);
+      return {
+        type: vscode.FileType.File,
+        ctime: realFileStat.ctimeMs,
+        mtime: realFileStat.mtimeMs,
+        size: realFileStat.size
+      }
+    }
+
     return {
       type: vscode.FileType.File,
       ctime: Date.now(),
