@@ -64,18 +64,24 @@ class FilterLineByInputRegex extends FilterLineBase{
             return undefined;
         }
         if(this.isInverseMatchMode){
+            // string match
             if(this.isEnableStringMatchInRegexMode && line.indexOf(this._rawRegexString) !== -1){
-                // matched return null
+                // matched, return null
                 return undefined;
             }
-            if(line.match(this._regex) === null){
+            // regex match
+            this._regex.lastIndex = 0;
+            if(!this._regex.test(line)){
                 return line;
             }
         }else{
+            // string match
             if(this.isEnableStringMatchInRegexMode && line.indexOf(this._rawRegexString) !== -1){
                 return line;
             }
-            if(line.match(this._regex) !== null){
+            // regex match
+            this._regex.lastIndex = 0;
+            if(this._regex.test(line)){
                 return line;
             }
         }
