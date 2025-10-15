@@ -333,12 +333,12 @@ class FilterLineBase{
                 console.log('closed');
                 if(canOpenFileSafely(outputPath)) {
                     vscode.commands.executeCommand('vscode.open', virtualFileUri, { preview: isOverwriteMode });
-                    vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
+                    // vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
                 } else {
                     vscode.window.showErrorMessage(
-                        "WARN: Filter line failed due to low system memory. Tip: Add more filter rules.",
+                        `error: Filter line failed due to low system memory. Tip: Add more filter rules, current rule: ${this.currentMatchRule}`,
                         `Failure`, 
-                        `Rule: ${this.currentMatchRule}`, 
+                        `Reason: Low memory`, 
                     );
                 }
                 resolve(true);
