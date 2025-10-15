@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import * as readline from 'readline';
 import * as path from 'path';
 import * as fs from 'fs';
-import {getValiadFileName} from './util';
+import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
 import {fileProvider, VITUAL_FILE_SCHEME} from './extension';
 
@@ -331,9 +331,17 @@ class FilterLineBase{
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
-                vscode.commands.executeCommand('vscode.open', virtualFileUri, { preview: isOverwriteMode });
+                if(canOpenFileSafely(outputPath)) {
+                    vscode.commands.executeCommand('vscode.open', virtualFileUri, { preview: isOverwriteMode });
+                    vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
+                } else {
+                    vscode.window.showErrorMessage(
+                        "WARN: Filter line failed due to low system memory. Tip: Add more filter rules.",
+                        `Failure`, 
+                        `Rule: ${this.currentMatchRule}`, 
+                    );
+                }
                 resolve(true);
-                vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
             });
         });
     }

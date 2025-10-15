@@ -1,5 +1,9 @@
 'use strict';
 
+import * as v8 from 'v8';
+import * as fs from 'fs';
+import * as os from 'os';
+
 function padWithBlank(str:string, length:number){
     if(str.length > length){
         return str;
@@ -44,4 +48,30 @@ function getValiadFileName(input: string): string {
     return first30.replace(/[^a-zA-Z0-9_!#$%&'()\-\@^`{}~+,;=$$$$.]/g, '#');
 }
 
-export {padWithBlank, readJsonFile, debounce, getValiadFileName};
+function canOpenFileSafely(filePath: string): boolean {
+    
+    const fileSize = fs.statSync(filePath).size; // bytes
+    const heapStats = v8.getHeapStatistics();
+    const memUsage = process.memoryUsage();
+    const sysFree = os.freemem();
+
+    const heapLimit = heapStats.heap_size_limit; // bytes
+    const heapFree = heapLimit - memUsage.heapUsed;
+
+    // file size * 3，avoid OOM
+    const estimatedNeeded = fileSize * 3;
+
+    console.log(`File size: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`V8 heap Free: ${(heapFree / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`System memory Free: ${(sysFree / 1024 / 1024).toFixed(2)} MB`);
+
+    // check heap mem
+    if (estimatedNeeded > heapFree) return false;
+    // check system mem
+    if (estimatedNeeded > sysFree * 0.9) return false;
+
+    return true;
+}
+
+
+export {padWithBlank, readJsonFile, debounce, getValiadFileName, canOpenFileSafely};
