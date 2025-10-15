@@ -331,7 +331,7 @@ class FilterLineBase{
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
-                vscode.commands.executeCommand('vscode.open', virtualFileUri);
+                vscode.commands.executeCommand('vscode.open', virtualFileUri, { preview: isOverwriteMode });
                 resolve(true);
                 vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
             });
