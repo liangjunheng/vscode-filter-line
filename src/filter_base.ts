@@ -298,7 +298,6 @@ class FilterLineBase{
             // open file
             const matchMode = this.isInverseMatchMode ? "➖" : "➕"
             let virtualFileUri = fileProvider.getVirtureFileFromRealFile(outputPath, VITUAL_FILE_SCHEME, matchMode + this.currentMatchRule)
-            let doc = await vscode.workspace.openTextDocument(virtualFileUri);
 
             // open write stream
             let writeStream = fs.createWriteStream(outputPath);
@@ -326,13 +325,13 @@ class FilterLineBase{
                     } catch (e) {
                         console.log(e);
                     }
-                    vscode.window.showTextDocument(doc, { preview: isOverwriteMode })
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
+                vscode.commands.executeCommand('vscode.open', virtualFileUri);
                 resolve(true);
                 vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
             });
