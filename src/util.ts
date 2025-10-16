@@ -52,11 +52,8 @@ function canOpenFileSafely(filePath: string): boolean {
     
     const fileSize = fs.statSync(filePath).size; // bytes
     const heapStats = v8.getHeapStatistics();
-    const memUsage = process.memoryUsage();
+    const heapFree = heapStats.total_available_size; // bytes
     const sysFree = os.freemem();
-
-    const heapLimit = heapStats.heap_size_limit; // bytes
-    const heapFree = heapLimit - memUsage.heapUsed;
 
     // file size * 3，avoid OOM
     const estimatedNeeded = fileSize * 3;

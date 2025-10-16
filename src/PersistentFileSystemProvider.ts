@@ -9,7 +9,6 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
   constructor(context: vscode.ExtensionContext) {
     this.storagePath = path.join(context.globalStorageUri.fsPath, 'cache', 'virtual-files');
     fs.mkdirSync(this.storagePath, { recursive: true });
-
     this._emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
   }
 
@@ -63,7 +62,7 @@ export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
       type: vscode.FileType.File,
       ctime: Date.now(),
       mtime: Date.now(),
-      size: this.readFile(uri).length
+      size: 0,
     };
   }
 
