@@ -61,7 +61,7 @@ async function deleteInvalidRealFileWhenCloseTab() {
 
 async function clearCacheFiles() {
     vscode.workspace.fs.delete(vscode.Uri.file(path.join(ctx.globalStorageUri.fsPath, 'cache', 'real-files')), { recursive: true });
-    vscode.workspace.fs.delete(vscode.Uri.file(path.join(ctx.globalStorageUri.fsPath, 'cache', 'virtual-files')), { recursive: true });
+    // vscode.workspace.fs.delete(vscode.Uri.file(path.join(ctx.globalStorageUri.fsPath, 'cache', 'virtual-files')), { recursive: true });
     // const currentActiveTab = vscode.window.activeTextEditor?.document.fileName ?? ''
     // for (const group of vscode.window.tabGroups.all) {
     //     for (const tab of group.tabs) {

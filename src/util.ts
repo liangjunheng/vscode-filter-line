@@ -45,14 +45,14 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
 function getValiadFileName(input: string): string {
     const first30 = input.slice(0, 30)
         .replace(/\*/g, '∗')
-        .replace(/\//g, '／')
-        .replace(/\\/g, '⧵')
+        .replace(/\//g, '⟍')
+        .replace(/\\/g, '⟋')
         .replace(/:/g, '꞉')
         .replace(/\?/g, 'ʔ')
-        .replace(/"/g, '＂')
-        .replace(/</g, '❮')
-        .replace(/>/g, '❯')
-        .replace(/\|/g, '∣');
+        .replace(/"/g, '″')
+        .replace(/</g, '﹤')
+        .replace(/>/g, '﹥')
+        .replace(/\|/g, 'ǀ');
     // Replace all non-alphanumeric characters with "#"
     return first30;
 }
