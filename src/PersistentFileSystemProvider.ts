@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export class PersistentFileSystemProvider implements vscode.FileSystemProvider {
-  private storagePath: string;
+  readonly storagePath: string;
   private _emitter: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 
   constructor(context: vscode.ExtensionContext) {

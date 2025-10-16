@@ -240,10 +240,11 @@ class FilterLineBase{
 
             // special path tail
             let ext = path.extname(inputPath);
-            let tail = '.filter';
+            // let tail = '.filter';
 
             // overwrite mode ?
-            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(tail) !== -1) && (inputPath.indexOf(path.join('vscode', 'filter-line-pro')) !== -1);
+            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(this.ctx.extension.id) !== -1);
+            console.log("isOverwriteMode: " + isOverwriteMode)
             let outputPath = '';
             if (isOverwriteMode) {
                 outputPath = inputPath;
@@ -270,11 +271,11 @@ class FilterLineBase{
                 inputPath = newInputPath;
             } else {
                 const fileName = getValiadFileName(this.currentMatchRule)
-                let inverseMatchSymbol = "!";
+                let inverseMatchSymbol = "➖";
                 if(!this.isInverseMatchMode) {
-                    inverseMatchSymbol = "";
+                    inverseMatchSymbol = "➕";
                 }
-                outputPath = path.join(this.ctx.globalStorageUri.fsPath, 'cache', 'real-files', `${Date.now()}`, inverseMatchSymbol + '[' + fileName + ']' + tail);
+                outputPath = path.join(this.ctx.globalStorageUri.fsPath, 'cache', 'real-files', `${Date.now()}`, inverseMatchSymbol + fileName);
                 fs.mkdirSync(path.dirname(outputPath), { recursive: true })
                 if (fs.existsSync(outputPath)) {
                     console.log('output file already exist, force delete when not under overwrite mode');
@@ -297,7 +298,11 @@ class FilterLineBase{
 
             // open file
             const matchMode = this.isInverseMatchMode ? "➖" : "➕"
-            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(outputPath, VITUAL_FILE_SCHEME, matchMode + this.currentMatchRule)
+            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(
+                outputPath,
+                VITUAL_FILE_SCHEME,
+                matchMode + this.currentMatchRule.replace(/\//g, '／')
+            );
 
             // open write stream
             let writeStream = fs.createWriteStream(outputPath);
@@ -331,9 +336,14 @@ class FilterLineBase{
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
-                if(canOpenFileSafely(outputPath)) {
+                const fileSize = fs.statSync(outputPath).size;
+                const isLargeFile = fileSize > 512 * 1024 * 1024;
+                
+                if(!isLargeFile && canOpenFileSafely(outputPath, 3)) {
                     vscode.commands.executeCommand('vscode.open', virtualFileUri, { preview: isOverwriteMode });
                     // vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
+                } else if (canOpenFileSafely(outputPath, 1.5)) {
+                    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(encodeURIComponent(outputPath)), { preview: isOverwriteMode });
                 } else {
                     vscode.window.showErrorMessage(
                         `error: Filter line failed due to low system memory. Tip: Add more filter rules, current rule: ${this.currentMatchRule}`,

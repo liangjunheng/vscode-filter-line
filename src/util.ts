@@ -43,12 +43,21 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
 }
 
 function getValiadFileName(input: string): string {
-    const first30 = input.slice(0, 30);
+    const first30 = input.slice(0, 30)
+        .replace(/\*/g, '∗')
+        .replace(/\//g, '／')
+        .replace(/\\/g, '⧵')
+        .replace(/:/g, '꞉')
+        .replace(/\?/g, 'ʔ')
+        .replace(/"/g, '＂')
+        .replace(/</g, '❮')
+        .replace(/>/g, '❯')
+        .replace(/\|/g, '∣');
     // Replace all non-alphanumeric characters with "#"
-    return first30.replace(/[^a-zA-Z0-9_!#$%&'()\-\@^`{}~+,;=$$$$.]/g, '#');
+    return first30;
 }
 
-function canOpenFileSafely(filePath: string): boolean {
+function canOpenFileSafely(filePath: string, factor: number = 3): boolean {
     
     const fileSize = fs.statSync(filePath).size; // bytes
     const heapStats = v8.getHeapStatistics();
@@ -56,7 +65,7 @@ function canOpenFileSafely(filePath: string): boolean {
     const sysFree = os.freemem();
 
     // file size * 3，avoid OOM
-    const estimatedNeeded = fileSize * 3;
+    const estimatedNeeded = fileSize * factor;
 
     console.log(`File size: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
     console.log(`V8 heap Free: ${(heapFree / 1024 / 1024).toFixed(2)} MB`);
