@@ -57,15 +57,17 @@ function getValiadFileName(input: string): string {
     return first30;
 }
 
-function canOpenFileSafely(filePath: string, factor: number = 3): boolean {
-    
+function canOpenFileSafely(
+    filePath: string,
+    options: { safetyFactor: number } = { safetyFactor: 3 }
+): boolean {
     const fileSize = fs.statSync(filePath).size; // bytes
     const heapStats = v8.getHeapStatistics();
     const heapFree = heapStats.total_available_size; // bytes
     const sysFree = os.freemem();
 
     // file size * 3，avoid OOM
-    const estimatedNeeded = fileSize * factor;
+    const estimatedNeeded = fileSize * options.safetyFactor;
 
     console.log(`File size: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
     console.log(`V8 heap Free: ${(heapFree / 1024 / 1024).toFixed(2)} MB`);

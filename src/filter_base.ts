@@ -340,7 +340,7 @@ class FilterLineBase{
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
-                if (canOpenFileSafely(outputPath, 1.5)) {
+                if (canOpenFileSafely(outputPath, { safetyFactor: 1.5 })) {
                     vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(encodeURIComponent(outputPath)), { preview: isOverwriteMode });
                 } else {
                     vscode.window.showErrorMessage(
