@@ -6,11 +6,7 @@ import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles} from './file_manager';
-import {PersistentFileSystemProvider} from './PersistentFileSystemProvider';
 
-
-export const VITUAL_FILE_SCHEME = 'filter-line-pro';
-export let fileProvider: PersistentFileSystemProvider;
 export let ctx: vscode.ExtensionContext;
 
 // this method is called when your extension is activated
@@ -20,11 +16,6 @@ export function activate(context: vscode.ExtensionContext) {
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "filter-line" is now active!');
     ctx = context
-    fileProvider = new PersistentFileSystemProvider(context);
-
-    context.subscriptions.push(
-        vscode.workspace.registerFileSystemProvider(VITUAL_FILE_SCHEME, fileProvider, { isReadonly: false })
-    );
 
     context.subscriptions.push({
         dispose: () => {

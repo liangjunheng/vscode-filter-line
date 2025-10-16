@@ -7,7 +7,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
-import {fileProvider, VITUAL_FILE_SCHEME} from './extension';
 
 class FilterLineBase{
     public isInverseMatchMode: boolean = false;
@@ -134,6 +133,16 @@ class FilterLineBase{
         vscode.window.showErrorMessage(text);
     }
 
+    private createFileUri(fileName: string) {
+        return path.join(
+            this.ctx.globalStorageUri.fsPath,
+            'cache',
+            'real-files',
+            `${Date.now()}`,
+            fileName
+        );
+    }
+
     protected getDocumentPathToBeFilter(filePath_?: string): Promise<string> {
         return new Promise<string>(async (resolve) => {
             let filePath = filePath_;
@@ -151,18 +160,14 @@ class FilterLineBase{
                     // In a 50 MB file, activeTextEditor is null. Try reading the current tab
                     const activeTabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
                     if (activeTabInput instanceof vscode.TabInputText) {
-                        if (activeTabInput.uri.scheme == VITUAL_FILE_SCHEME) {
-                            filePath = fileProvider.getRealFileFromVirtureFile(activeTabInput.uri);
-                        } else {
-                            filePath = activeTabInput.uri.fsPath;
-                        }
+                        filePath = activeTabInput.uri.fsPath;
                     }
                 }
 
 
                 if (!fs.existsSync(filePath ?? "") && editor?.document) {
                     // Write cache data to a file
-                    filePath = path.join(this.ctx.globalStorageUri.fsPath, 'cache', 'real-files', `${Date.now()}`, 'TabBuffer.txt');
+                    filePath = this.createFileUri('TabBuffer.txt')
                     const allText = editor.document.getText();
                     fs.mkdirSync(path.dirname(filePath), { recursive: true });
                     fs.writeFileSync(filePath, allText);
@@ -245,10 +250,13 @@ class FilterLineBase{
             // overwrite mode ?
             let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(this.ctx.extension.id) !== -1);
             console.log("isOverwriteMode: " + isOverwriteMode)
+
+            // match mode
+            const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
+
             let outputPath = '';
             if (isOverwriteMode) {
                 outputPath = inputPath;
-
                 // change input path
                 let newInputPath = inputPath + Math.floor(Date.now() / 1000) + ext;
                 try {
@@ -271,11 +279,7 @@ class FilterLineBase{
                 inputPath = newInputPath;
             } else {
                 const fileName = getValiadFileName(this.currentMatchRule)
-                let inverseMatchSymbol = "➖";
-                if(!this.isInverseMatchMode) {
-                    inverseMatchSymbol = "➕";
-                }
-                outputPath = path.join(this.ctx.globalStorageUri.fsPath, 'cache', 'real-files', `${Date.now()}`, inverseMatchSymbol + fileName);
+                outputPath = this.createFileUri(matchModeSymbol + fileName);
                 fs.mkdirSync(path.dirname(outputPath), { recursive: true })
                 if (fs.existsSync(outputPath)) {
                     console.log('output file already exist, force delete when not under overwrite mode');
@@ -296,26 +300,25 @@ class FilterLineBase{
             console.log('input path: ' + inputPath);
             console.log('output path: ' + outputPath);
 
-            // open file
-            const matchMode = this.isInverseMatchMode ? "➖" : "➕"
-            let virtualFileUri = fileProvider.getVirtureFileFromRealFile(
-                outputPath,
-                VITUAL_FILE_SCHEME,
-                matchMode + this.currentMatchRule.replace(/\//g, '／')
-            );
-
+            // open read stream
+            const inputStream = fs.createReadStream(inputPath);
+            const readLineSteam = readline.createInterface({
+                input: inputStream
+            });
             // open write stream
-            let writeStream = fs.createWriteStream(outputPath);
+            const writeStream = fs.createWriteStream(outputPath);
+            // close all stream
+            function closeStream() {
+                inputStream.destroy()
+                readLineSteam.close()
+                writeStream.destroy()
+            }
+
+            // start match line
             writeStream.on('open', () => {
                 console.log('write stream opened');
-
-                // open read stream
-                const readLine = readline.createInterface({
-                    input: fs.createReadStream(inputPath)
-                });
-
                 // filter line by line
-                readLine.on('line', (line: string) => {
+                readLineSteam.on('line', (line: string) => {
                     // console.log('line ', line);
                     let fixedline = this.matchLine(line);
                     if (fixedline !== undefined) {
@@ -333,16 +336,11 @@ class FilterLineBase{
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
+                closeStream()
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
-                const fileSize = fs.statSync(outputPath).size;
-                const isLargeFile = fileSize > 512 * 1024 * 1024;
-                
-                if(!isLargeFile && canOpenFileSafely(outputPath, 3)) {
-                    vscode.commands.executeCommand('vscode.open', virtualFileUri, { preview: isOverwriteMode });
-                    // vscode.window.showInformationMessage(this.currentMatchRule, "Filter Line is completed!");
-                } else if (canOpenFileSafely(outputPath, 1.5)) {
+                if (canOpenFileSafely(outputPath, 1.5)) {
                     vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(encodeURIComponent(outputPath)), { preview: isOverwriteMode });
                 } else {
                     vscode.window.showErrorMessage(
@@ -351,6 +349,7 @@ class FilterLineBase{
                         `Reason: Low memory`, 
                     );
                 }
+                closeStream()
                 resolve(true);
             });
         });
@@ -370,10 +369,11 @@ class FilterLineBase{
             if (!succeed) {
                 return;
             }
+            const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
-                    title: `Filtering by rule: ${this.currentMatchRule}`,
+                    title: `Filtering by rule: ${matchModeSymbol + this.currentMatchRule}`,
                     cancellable: false,
                 },
                 async (progress) => {
