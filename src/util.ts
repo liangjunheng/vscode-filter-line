@@ -50,8 +50,8 @@ function getValiadFileName(input: string): string {
         .replace(/:/g, '꞉')
         .replace(/\?/g, 'ʔ')
         .replace(/"/g, '″')
-        .replace(/</g, '﹤')
-        .replace(/>/g, '﹥')
+        .replace(/</g, '＜')
+        .replace(/>/g, '＞')
         .replace(/\|/g, 'ǀ');
     // Replace all non-alphanumeric characters with "#"
     return first30;
