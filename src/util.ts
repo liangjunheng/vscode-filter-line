@@ -43,7 +43,7 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
 }
 
 function getValiadFileName(input: string): string {
-    const first30 = input.slice(0, 30)
+    const fileName = input.slice(0, 200)
         .replace(/\*/g, '∗')
         .replace(/\//g, '⟍')
         .replace(/\\/g, '⟋')
@@ -53,8 +53,7 @@ function getValiadFileName(input: string): string {
         .replace(/</g, '＜')
         .replace(/>/g, '＞')
         .replace(/\|/g, 'ǀ');
-    // Replace all non-alphanumeric characters with "#"
-    return first30;
+    return fileName;
 }
 
 function canOpenFileSafely(
