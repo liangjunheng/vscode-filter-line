@@ -1,6 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
+import {searchByRegex} from './search_util';
 
 class FilterLineByInputRegex extends FilterLineBase{
     private _regex?: RegExp;
@@ -38,7 +39,7 @@ class FilterLineByInputRegex extends FilterLineBase{
             // console.log('input : ' + text);
             try{
                 this._rawRegexString = text
-                if (this.isEnableSmartCaseInRegex() && !/[A-Z]/.test(text)) {
+                if (this.isEnableSmartCase() && !/[A-Z]/.test(text)) {
                     this._regex = new RegExp(text, 'i');
                 } else {
                     this._regex = new RegExp(text);
@@ -59,7 +60,20 @@ class FilterLineByInputRegex extends FilterLineBase{
         }
     }
 
-    protected matchLine(line: string): string | undefined{
+    protected async matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> {
+        return searchByRegex(
+            inputPath,
+            outputPath,
+            pattern,
+            {
+                matchSelf: this.isEnableStringMatchInRegex(),
+                inverseMatch: this.isInverseMatchMode,
+                ingoreCase: this.isEnableSmartCase(),
+            }
+        );
+    }
+
+    protected matchLineByFs(line: string): string | undefined{
         if(this._regex === undefined){
             return undefined;
         }

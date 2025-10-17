@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheFileUri} from './file_manager';
+import {checkRipgrep} from './search_util';
 
 class FilterLineBase{
     public isInverseMatchMode: boolean = false;
@@ -21,8 +22,8 @@ class FilterLineBase{
         this.historyCommand = new HistoryCommand(this.ctx);
     }
 
-    protected isEnableSmartCaseInRegex(): boolean {
-        return vscode.workspace.getConfiguration('filter-line').get('enableSmartCaseInRegex', true);
+    protected isEnableSmartCase(): boolean {
+        return vscode.workspace.getConfiguration('filter-line').get('enableSmartCase', true);
     }
 
     protected isEnableStringMatchInRegex(): boolean {
@@ -226,71 +227,103 @@ class FilterLineBase{
         });
     }
 
-    protected filterFile(filePath: string): Promise<boolean> {
-        return new Promise(async (resolve) => {
-            let inputPath = filePath;
-            if (inputPath === undefined || !fs.existsSync(inputPath)) {
-                this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
-                return
+    protected async filterFile(filePath: string) {
+        let inputPath = filePath;
+        if (inputPath === undefined || !fs.existsSync(inputPath)) {
+            this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
+            return
+        }
+
+        // special path tail
+        let ext = path.extname(inputPath);
+
+        // overwrite mode ?
+        let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(this.ctx.extension.id) !== -1);
+        console.log("isOverwriteMode: " + isOverwriteMode)
+
+        // match mode
+        const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
+        let outputPath = '';
+        if (isOverwriteMode) {
+            outputPath = inputPath;
+            // change input path
+            let newInputPath = inputPath + Math.floor(Date.now() / 1000) + ext;
+            try {
+                if (fs.existsSync(newInputPath)) {
+                    fs.unlinkSync(newInputPath);
+                }
+            } catch (e) {
+                this.showError('unlink error : ' + e);
+                return;
             }
-
-            // special path tail
-            let ext = path.extname(inputPath);
-            // let tail = '.filter';
-
-            // overwrite mode ?
-            let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(this.ctx.extension.id) !== -1);
-            console.log("isOverwriteMode: " + isOverwriteMode)
-
-            // match mode
-            const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
-
-            let outputPath = '';
-            if (isOverwriteMode) {
-                outputPath = inputPath;
-                // change input path
-                let newInputPath = inputPath + Math.floor(Date.now() / 1000) + ext;
+            try {
+                fs.renameSync(inputPath, newInputPath);
+            } catch (e) {
+                this.showError('rename error : ' + e);
+                return;
+            }
+            console.log('after rename');
+            inputPath = newInputPath;
+        } else {
+            const fileName = getValiadFileName(this.currentMatchRule)
+            outputPath = createCacheFileUri(matchModeSymbol + fileName);
+            fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+            if (fs.existsSync(outputPath)) {
+                console.log('output file already exist, force delete when not under overwrite mode');
+                let tmpPath = outputPath + Math.floor(Date.now() / 1000) + ext;
                 try {
-                    if (fs.existsSync(newInputPath)) {
-                        fs.unlinkSync(newInputPath);
-                    }
+                    fs.renameSync(outputPath, tmpPath);
+                    fs.unlinkSync(tmpPath);
                 } catch (e) {
-                    this.showError('unlink error : ' + e);
-                    resolve(false);
-                    return;
+                    console.log('remove error: ' + e);
                 }
-                try {
-                    fs.renameSync(inputPath, newInputPath);
-                } catch (e) {
-                    this.showError('rename error : ' + e);
-                    resolve(false);
-                    return;
-                }
-                console.log('after rename');
-                inputPath = newInputPath;
             } else {
-                const fileName = getValiadFileName(this.currentMatchRule)
-                outputPath = createCacheFileUri(matchModeSymbol + fileName);
-                fs.mkdirSync(path.dirname(outputPath), { recursive: true })
-                if (fs.existsSync(outputPath)) {
-                    console.log('output file already exist, force delete when not under overwrite mode');
-                    let tmpPath = outputPath + Math.floor(Date.now() / 1000) + ext;
-                    try {
-                        fs.renameSync(outputPath, tmpPath);
-                        fs.unlinkSync(tmpPath);
-                    } catch (e) {
-                        console.log('remove error: ' + e);
-                    }
-                } else {
-                    // create file
-                    fs.writeFileSync(outputPath, '');
-                }
+                // create file
+                fs.writeFileSync(outputPath, '');
             }
+        }
 
-            console.log('overwrite mode: ' + ((isOverwriteMode) ? 'on' : 'off'));
-            console.log('input path: ' + inputPath);
-            console.log('output path: ' + outputPath);
+        console.log('overwrite mode: ' + ((isOverwriteMode) ? 'on' : 'off'));
+        console.log('input path: ' + inputPath);
+        console.log('output path: ' + outputPath);
 
+        if(checkRipgrep()) {
+           await this.outputMatchLineByRipgrep(inputPath, outputPath)
+        } else {
+           await this.outputMatchLineByFs(inputPath, outputPath)
+        }
+        try {
+            if (isOverwriteMode) {
+                fs.unlinkSync(inputPath);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        if (canOpenFileSafely(outputPath, { safetyFactor: 1.5 })) {
+            vscode.commands.executeCommand(
+                'vscode.open',
+                vscode.Uri.parse(encodeURIComponent(outputPath)),
+                { preview: isOverwriteMode }
+            );
+        } else {
+            vscode.window.showErrorMessage(
+                `error: Filter line failed due to low system memory. Tip: Add more filter rules, current rule: ${this.currentMatchRule}`,
+                `Failure`,
+                `Reason: Low memory`,
+            );
+        }
+    }
+
+    private outputMatchLineByRipgrep(inputPath: string, outputPath: string): Promise<any> | any {
+       return this.matchLineByRipgrep(inputPath, outputPath, this.currentMatchRule)
+    }
+
+    protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
+    }
+
+    // matchlines, fallback plan
+    private outputMatchLineByFs(inputPath: string, outputPath: string): Promise<any> | any {
+        return new Promise<Boolean>((resolve) => {
             // open write stream
             const writeStream = fs.createWriteStream(outputPath);
             // start match line
@@ -303,19 +336,12 @@ class FilterLineBase{
                 // filter line by line
                 readLineSteam.on('line', (line: string) => {
                     // console.log('line ', line);
-                    let fixedline = this.matchLine(line);
+                    let fixedline = this.matchLineByFs(line);
                     if (fixedline !== undefined) {
                         writeStream.write(fixedline + '\n');
                     }
                 }).on('close', () => {
                     writeStream.end();
-                    try {
-                        if (isOverwriteMode) {
-                            fs.unlinkSync(inputPath);
-                        }
-                    } catch (e) {
-                        console.log(e);
-                    }
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
@@ -323,21 +349,12 @@ class FilterLineBase{
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
-                if (canOpenFileSafely(outputPath, { safetyFactor: 1.5 })) {
-                    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(encodeURIComponent(outputPath)), { preview: isOverwriteMode });
-                } else {
-                    vscode.window.showErrorMessage(
-                        `error: Filter line failed due to low system memory. Tip: Add more filter rules, current rule: ${this.currentMatchRule}`,
-                        `Failure`, 
-                        `Reason: Low memory`, 
-                    );
-                }
                 resolve(true);
             });
         });
     }
 
-    protected matchLine(line: string): string | undefined{
+    protected matchLineByFs(line: string): string | undefined{
         return undefined;
     }
 
@@ -351,11 +368,12 @@ class FilterLineBase{
             if (!succeed) {
                 return;
             }
+            const isFsModeSymbol = !checkRipgrep() ? "(Fs)" : ""
             const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
-                    title: `Filtering by rule: ${matchModeSymbol + this.currentMatchRule}`,
+                    title: `Filtering by rule${isFsModeSymbol}: ${matchModeSymbol + this.currentMatchRule}`,
                     cancellable: false,
                 },
                 async (progress) => {

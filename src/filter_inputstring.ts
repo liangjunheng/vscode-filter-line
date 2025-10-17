@@ -1,6 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { FilterLineBase } from './filter_base';
+import {searchByString} from './search_util';
 
 class FilterLineByInputString extends FilterLineBase{
     private _inputstring?: string;
@@ -42,7 +43,19 @@ class FilterLineByInputString extends FilterLineBase{
         }
     }
 
-    protected matchLine(line: string): string | undefined{
+    protected async matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> {
+        return searchByString(
+            inputPath,
+            outputPath,
+            pattern,
+            {
+                inverseMatch: this.isInverseMatchMode,
+                ingoreCase: this.isEnableSmartCase() && !/[A-Z]/.test(pattern),
+            }
+        );
+    }
+
+    protected matchLineByFs(line: string): string | undefined{
         if(this._inputstring === undefined){
             return undefined;
         }
