@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
+import {createCacheFileUri} from './file_manager';
 
 class FilterLineBase{
     public isInverseMatchMode: boolean = false;
@@ -133,16 +134,6 @@ class FilterLineBase{
         vscode.window.showErrorMessage(text);
     }
 
-    private createFileUri(fileName: string) {
-        return path.join(
-            this.ctx.globalStorageUri.fsPath,
-            'cache',
-            'real-files',
-            `${Date.now()}`,
-            fileName
-        );
-    }
-
     protected getDocumentPathToBeFilter(filePath_?: string): Promise<string> {
         return new Promise<string>(async (resolve) => {
             let filePath = filePath_;
@@ -167,7 +158,7 @@ class FilterLineBase{
 
                 if (!fs.existsSync(filePath ?? "") && editor?.document) {
                     // Write cache data to a file
-                    filePath = this.createFileUri('TabBuffer.txt')
+                    filePath = createCacheFileUri('TabBuffer.txt')
                     const allText = editor.document.getText();
                     fs.mkdirSync(path.dirname(filePath), { recursive: true });
                     fs.writeFileSync(filePath, allText);
@@ -279,7 +270,7 @@ class FilterLineBase{
                 inputPath = newInputPath;
             } else {
                 const fileName = getValiadFileName(this.currentMatchRule)
-                outputPath = this.createFileUri(matchModeSymbol + fileName);
+                outputPath = createCacheFileUri(matchModeSymbol + fileName);
                 fs.mkdirSync(path.dirname(outputPath), { recursive: true })
                 if (fs.existsSync(outputPath)) {
                     console.log('output file already exist, force delete when not under overwrite mode');
