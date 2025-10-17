@@ -120,12 +120,11 @@
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "@types/mocha": "^2.2.42",
-        "@types/node": "^24.3.1",
+        "@types/mocha": "10.0.10",
+        "@types/node": "24.8.1",
         "@types/vscode": "^1.100.0",
-        "tslint": "^5.12.1",
-        "typescript": "^5.9.2",
-        "vscode": "^1.1.36"
+        "tslint": "5.20.1",
+        "typescript": "5.9.3"
     },
     "icon": "images/icon.png",
     "bugs": {
@@ -138,6 +137,7 @@
     },
     "homepage": "https://github.com/liangjunheng/vscode-filter-line",
     "dependencies": {
-        "eoml": "^1.0.2"
+        "eoml": "^1.0.2",
+        "@vscode/ripgrep": "1.15.14"
     }
 }
