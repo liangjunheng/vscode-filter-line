@@ -300,23 +300,15 @@ class FilterLineBase{
             console.log('input path: ' + inputPath);
             console.log('output path: ' + outputPath);
 
-            // open read stream
-            const inputStream = fs.createReadStream(inputPath);
-            const readLineSteam = readline.createInterface({
-                input: inputStream
-            });
             // open write stream
             const writeStream = fs.createWriteStream(outputPath);
-            // close all stream
-            function closeStream() {
-                inputStream.destroy()
-                readLineSteam.close()
-                writeStream.destroy()
-            }
-
             // start match line
             writeStream.on('open', () => {
                 console.log('write stream opened');
+                // open read stream
+                const readLineSteam = readline.createInterface({
+                    input: fs.createReadStream(inputPath)
+                });
                 // filter line by line
                 readLineSteam.on('line', (line: string) => {
                     // console.log('line ', line);
@@ -336,7 +328,7 @@ class FilterLineBase{
                 });
             }).on('error', (e: Error) => {
                 console.log('can not open write stream : ' + e);
-                closeStream()
+                writeStream.destroy()
                 resolve(false);
             }).on('close', () => {
                 console.log('closed');
@@ -349,7 +341,6 @@ class FilterLineBase{
                         `Reason: Low memory`, 
                     );
                 }
-                closeStream()
                 resolve(true);
             });
         });
