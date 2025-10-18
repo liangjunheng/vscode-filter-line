@@ -60,7 +60,7 @@ class FilterLineByInputRegex extends FilterLineBase{
         }
     }
 
-    protected async matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> {
+    protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
         return searchByRegex(
             inputPath,
             outputPath,

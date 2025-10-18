@@ -7,7 +7,7 @@ function getCacheDir() {
 }
 
 function createCacheFileUri(fileName: string) {
-    return path.join(getCacheDir(), `${Date.now()}`, fileName);
+    return path.join(getCacheDir(), `${Date.now()}`, fileName).trimEnd();
 }
 
 async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {

@@ -43,7 +43,7 @@ class FilterLineByInputString extends FilterLineBase{
         }
     }
 
-    protected async matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> {
+    protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
         return searchByString(
             inputPath,
             outputPath,

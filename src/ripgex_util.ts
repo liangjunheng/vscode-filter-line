@@ -1,5 +1,5 @@
 import { rgPath } from "@vscode/ripgrep";
-import { spawn } from 'child_process';
+import { spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 
@@ -15,81 +15,64 @@ export function searchByString(
     outputFilePath: string,
     pattern: string,
     options: { inverseMatch: boolean, ingoreCase: boolean } = { inverseMatch: false, ingoreCase: false }
-): Promise<Boolean> {
+): Boolean {
     if (!fs.existsSync(rgPath)) {
         vscode.window.showErrorMessage('ripgrep not found!');
-        return Promise.resolve(false)
+        return false;
     }
-    return new Promise<Boolean>((resolve) => {
-        let args = [
-            '-F', '-e', `"${pattern}"`,
-            `"${inputFilePath}"`,
-            '>', `"${outputFilePath}"`,
-        ]
-        if (options.ingoreCase) {
-            args = ['-i', ...args]
-        }
-        if (options.inverseMatch) {
-            args = ['-v', ...args]
-        }
-        const cmd = spawn(rgPath, args, { shell: true });
-        cmd.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
-        });
-        cmd.stderr.on('data', data => {
-            console.error(`stderr: ${data}`);
-        });
-        cmd.on('close', code => {
-            console.log(`ripgrep exited with code ${code}`);
-        });
-    });
+    let args = [
+        '-F', '-e', JSON.stringify(pattern),
+        JSON.stringify(inputFilePath),
+        '>', JSON.stringify(outputFilePath),
+    ]
+    if (options.ingoreCase) {
+        args = ['-i', ...args]
+    }
+    if (options.inverseMatch) {
+        args = ['-v', ...args]
+    }
+    console.log(`searchByString: ${rgPath} ${args.join(' ')}`);
+    const result = spawnSync(JSON.stringify(rgPath), args, { shell: true });
+    console.log(`searchByString, cmd-output: ${result}`);
+    if (result.error) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
-export async function searchByRegex(
+export function searchByRegex(
     inputFilePath: string,
     outputFilePath: string,
     pattern: string,
     options: { matchSelf: boolean, inverseMatch: boolean, ingoreCase: boolean } = { matchSelf: false, inverseMatch: false, ingoreCase: true }
-): Promise<Boolean> {
+): Boolean {
     if (!fs.existsSync(rgPath)) {
         vscode.window.showErrorMessage('ripgrep not found!')
-        return Promise.resolve(false)
+        return false;
     }
-    return new Promise<Boolean>((resolve) => {
-        let args = [
-            '-e', `"${pattern}"`,
-            `"${inputFilePath}"`,
-            '>', `"${outputFilePath}"`,
-        ]
-        if (options.matchSelf) {
-            args = ['-e', `"${escapeRegex(pattern)}"`, ...args]
-        }
-        if (options.ingoreCase) {
-            args = ['-i', ...args]
-        }
-        if (options.inverseMatch) {
-            args = ['-v', ...args]
-        }
-        console.log(`searchByRegex: ${rgPath} ${args.join(' ')}`);
-
-        const cmd = spawn(`"${rgPath}"`, args, { shell: true });
-        cmd.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
-            resolve(true)
-        });
-        cmd.stderr.on('data', data => {
-            console.error(`stderr: ${data}`);
-            resolve(false)
-        });
-        cmd.on('close', code => {
-            console.log(`ripgrep exited with code ${code}`);
-            if (code === 0) {
-                resolve(true)
-            } else {
-                resolve(false)
-            }
-        });
-    });
+    let args = [
+        '-e', JSON.stringify(pattern),
+        JSON.stringify(inputFilePath),
+        '>', JSON.stringify(outputFilePath),
+    ]
+    if (options.matchSelf) {
+        args = ['-e', `"${escapeRegex(pattern)}"`, ...args];
+    }
+    if (options.ingoreCase) {
+        args = ['-i', ...args];
+    }
+    if (options.inverseMatch) {
+        args = ['-v', ...args];
+    }
+    console.log(`searchByRegex: ${rgPath} ${args.join(' ')}`);
+    const result = spawnSync(JSON.stringify(rgPath), args, { shell: true });
+    console.log(`searchByRegex, cmd-output: ${result}`);
+    if (result.error) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 function escapeRegex(str: string): string {
