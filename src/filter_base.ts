@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheFileUri} from './file_manager';
-import {checkRipgrep} from './search_util';
+import {checkRipgrep} from './ripgex_util';
 
 class FilterLineBase{
     public isInverseMatchMode: boolean = false;

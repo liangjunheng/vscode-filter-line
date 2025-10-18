@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { FilterLineBase } from './filter_base';
-import {searchByString} from './search_util';
+import {searchByString} from './ripgex_util';
 
 class FilterLineByInputString extends FilterLineBase{
     private _inputstring?: string;

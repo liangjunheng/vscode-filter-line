@@ -7,7 +7,6 @@ export function checkRipgrep() {
     if (fs.existsSync(rgPath)) {
         return true;
     }
-    vscode.window.showErrorMessage('ripgrep not found!');
     return false;
 }
 
