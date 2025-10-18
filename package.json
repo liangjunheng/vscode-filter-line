@@ -85,7 +85,7 @@
             "properties": {
                 "filter-line.ripgrepPath": {
                     "type": "string",
-                    "default": "rg",
+                    "default": "",
                     "scope": "application",
                     "description": "RipGrep Path"
                 },

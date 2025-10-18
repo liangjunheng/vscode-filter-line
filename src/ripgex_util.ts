@@ -3,6 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+/**
+ * 
+ */
 let ripgrepPath = path.join(
     vscode.env.appRoot,
     'node_modules',
@@ -11,6 +14,9 @@ let ripgrepPath = path.join(
     'bin',
     process.platform === 'win32' ? 'rg.exe' : 'rg'
 );
+if(vscode.workspace.getConfiguration('filter-line').get('ripgrepPath', '') === '') {
+    vscode.workspace.getConfiguration('filter-line').update('ripgrepPath', ripgrepPath, vscode.ConfigurationTarget.Global)
+}
 function getRipGrepPath(): string {
     if (fs.existsSync(ripgrepPath)) {
         return ripgrepPath;
@@ -19,6 +25,9 @@ function getRipGrepPath(): string {
     return ripgrepPath;
 }
 
+/**
+ * 
+*/
 export function checkRipgrep() {
     if (fs.existsSync(getRipGrepPath())) {
         return true;
@@ -26,6 +35,9 @@ export function checkRipgrep() {
     return false;
 }
 
+/**
+ * 
+*/
 export function searchByString(
     inputFilePath: string,
     outputFilePath: string,
@@ -58,6 +70,9 @@ export function searchByString(
     }
 }
 
+/***
+ * 
+*/
 export function searchByRegex(
     inputFilePath: string,
     outputFilePath: string,
@@ -93,6 +108,9 @@ export function searchByRegex(
     }
 }
 
+/**
+ * 
+ */
 function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
