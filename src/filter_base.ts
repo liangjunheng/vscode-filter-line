@@ -299,7 +299,7 @@ class FilterLineBase{
         } catch (e) {
             console.log(e);
         }
-        if (canOpenFileSafely(outputPath, { safetyFactor: 1.5 })) {
+        if (canOpenFileSafely(outputPath, { safetyFactor: 2 })) {
             vscode.commands.executeCommand(
                 'vscode.open',
                 vscode.Uri.parse(encodeURIComponent(outputPath)),
