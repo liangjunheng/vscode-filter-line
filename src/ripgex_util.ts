@@ -133,7 +133,7 @@ function isValidRegex(pattern: string) {
     let args = [
         '-e', `"${pattern}"`,
         '--no-filename',
-        JSON.stringify(path.join(ctx.extensionPath,'src','asset','ripgrep_regex_test.txt')),
+        JSON.stringify(path.join(ctx.extensionPath,'asset','ripgrep_regex_test.txt')),
     ]
     const result = ripgrep(args);
     console.log(`isValidRegex: ${result.status}, "${pattern}"`)
