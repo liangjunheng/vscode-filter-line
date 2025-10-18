@@ -1,7 +1,8 @@
-import { spawnSync } from 'child_process';
+import { spawnSync, SpawnSyncReturns } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { ctx } from './extension';
 
 /**
  * 
@@ -25,6 +26,14 @@ function getRipGrepPath(): string {
     return ripgrepPath;
 }
 
+function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
+    const rgPath = getRipGrepPath()
+    console.log(`ripgrep: ${rgPath} ${args.join(' ')}`);
+    const result = spawnSync(JSON.stringify(rgPath), args, { shell: true });
+    console.log(`ripgrep end, status: ${result.status}`);
+    return result;
+}
+
 /**
  * 
 */
@@ -44,13 +53,8 @@ export function searchByString(
     pattern: string,
     options: { inverseMatch: boolean, ingoreCase: boolean } = { inverseMatch: false, ingoreCase: false }
 ): Boolean {
-    const rgPath = getRipGrepPath()
-    if (!fs.existsSync(rgPath)) {
-        vscode.window.showErrorMessage('ripgrep not found!');
-        return false;
-    }
     let args = [
-        '-F', '-e', JSON.stringify(pattern),
+        '-F', '-e', `"${escapeCmd(pattern)}"`,
         '--no-filename',
         JSON.stringify(inputFilePath),
         '>', JSON.stringify(outputFilePath),
@@ -61,10 +65,9 @@ export function searchByString(
     if (options.inverseMatch) {
         args = ['-v', ...args]
     }
-    console.log(`searchByString: ${rgPath} ${args.join(' ')}`);
-    const result = spawnSync(JSON.stringify(rgPath), args, { shell: true });
-    console.log(`searchByString, cmd-output: ${result}`);
-    if (result.error) {
+    const result = ripgrep(args);
+    console.log(`searchByString, cmd-output: ${result.status}`);
+    if(result.status === 2) {
         return false;
     } else {
         return true;
@@ -80,30 +83,35 @@ export function searchByRegex(
     pattern: string,
     options: { matchSelf: boolean, inverseMatch: boolean, ingoreCase: boolean } = { matchSelf: false, inverseMatch: false, ingoreCase: true }
 ): Boolean {
-    const rgPath = getRipGrepPath()
-    if (!fs.existsSync(rgPath)) {
-        vscode.window.showErrorMessage('ripgrep not found!')
-        return false;
-    }
+    // build args
     let args = [
-        '-e', `"${escapeCmd(pattern)}"`,
         '--no-filename',
         JSON.stringify(inputFilePath),
         '>', JSON.stringify(outputFilePath),
     ]
-    if (options.matchSelf) {
-        args = ['-e', `"${escapeCmd(escapeRegex(pattern))}"`, ...args];
+    // pattern regex
+    const patternRegex = escapeCmd(pattern);
+    if (isValidRegex(patternRegex)) {
+        args = ['-e', `"${patternRegex}"`, ...args];
     }
+    // match pattern self
+    if (options.matchSelf) {
+        const matchSelfRegex = escapeCmd(escapeRegex(pattern));
+        if (isValidRegex(matchSelfRegex)) {
+            args = ['-e', `"${matchSelfRegex}"`, ...args];
+        }
+    }
+    // ignorecase
     if (options.ingoreCase) {
         args = ['-i', ...args];
     }
+    // inverse match
     if (options.inverseMatch) {
         args = ['-v', ...args];
     }
-    console.log(`searchByRegex: ${rgPath} ${args.join(' ')}`);
-    const result = spawnSync(JSON.stringify(rgPath), args, { shell: true });
-    console.log(`searchByRegex, cmd-output: ${result}`);
-    if (result.error) {
+    const result = ripgrep(args);
+    console.log(`searchByRegex, cmd-output: ${result.status}`);
+    if(result.status === 2) {
         return false;
     } else {
         return true;
@@ -119,4 +127,19 @@ function escapeRegex(str: string): string {
 
 function escapeCmd(str: string): string {
     return str.replace(/['"]/g, '\\$&');
+}
+
+function isValidRegex(pattern: string) {
+    let args = [
+        '-e', `"${pattern}"`,
+        '--no-filename',
+        JSON.stringify(path.join(ctx.extensionPath,'src','asset','ripgrep_regex_test.txt')),
+    ]
+    const result = ripgrep(args);
+    console.log(`isValidRegex: ${result.status}, "${pattern}"`)
+    if(result.status === 2) {
+        return false;
+    } else {
+        return true;
+    }
 }
