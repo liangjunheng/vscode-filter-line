@@ -51,6 +51,7 @@ export function searchByString(
     }
     let args = [
         '-F', '-e', JSON.stringify(pattern),
+        '--no-filename',
         JSON.stringify(inputFilePath),
         '>', JSON.stringify(outputFilePath),
     ]
@@ -85,12 +86,13 @@ export function searchByRegex(
         return false;
     }
     let args = [
-        '-e', JSON.stringify(pattern),
+        '-e', `"${escapeCmd(pattern)}"`,
+        '--no-filename',
         JSON.stringify(inputFilePath),
         '>', JSON.stringify(outputFilePath),
     ]
     if (options.matchSelf) {
-        args = ['-e', `"${escapeRegex(pattern)}"`, ...args];
+        args = ['-e', `"${escapeCmd(escapeRegex(pattern))}"`, ...args];
     }
     if (options.ingoreCase) {
         args = ['-i', ...args];
@@ -113,4 +115,8 @@ export function searchByRegex(
  */
 function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function escapeCmd(str: string): string {
+    return str.replace(/['"]/g, '\\$&');
 }
