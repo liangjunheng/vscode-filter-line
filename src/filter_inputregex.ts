@@ -68,7 +68,7 @@ class FilterLineByInputRegex extends FilterLineBase{
             {
                 matchSelf: this.isEnableStringMatchInRegex(),
                 inverseMatch: this.isInverseMatchMode,
-                ingoreCase: this.isEnableSmartCase(),
+                ingoreCase: this.isEnableSmartCase() && !/[A-Z]/.test(pattern),
             }
         );
     }
