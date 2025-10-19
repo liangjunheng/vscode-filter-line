@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { FilterLineBase } from './filter_base';
-import {checkRipgrep, searchStringByRipgrep} from './ripgex_util';
+import {checkRegexByRipgrep, checkRipgrep, searchStringByRipgrep} from './ripgex_util';
 
 class FilterLineByInputString extends FilterLineBase{
     private _inputstring?: string;
@@ -30,8 +30,13 @@ class FilterLineByInputString extends FilterLineBase{
                 callback(false);
                 return;
             }
-            this.isRipgrepMode = checkRipgrep()
             console.log('input : ' + text);
+            this.isRipgrepMode = checkRipgrep()
+            if(this.isRipgrepMode && !checkRegexByRipgrep(text)) {
+                this.showError('checkRegexByRipgrep incorrect: ' + text);
+                callback(false);
+                return;
+            }
             this._inputstring = text;
             await this.historyCommand.addToHistory(this.HIST_KEY, text);
             callback(true);
