@@ -28,9 +28,9 @@ function getRipGrepPath(): string {
 
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
     const rgPath = getRipGrepPath()
-    console.log(`ripgrep: ${rgPath} ${args.join(' ')}`);
+    console.log(`ripgrep start: ${rgPath} ${args.join(' ')}`);
     const result = spawnSync(JSON.stringify(rgPath), args, { shell: true });
-    console.log(`ripgrep end, status: ${result.status}`);
+    console.log(`ripgrep end, status: ${result.status}, stderr: ${result.stderr}`);
     return result;
 }
 
@@ -96,7 +96,8 @@ export function searchByRegex(
     }
     // match pattern self
     if (options.matchSelf) {
-        const matchSelfRegex = escapeCmd(escapeRegex(pattern));
+        let matchSelfRegex = escapeRegex(pattern.replace(/\\"/g, '\\\\\"'));
+        matchSelfRegex = escapeCmd(matchSelfRegex);
         if (isValidRegex(matchSelfRegex)) {
             args = ['-e', `"${matchSelfRegex}"`, ...args];
         }
@@ -126,7 +127,7 @@ function escapeRegex(str: string): string {
 }
 
 function escapeCmd(str: string): string {
-    return str.replace(/['"]/g, '\\$&');
+    return str.replace(/["]/g, '\\$&');
 }
 
 function isValidRegex(pattern: string) {
@@ -136,7 +137,7 @@ function isValidRegex(pattern: string) {
         JSON.stringify(path.join(ctx.extensionPath,'asset','ripgrep_regex_test.txt')),
     ]
     const result = ripgrep(args);
-    console.log(`isValidRegex: ${result.status}, "${pattern}"`)
+    console.log(`isValidRegex: ${result.status === 2 ? false : true}, "${pattern}"`)
     if(result.status === 2) {
         return false;
     } else {
