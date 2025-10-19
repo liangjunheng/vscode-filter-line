@@ -55,7 +55,7 @@ class FilterLineByInputString extends FilterLineBase{
             }
         );
         if (result.stderr.length > 0) {
-            this.showError('filter incorrect :' + result.stderr);
+            vscode.window.showErrorMessage('filter incorrect: ' + result.stderr, 'Failure');
         }
         return result;
     }
