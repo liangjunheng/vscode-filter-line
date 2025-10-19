@@ -1,1 +1,1 @@
-test
+// This file is required for ripgrep regex verification. Please do not delete it.

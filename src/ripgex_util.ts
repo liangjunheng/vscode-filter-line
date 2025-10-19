@@ -50,6 +50,7 @@ function isValidRegex(pattern: string) {
         '-e', `"${pattern}"`,
         '--no-filename',
         JSON.stringify(path.join(ctx.extensionPath,'asset','ripgrep_regex_test.txt')),
+        '>', JSON.stringify(path.join(ctx.extensionPath,'asset','ripgrep_regex_test_result.txt')),
     ]
     const result = ripgrep(args);
     console.log(`isValidRegex: ${result.status === 2 ? false : true}, "${pattern}"`)
