@@ -36,91 +36,6 @@ function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
 
 /**
  * 
-*/
-export function checkRipgrep() {
-    if (fs.existsSync(getRipGrepPath())) {
-        return true;
-    }
-    return false;
-}
-
-/**
- * 
-*/
-export function searchByString(
-    inputFilePath: string,
-    outputFilePath: string,
-    pattern: string,
-    options: { inverseMatch: boolean, ingoreCase: boolean } = { inverseMatch: false, ingoreCase: false }
-): Boolean {
-    let args = [
-        '-F', '-e', `"${escapeCmd(pattern)}"`,
-        '--no-filename',
-        JSON.stringify(inputFilePath),
-        '>', JSON.stringify(outputFilePath),
-    ]
-    if (options.ingoreCase) {
-        args = ['-i', ...args]
-    }
-    if (options.inverseMatch) {
-        args = ['-v', ...args]
-    }
-    const result = ripgrep(args);
-    console.log(`searchByString, cmd-output: ${result.status}`);
-    if(result.status === 2) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-/***
- * 
-*/
-export function searchByRegex(
-    inputFilePath: string,
-    outputFilePath: string,
-    pattern: string,
-    options: { matchSelf: boolean, inverseMatch: boolean, ingoreCase: boolean } = { matchSelf: false, inverseMatch: false, ingoreCase: true }
-): Boolean {
-    // build args
-    let args = [
-        '--no-filename',
-        JSON.stringify(inputFilePath),
-        '>', JSON.stringify(outputFilePath),
-    ]
-    // pattern regex
-    const patternRegex = escapeCmd(pattern);
-    if (isValidRegex(patternRegex)) {
-        args = ['-e', `"${patternRegex}"`, ...args];
-    }
-    // match pattern self
-    if (options.matchSelf) {
-        let matchSelfRegex = escapeRegex(pattern.replace(/\\"/g, '\\\\\"'));
-        matchSelfRegex = escapeCmd(matchSelfRegex);
-        if (isValidRegex(matchSelfRegex)) {
-            args = ['-e', `"${matchSelfRegex}"`, ...args];
-        }
-    }
-    // ignorecase
-    if (options.ingoreCase) {
-        args = ['-i', ...args];
-    }
-    // inverse match
-    if (options.inverseMatch) {
-        args = ['-v', ...args];
-    }
-    const result = ripgrep(args);
-    console.log(`searchByRegex, cmd-output: ${result.status}`);
-    if(result.status === 2) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-/**
- * 
  */
 function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -143,4 +58,110 @@ function isValidRegex(pattern: string) {
     } else {
         return true;
     }
+}
+
+function buildRegexWithCmd(pattern: string): string {
+    return escapeCmd(pattern);
+}
+
+function buildRegexSelfWithCmd(pattern: string): string {
+    let matchSelfRegex = escapeRegex(pattern.replace(/\\"/g, '\\\\\"'));
+    matchSelfRegex = escapeCmd(matchSelfRegex);
+    return matchSelfRegex
+}
+
+/**
+ * Check if the ripgrep is available
+ * 
+*/
+export function checkRipgrep() {
+    if (fs.existsSync(getRipGrepPath())) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Check if the regex is available
+ * @param pattern regex string
+ * @param options 
+ * @returns 
+ */
+export function checkRegexByRipgrep(
+    pattern: string,
+    options: { matchSelf: boolean } = { matchSelf: false }
+): Boolean {
+    if (isValidRegex(buildRegexWithCmd(pattern))) {
+        return true;
+    }
+    if (options.matchSelf && isValidRegex(buildRegexSelfWithCmd(pattern))) {
+        return true
+    }
+    return false;
+}
+
+/**
+ * 
+*/
+export function searchStringByRipgrep(
+    inputFilePath: string,
+    outputFilePath: string,
+    pattern: string,
+    options: { inverseMatch: boolean, ingoreCase: boolean } = { inverseMatch: false, ingoreCase: false }
+): SpawnSyncReturns<Buffer> {
+    let args = [
+        '-F', '-e', `"${buildRegexWithCmd(pattern)}"`,
+        '--no-filename',
+        JSON.stringify(inputFilePath),
+        '>', JSON.stringify(outputFilePath),
+    ]
+    if (options.ingoreCase) {
+        args = ['-i', ...args]
+    }
+    if (options.inverseMatch) {
+        args = ['-v', ...args]
+    }
+    const result = ripgrep(args);
+    console.log(`searchByString, cmd-output: ${result.status}`);
+    return result;
+}
+
+/***
+ * 
+*/
+export function searchRegexByRipgrep(
+    inputFilePath: string,
+    outputFilePath: string,
+    pattern: string,
+    options: { matchSelf: boolean, inverseMatch: boolean, ingoreCase: boolean } = { matchSelf: false, inverseMatch: false, ingoreCase: true }
+): SpawnSyncReturns<Buffer> {
+    // build args
+    let args = [
+        '--no-filename',
+        JSON.stringify(inputFilePath),
+        '>', JSON.stringify(outputFilePath),
+    ]
+    // pattern regex
+    const patternRegex = buildRegexWithCmd(pattern);
+    if (isValidRegex(patternRegex)) {
+        args = ['-e', `"${patternRegex}"`, ...args];
+    }
+    // match pattern self
+    if (options.matchSelf) {
+        const matchSelfRegex = buildRegexSelfWithCmd(pattern);
+        if (isValidRegex(matchSelfRegex)) {
+            args = ['-e', `"${matchSelfRegex}"`, ...args];
+        }
+    }
+    // ignorecase
+    if (options.ingoreCase) {
+        args = ['-i', ...args];
+    }
+    // inverse match
+    if (options.inverseMatch) {
+        args = ['-v', ...args];
+    }
+    const result = ripgrep(args);
+    console.log(`searchByRegex, cmd-output: ${result.status}`);
+    return result;
 }

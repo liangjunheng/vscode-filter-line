@@ -16,6 +16,7 @@ class FilterLineBase{
     protected readonly historyCommand: HistoryCommand;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
     private currentMatchRule: string = ''
+    protected isRipgrepMode = false;
 
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
@@ -287,7 +288,7 @@ class FilterLineBase{
         console.log('input path: ' + inputPath);
         console.log('output path: ' + outputPath);
 
-        if(checkRipgrep()) {
+        if(this.isRipgrepMode) {
            await this.outputMatchLineByRipgrep(inputPath, outputPath)
         } else {
            await this.outputMatchLineByFs(inputPath, outputPath)

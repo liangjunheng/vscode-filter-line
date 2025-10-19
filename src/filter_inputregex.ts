@@ -1,13 +1,13 @@
 'use strict';
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
-import {searchByRegex} from './ripgex_util';
+import {checkRegexByRipgrep, checkRipgrep, searchRegexByRipgrep} from './ripgex_util';
 
 class FilterLineByInputRegex extends FilterLineBase{
     private _regex?: RegExp;
     private _rawRegexString: string = "";
     private readonly HIST_KEY = 'inputRegex';
-    private isEnableStringMatchInRegexMode = true
+    private isEnableStringMatchInRegexMode = false;
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
@@ -37,17 +37,20 @@ class FilterLineByInputRegex extends FilterLineBase{
                 return;
             }
             // console.log('input : ' + text);
-            try{
-                this._rawRegexString = text
-                if (this.isEnableSmartCase() && !/[A-Z]/.test(text)) {
-                    this._regex = new RegExp(text, 'i');
-                } else {
-                    this._regex = new RegExp(text);
+            this.isRipgrepMode = checkRipgrep();
+            if(this.isRipgrepMode) {
+                if(!checkRegexByRipgrep(text, { matchSelf: this.isEnableStringMatchInRegexMode})) {
+                    this.showError('checkRegexByRipgrep incorrect: ' + text);
+                    callback(false);
+                    return;
                 }
-            }catch(e){
-                this.showError('Regex incorrect :' + e);
-                callback(false);
-                return;
+            } else {
+                if(!this.checkRegexByFs(text)) {
+                    this.showError('checkRegexByFs incorrect: ' + text);
+                    callback(false);
+                    return;
+                }
+                this.makeRegexByFs(text);
             }
             await this.historyCommand.addToHistory(this.HIST_KEY, text);
             callback(true);
@@ -61,7 +64,7 @@ class FilterLineByInputRegex extends FilterLineBase{
     }
 
     protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
-        return searchByRegex(
+        const result = searchRegexByRipgrep(
             inputPath,
             outputPath,
             pattern,
@@ -71,8 +74,29 @@ class FilterLineByInputRegex extends FilterLineBase{
                 ingoreCase: this.isEnableSmartCase() && !/[A-Z]/.test(pattern),
             }
         );
+        if(result.stderr.length > 0) {
+            this.showError('filter incorrect :' + result.stderr);
+        }
+        return result;
     }
 
+    private checkRegexByFs(pattern: string): Boolean {
+        try {
+            new RegExp(pattern);
+            return true;
+        } catch (e) {
+            this.showError('Regex incorrect :' + e);
+            return false;
+        }
+    }
+    private makeRegexByFs(pattern: string) {
+        this._rawRegexString = pattern
+        if (this.isEnableSmartCase() && !/[A-Z]/.test(pattern)) {
+            this._regex = new RegExp(pattern, 'i');
+        } else {
+            this._regex = new RegExp(pattern);
+        }
+    }
     protected matchLineByFs(line: string): string | undefined{
         if(this._regex === undefined){
             return undefined;
