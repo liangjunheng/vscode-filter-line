@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
-import {createCacheFileUri} from './file_manager';
+import {createCacheResultFileUri} from './file_manager';
 import {checkRipgrep} from './ripgex_util';
 
 class FilterLineBase{
@@ -160,7 +160,7 @@ class FilterLineBase{
 
                 if (!fs.existsSync(filePath ?? "") && editor?.document) {
                     // Write cache data to a file
-                    filePath = createCacheFileUri('TabBuffer.txt')
+                    filePath = createCacheResultFileUri('TabBuffer.txt')
                     const allText = editor.document.getText();
                     fs.mkdirSync(path.dirname(filePath), { recursive: true });
                     fs.writeFileSync(filePath, allText);
@@ -267,7 +267,7 @@ class FilterLineBase{
             inputPath = newInputPath;
         } else {
             const fileName = getValiadFileName(this.currentMatchRule)
-            outputPath = createCacheFileUri(matchModeSymbol + fileName);
+            outputPath = createCacheResultFileUri(matchModeSymbol + fileName);
             fs.mkdirSync(path.dirname(outputPath), { recursive: true })
             if (fs.existsSync(outputPath)) {
                 console.log('output file already exist, force delete when not under overwrite mode');

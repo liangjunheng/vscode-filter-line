@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
-import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidRealFile} from './file_manager';
+import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile} from './file_manager';
 
 export let ctx: vscode.ExtensionContext;
 
@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // delete invalid RealFile When Tab is Closed
     deleteInvalidRealFileWhenCloseTab()
-    deleteInvalidRealFile()
+    deleteInvalidCacheFile()
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand

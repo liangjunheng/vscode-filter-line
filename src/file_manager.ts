@@ -1,13 +1,26 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import { ctx } from './extension';
 
-function getCacheDir() {
-    return path.join(ctx.globalStorageUri.fsPath, 'cache', 'real-files');
+function getCacheResultDir(): string {
+    return path.join(ctx.globalStorageUri.fsPath, 'cache', 'search-result');
 }
 
-function createCacheFileUri(fileName: string) {
-    return path.join(getCacheDir(), `${Date.now()}`, fileName).trimEnd();
+function createCacheResultFileUri(fileName: string): string {
+    return path.join(getCacheResultDir(), `result-${Date.now()}`, fileName).trimEnd();
+}
+
+function getCachePatternDir(): string {
+    const filePath = path.join(ctx.globalStorageUri.fsPath, 'cache', 'riggrep-pattern');
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    return filePath
+}
+
+function createCachePatternFileUri(fileName: string): string {
+    const filePath = path.join(getCachePatternDir(), `pattern-${Date.now()}`, fileName).trimEnd();
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    return filePath
 }
 
 async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {
@@ -31,7 +44,10 @@ async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {
     return fileList;
 }
 
-async function deleteInvalidRealFile() {
+async function deleteInvalidCacheFile() {
+    // delete ripgrep pattern
+    vscode.workspace.fs.delete(vscode.Uri.file(getCachePatternDir()), { recursive: true });
+    // delete search result
     const fsTabPathSet = new Set<string>();
     for (const group of vscode.window.tabGroups.all) {
         for (const tab of group.tabs) {
@@ -42,7 +58,7 @@ async function deleteInvalidRealFile() {
         }
     }
 
-    const tmpFilePaths = await traverseFolder(vscode.Uri.file(getCacheDir()));
+    const tmpFilePaths = await traverseFolder(vscode.Uri.file(getCacheResultDir()));
     tmpFilePaths.forEach(filePath => {
         console.log(`tmpFilePaths path: ${filePath}, has: ${fsTabPathSet.has(filePath)}`);
         if (!fsTabPathSet.has(filePath)) {
@@ -69,7 +85,8 @@ async function deleteInvalidRealFileWhenCloseTab() {
 }
 
 async function clearCacheFiles() {
-    vscode.workspace.fs.delete(vscode.Uri.file(getCacheDir()), { recursive: true });
+    vscode.workspace.fs.delete(vscode.Uri.file(getCacheResultDir()), { recursive: true });
+    vscode.workspace.fs.delete(vscode.Uri.file(getCachePatternDir()), { recursive: true });
     // vscode.workspace.fs.delete(vscode.Uri.file(path.join(ctx.globalStorageUri.fsPath, 'cache', 'virtual-files')), { recursive: true });
     // const currentActiveTab = vscode.window.activeTextEditor?.document.fileName ?? ''
     // for (const group of vscode.window.tabGroups.all) {
@@ -85,5 +102,5 @@ async function clearCacheFiles() {
     // vscode.window.showTextDocument(vscode.Uri.parse(currentActiveTab))
 }
 
-export { deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCacheFileUri, deleteInvalidRealFile, getCacheDir }
+export { deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCachePatternFileUri, createCacheResultFileUri, deleteInvalidCacheFile }
 
