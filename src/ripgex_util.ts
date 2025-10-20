@@ -47,14 +47,14 @@ function escapeRegex(str: string): string {
 // }
 
 function isValidRegex(pattern: string) {
-    const result = spawnSync('rg', [pattern, '--quiet'], {
+    const result = spawnSync(getRipGrepPath(), [pattern, '--quiet'], {
         encoding: 'utf-8'
     });
-    console.log(`isValidRegex: ${result.stderr.length === 0}, pattern: ${pattern}, status: ${result.status}, stderr: ${result.stderr}`)
+    console.log(`isValidRegex: ${result.stderr.length === 0}, pattern: ${pattern}, status: ${result.status}, stderr: ${result.stderr}`);
     if (result.stderr.length === 0) {
-        return true
+        return true;
     } else {
-        return false
+        return false;
     }
 }
 

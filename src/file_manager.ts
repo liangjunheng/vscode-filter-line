@@ -8,7 +8,9 @@ function getCacheResultDir(): string {
 }
 
 function createCacheResultFileUri(fileName: string): string {
-    return path.join(getCacheResultDir(), `result-${Date.now()}`, fileName).trimEnd();
+    const filePath = path.join(getCacheResultDir(), `result-${Date.now()}`, fileName).trimEnd();
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    return filePath
 }
 
 function deleteCacheResultFileUri(resultFilePath: string) {
@@ -16,9 +18,7 @@ function deleteCacheResultFileUri(resultFilePath: string) {
 }
 
 function getCachePatternDir(): string {
-    const filePath = path.join(ctx.globalStorageUri.fsPath, 'cache', 'riggrep-pattern');
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    return filePath
+    return path.join(ctx.globalStorageUri.fsPath, 'cache', 'riggrep-pattern');
 }
 
 function createCachePatternFileUri(fileName: string): string {
