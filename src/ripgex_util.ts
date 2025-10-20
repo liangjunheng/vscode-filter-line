@@ -48,18 +48,14 @@ function escapeRegex(str: string): string {
 // }
 
 function isValidRegex(pattern: string) {
-    let args = [
-        '-e', `"${pattern}"`,
-        '--no-filename',
-        JSON.stringify(path.join(ctx.extensionPath,'asset','ripgrep_regex_test.txt')),
-        '>', JSON.stringify(path.join(ctx.extensionPath,'asset','ripgrep_regex_test_result.txt')),
-    ]
-    const result = ripgrep(args);
-    console.log(`isValidRegex: ${result.status === 2 ? false : true}, "${pattern}"`)
-    if(result.status === 2) {
-        return false;
+    const result = spawnSync('rg', [pattern, '--quiet'], {
+        encoding: 'utf-8'
+    });
+    console.log(`isValidRegex: ${result.stderr.length === 0}, pattern: ${pattern}, status: ${result.status}, stderr: ${result.stderr}`)
+    if (result.stderr.length === 0) {
+        return true
     } else {
-        return true;
+        return false
     }
 }
 
