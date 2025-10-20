@@ -19,7 +19,7 @@ class FilterLineByInputRegex extends FilterLineBase{
         }
     }
 
-    protected async prepare(callback : (succeed: boolean)=>void){
+    protected async awaitUserInput(): Promise<string> {
         // Match the regular expression pattern itself
         this.isEnableStringMatchInRegexMode = this.isEnableStringMatchInRegex()
         console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
@@ -28,39 +28,34 @@ class FilterLineByInputRegex extends FilterLineBase{
         if(this.isInverseMatchMode) {
             title = "filter to lines not machting(regex)"
         }
-        const usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
+        let usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
+        if (usrChoice === this.NEW_PATTERN_CHOISE) {
+            usrChoice = await vscode.window.showInputBox() ?? ''
+        }
+        return usrChoice;
+    }
 
-        const makeRegEx = async (text: string | undefined) => {
-            if(text === undefined || text === ''){
-                // console.log('No input');
-                callback(false);
+    protected async awaitUserInputEnd(text: string): Promise<void> {
+        if (text === undefined || text === '') {
+            // console.log('No input');
+            return;
+        }
+        // console.log('input : ' + text);
+        this.isRipgrepMode = checkRipgrep();
+        if (this.isRipgrepMode) {
+            if (!checkRegexByRipgrep(text, { matchSelf: this.isEnableStringMatchInRegexMode })) {
+                this.showError('checkRegexByRipgrep incorrect: ' + text);
                 return;
             }
-            // console.log('input : ' + text);
-            this.isRipgrepMode = checkRipgrep();
-            if(this.isRipgrepMode) {
-                if(!checkRegexByRipgrep(text, { matchSelf: this.isEnableStringMatchInRegexMode})) {
-                    this.showError('checkRegexByRipgrep incorrect: ' + text);
-                    callback(false);
-                    return;
-                }
-            } else {
-                if(!this.checkRegexByFs(text)) {
-                    this.showError('checkRegexByFs incorrect: ' + text);
-                    callback(false);
-                    return;
-                }
-                this.makeRegexByFs(text);
-            }
-            await this.historyCommand.addToHistory(this.HIST_KEY, text);
-            callback(true);
-        };
-
-        if (usrChoice !== this.NEW_PATTERN_CHOISE) {
-            makeRegEx(usrChoice);
         } else {
-            vscode.window.showInputBox().then(makeRegEx);
+            if (!this.checkRegexByFs(text)) {
+                this.showError('checkRegexByFs incorrect: ' + text);
+                return;
+            }
+            this.makeRegexByFs(text);
         }
+        await this.historyCommand.addToHistory(this.HIST_KEY, text);
+        return
     }
 
     protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {

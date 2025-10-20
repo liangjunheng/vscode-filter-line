@@ -359,16 +359,18 @@ class FilterLineBase{
         return undefined;
     }
 
-    protected prepare(callback : (succeed: boolean)=>void){
+    protected awaitUserInput(): Promise<string> | string {
+        return ''
+    }
+
+    protected awaitUserInputEnd(input: string): Promise<any> | any {
 
     }
 
-    public filter(filePath?: string) {
+    public async filter(filePath?: string) {
         console.log('filter:' + filePath);
-        this.prepare((succeed) => {
-            if (!succeed) {
-                return;
-            }
+        const userInput = await this.awaitUserInput()
+        if(userInput && userInput !== '') {
             const isFsModeSymbol = !checkRipgrep() ? "(Fs)" : ""
             const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
@@ -378,11 +380,12 @@ class FilterLineBase{
                     cancellable: false,
                 },
                 async (progress) => {
+                    await this.awaitUserInputEnd(userInput)
                     const docPath = await this.getDocumentPathToBeFilter(filePath)
                     await this.filterFile(docPath);
                 }
             );
-        });
+        }
     }
 }
 

@@ -60,35 +60,35 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand(filters.filter(val => val.label === choice)[0].command, path);
     });
 
-    let disposable_inputstring = vscode.commands.registerCommand('extension.filterLineByInputString', (path) => {
+    let disposable_inputstring = vscode.commands.registerCommand('extension.filterLineByInputString', async (path) => {
         let filter = new FilterLineByInputString(context);
-        filter.filter(path);
+        await filter.filter(path);
         context.subscriptions.push(filter);
     });
 
-    let disposable_inputregex = vscode.commands.registerCommand('extension.filterLineByInputRegex', (path) => {
+    let disposable_inputregex = vscode.commands.registerCommand('extension.filterLineByInputRegex', async (path) => {
         let filter = new FilterLineByInputRegex(context);
-        filter.filter(path);
+        await filter.filter(path);
         context.subscriptions.push(filter);
     });
 
-    let disposable_notcontaininputstring = vscode.commands.registerCommand('extension.filterLineByNotContainInputString', (path) => {
+    let disposable_notcontaininputstring = vscode.commands.registerCommand('extension.filterLineByNotContainInputString', async (path) => {
         let filter = new FilterLineByInputString(context);
         filter.isInverseMatchMode = true;
-        filter.filter(path);
+        await filter.filter(path);
         context.subscriptions.push(filter);
     });
 
-    let disposable_notmatchinputregex = vscode.commands.registerCommand('extension.filterLineByNotMatchInputRegex', (path) => {
+    let disposable_notmatchinputregex = vscode.commands.registerCommand('extension.filterLineByNotMatchInputRegex', async (path) => {
         let filter = new FilterLineByInputRegex(context);
         filter.isInverseMatchMode = true;
-        filter.filter(path);
+        await filter.filter(path);
         context.subscriptions.push(filter);
     });
 
-    let disposable_configfile = vscode.commands.registerCommand('extension.filterLineByConfigFile', (path) => {
+    let disposable_configfile = vscode.commands.registerCommand('extension.filterLineByConfigFile', async (path) => {
         let filter = new FilterLineByConfigFile(context);
-        filter.filter(path);
+        await filter.filter(path);
         context.subscriptions.push(filter);
     });
 

@@ -17,38 +17,33 @@ class FilterLineByInputString extends FilterLineBase{
         }
     }
 
-    protected async prepare(callback : (succeed: boolean)=>void){
+    protected async awaitUserInput(): Promise<string> {
         let title = "filter to lines machting(string)"
         if(this.isInverseMatchMode) {
             title = "filter to lines not machting(string)"
         }
         let usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
-
-        const makeInputStr = async (text: string | undefined) => {
-            if(text === undefined || text === ''){
-                console.log('No input');
-                callback(false);
-                return;
-            }
-            console.log('input : ' + text);
-            this.isRipgrepMode = checkRipgrep()
-            if(this.isRipgrepMode && !checkRegexByRipgrep(text)) {
-                this.showError('checkRegexByRipgrep incorrect: ' + text);
-                callback(false);
-                return;
-            }
-            this._inputstring = text;
-            await this.historyCommand.addToHistory(this.HIST_KEY, text);
-            callback(true);
-        };
-
-        if (usrChoice !== this.NEW_PATTERN_CHOISE) {
-            makeInputStr(usrChoice);
-        } else {
-            vscode.window.showInputBox().then(makeInputStr);
+        if (usrChoice === this.NEW_PATTERN_CHOISE) {
+            usrChoice = await vscode.window.showInputBox() ?? ''
         }
+        return usrChoice;
     }
 
+    protected async awaitUserInputEnd(text: string): Promise<any> {
+        if (text === undefined || text === '') {
+            console.log('No input');
+            return;
+        }
+        console.log('input : ' + text);
+        this.isRipgrepMode = checkRipgrep()
+        if (this.isRipgrepMode && !checkRegexByRipgrep(text)) {
+            this.showError('checkRegexByRipgrep incorrect: ' + text);
+            return;
+        }
+        this._inputstring = text;
+        await this.historyCommand.addToHistory(this.HIST_KEY, text);
+    }
+    
     protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
         const result = searchStringByRipgrep(
             inputPath,
