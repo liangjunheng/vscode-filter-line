@@ -11,6 +11,10 @@ function createCacheResultFileUri(fileName: string): string {
     return path.join(getCacheResultDir(), `result-${Date.now()}`, fileName).trimEnd();
 }
 
+function deleteCacheResultFileUri(resultFilePath: string) {
+    vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(resultFilePath)), { recursive: true });
+}
+
 function getCachePatternDir(): string {
     const filePath = path.join(ctx.globalStorageUri.fsPath, 'cache', 'riggrep-pattern');
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -21,6 +25,10 @@ function createCachePatternFileUri(fileName: string): string {
     const filePath = path.join(getCachePatternDir(), `pattern-${Date.now()}`, fileName).trimEnd();
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     return filePath
+}
+
+function deleteCachePatternFileUri(patternFilePath: string) {
+    vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(patternFilePath)), { recursive: true });
 }
 
 async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {
@@ -102,5 +110,5 @@ async function clearCacheFiles() {
     // vscode.window.showTextDocument(vscode.Uri.parse(currentActiveTab))
 }
 
-export { deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCachePatternFileUri, createCacheResultFileUri, deleteInvalidCacheFile }
+export { deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCachePatternFileUri, deleteCachePatternFileUri, createCacheResultFileUri, deleteCacheResultFileUri, deleteInvalidCacheFile }
 

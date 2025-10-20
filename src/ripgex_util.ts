@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { createCachePatternFileUri } from './file_manager';
+import { createCachePatternFileUri, deleteCachePatternFileUri } from './file_manager';
 
 /**
  * 
@@ -137,6 +137,7 @@ export function searchStringByRipgrep(
         args = ['-v', ...args]
     }
     const result = ripgrep(args);
+    deleteCachePatternFileUri(patternFilePath)
     console.log(`searchByString, cmd-output: ${result.status}`);
     return result;
 }
@@ -168,6 +169,7 @@ export function searchRegexByRipgrep(
         args = ['-v', ...args];
     }
     const result = ripgrep(args);
+    deleteCachePatternFileUri(patternFilePath)
     console.log(`searchByRegex, cmd-output: ${result.status}`);
     return result;
 }
