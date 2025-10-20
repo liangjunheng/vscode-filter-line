@@ -1,8 +1,10 @@
 import { spawnSync, SpawnSyncReturns } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import * as vscode from 'vscode';
 import { ctx } from './extension';
+import { createCachePatternFileUri } from './file_manager';
 
 /**
  * 
@@ -41,9 +43,9 @@ function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function escapeCmd(str: string): string {
-    return str.replace(/["]/g, '\\$&');
-}
+// function escapeCmd(str: string): string {
+//     return str.replace(/["]/g, '\\$&');
+// }
 
 function isValidRegex(pattern: string) {
     let args = [
@@ -61,14 +63,29 @@ function isValidRegex(pattern: string) {
     }
 }
 
-function buildRegexWithCmd(pattern: string): string {
-    return escapeCmd(pattern);
-}
+// function buildRegexWithCmd(pattern: string): string {
+//     return escapeCmd(pattern);
+// }
 
-function buildRegexSelfWithCmd(pattern: string): string {
-    let matchSelfRegex = escapeRegex(pattern.replace(/\\"/g, '\\\\\"'));
-    matchSelfRegex = escapeCmd(matchSelfRegex);
-    return matchSelfRegex
+// function buildRegexSelfWithCmd(pattern: string): string {
+//     let matchSelfRegex = escapeRegex(pattern.replace(/\\"/g, '\\\\\"'));
+//     matchSelfRegex = escapeCmd(matchSelfRegex);
+//     return matchSelfRegex
+// }
+
+function ceatePatternFile(pattern: string, needMatchPatternSelf: boolean = false): string {
+    const patternFilePath = createCachePatternFileUri("pattern.txt");
+
+    let isPatternValid = false
+    if(isValidRegex(pattern)) {
+        fs.writeFileSync(patternFilePath, pattern, { encoding: "utf8", flag: 'a' });
+        isPatternValid = true;
+    }
+
+    if (needMatchPatternSelf && isValidRegex(escapeRegex(pattern))) {
+        fs.writeFileSync(patternFilePath, `${ isPatternValid ? os.EOL : '' }${escapeRegex(pattern)}`, { encoding: "utf8", flag: 'a' });
+    }
+    return patternFilePath
 }
 
 /**
@@ -92,10 +109,10 @@ export function checkRegexByRipgrep(
     pattern: string,
     options: { matchSelf: boolean } = { matchSelf: false }
 ): Boolean {
-    if (isValidRegex(buildRegexWithCmd(pattern))) {
+    if (isValidRegex(pattern)) {
         return true;
     }
-    if (options.matchSelf && isValidRegex(buildRegexSelfWithCmd(pattern))) {
+    if (options.matchSelf && isValidRegex(escapeRegex(pattern))) {
         return true
     }
     return false;
@@ -111,11 +128,13 @@ export function searchStringByRipgrep(
     options: { inverseMatch: boolean, ingoreCase: boolean } = { inverseMatch: false, ingoreCase: false }
 ): SpawnSyncReturns<Buffer> {
     let args = [
-        '-F', '-e', `"${buildRegexWithCmd(pattern)}"`,
         '--no-filename',
         JSON.stringify(inputFilePath),
         '>', JSON.stringify(outputFilePath),
     ]
+    const patternFilePath = ceatePatternFile(pattern);
+    args = ['--fixed-strings', '-f', JSON.stringify(patternFilePath), ...args];
+
     if (options.ingoreCase) {
         args = ['-i', ...args]
     }
@@ -142,18 +161,9 @@ export function searchRegexByRipgrep(
         JSON.stringify(inputFilePath),
         '>', JSON.stringify(outputFilePath),
     ]
-    // pattern regex
-    const patternRegex = buildRegexWithCmd(pattern);
-    if (isValidRegex(patternRegex)) {
-        args = ['-e', `"${patternRegex}"`, ...args];
-    }
-    // match pattern self
-    if (options.matchSelf) {
-        const matchSelfRegex = buildRegexSelfWithCmd(pattern);
-        if (isValidRegex(matchSelfRegex)) {
-            args = ['-e', `"${matchSelfRegex}"`, ...args];
-        }
-    }
+    const patternFilePath = ceatePatternFile(pattern, options.matchSelf);
+    args = ['-f', JSON.stringify(patternFilePath), ...args];
+
     // ignorecase
     if (options.ingoreCase) {
         args = ['-i', ...args];
