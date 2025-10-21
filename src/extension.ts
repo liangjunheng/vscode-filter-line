@@ -6,6 +6,7 @@ import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile} from './file_manager';
+import { checkRipgrep } from './ripgex_util';
 
 export let ctx: vscode.ExtensionContext;
 
@@ -30,6 +31,45 @@ export function activate(context: vscode.ExtensionContext) {
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
+    let disposable_filterFromDirby = vscode.commands.registerCommand('extension.filterLineFromDirBy', async (dirUri) => {
+        if(!checkRipgrep()) {
+            vscode.window.showErrorMessage('Ripgrep executable not found. Folder filtering is unavailable', "Failure");
+            return;
+        }
+
+        let path: string | undefined;
+        if (typeof dirUri !== 'undefined' && !(dirUri instanceof vscode.Uri)) {
+            console.warn('File URI validation failed');
+            return;
+        }
+        path = (dirUri) ? dirUri.fsPath : undefined;
+
+        interface Filters {
+            label: string;
+            command: string;
+        }
+
+        const filters: Array<Filters> = [
+            {label: 'Input Regex', command: 'extension.filterLineByInputRegex'},
+            {label: 'Input String', command: 'extension.filterLineByInputString'},
+            {label: 'Not Match Input Regex', command: 'extension.filterLineByNotMatchInputRegex'},
+            {label: 'Not Contain Input String', command: 'extension.filterLineByNotContainInputString'},
+            {label: 'Config File', command: 'extension.filterLineByConfigFile'}];
+
+        const choices: vscode.QuickPickItem[] = filters.map(item => Object.create({label: item.label}));
+        let choice: string | vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(choices);
+        if (choice === undefined) {
+            return;
+        } else {
+            choice = choice.label;
+        }
+        await vscode.commands.executeCommand(filters.filter(val => val.label === choice)[0].command, path);
+    });
+
+
+    // The command has been defined in the package.json file
+    // Now provide the implementation of the command with  registerCommand
+    // The commandId parameter must match the command field in package.json
     let disposable_filterby = vscode.commands.registerCommand('extension.filterLineBy', async (fileUri) => {
         let path: string | undefined;
         if (typeof fileUri !== 'undefined' && !(fileUri instanceof vscode.Uri)) {
@@ -44,10 +84,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const filters: Array<Filters> = [
-            {label: 'Input String', command: 'extension.filterLineByInputString'},
             {label: 'Input Regex', command: 'extension.filterLineByInputRegex'},
-            {label: 'Not Contain Input String', command: 'extension.filterLineByNotContainInputString'},
+            {label: 'Input String', command: 'extension.filterLineByInputString'},
             {label: 'Not Match Input Regex', command: 'extension.filterLineByNotMatchInputRegex'},
+            {label: 'Not Contain Input String', command: 'extension.filterLineByNotContainInputString'},
             {label: 'Config File', command: 'extension.filterLineByConfigFile'}];
 
         const choices: vscode.QuickPickItem[] = filters.map(item => Object.create({label: item.label}));
@@ -92,6 +132,7 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(filter);
     });
 
+    context.subscriptions.push(disposable_filterFromDirby);
     context.subscriptions.push(disposable_filterby);
     context.subscriptions.push(disposable_inputstring);
     context.subscriptions.push(disposable_inputregex);

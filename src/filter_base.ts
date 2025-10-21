@@ -176,6 +176,10 @@ class FilterLineBase{
             }
 
             let stats = fs.statSync(filePath);
+            if(stats.isDirectory() && checkRipgrep()) {
+                resolve(filePath);
+                return;
+            }
             if (!stats.isFile()) {
                 this.showError('Can only filter file');
                 resolve('');

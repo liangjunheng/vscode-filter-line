@@ -47,7 +47,11 @@
             },
             {
                 "command": "extension.filterLineBy",
-                "title": "Filter Line By..."
+                "title": "📄Filter Line By..."
+            },
+            {
+                "command": "extension.filterLineFromDirBy",
+                "title": "📁Filter Line By..."
             }
         ],    
         "keybindings": [
@@ -66,6 +70,17 @@
         ],
         "menus": {
             "explorer/context": [
+                {
+                    "when": "!explorerResourceIsFolder",
+                    "command": "extension.filterLineBy",
+                    "group": "4_filterLine@1"
+                },{
+                    "when": "!explorerResourceIsFile",
+                    "command": "extension.filterLineFromDirBy",
+                    "group": "4_filterLine@1"
+                }
+            ],
+            "editor/context": [
                 {
                     "when": "!explorerResourceIsFolder",
                     "command": "extension.filterLineBy",
