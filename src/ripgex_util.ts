@@ -30,7 +30,7 @@ function getRipGrepPath(): string {
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
     const rgPath = getRipGrepPath()
     console.log(`ripgrep start: ${rgPath} ${args.join(' ')}`);
-    const result = spawnSync(JSON.stringify(rgPath), args, { shell: true });
+    const result = spawnSync(escapePath(rgPath), args, { shell: true });
     console.log(`ripgrep end, status: ${result.status}, stderr: ${result.stderr}`);
     return result;
 }
@@ -40,6 +40,16 @@ function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
  */
 function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function escapePath(path: string): string {
+    if (process.platform === 'win32') {
+        // Windows CMD & PowerShell
+        return JSON.stringify(path);
+    } else {
+        // Linux/macOS Bash
+        return `'${JSON.stringify(path)}'`;
+    }
 }
 
 // function escapeCmd(str: string): string {
@@ -124,11 +134,11 @@ export function searchStringByRipgrep(
 ): SpawnSyncReturns<Buffer> {
     let args = [
         '--no-filename',
-        JSON.stringify(inputFilePath),
-        '>', JSON.stringify(outputFilePath),
+        escapePath(inputFilePath),
+        '>', escapePath(outputFilePath),
     ]
     const patternFilePath = ceatePatternFile(pattern);
-    args = ['--fixed-strings', '-f', JSON.stringify(patternFilePath), ...args];
+    args = ['--fixed-strings', '-f', escapePath(patternFilePath), ...args];
 
     if (options.ingoreCase) {
         args = ['-i', ...args]
@@ -154,11 +164,11 @@ export function searchRegexByRipgrep(
     // build args
     let args = [
         '--no-filename',
-        JSON.stringify(inputFilePath),
-        '>', JSON.stringify(outputFilePath),
+        escapePath(inputFilePath),
+        '>', escapePath(outputFilePath),
     ]
     const patternFilePath = ceatePatternFile(pattern, options.matchSelf);
-    args = ['-f', JSON.stringify(patternFilePath), ...args];
+    args = ['-f', escapePath(patternFilePath), ...args];
 
     // ignorecase
     if (options.ingoreCase) {
