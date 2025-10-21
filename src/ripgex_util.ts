@@ -48,7 +48,7 @@ function escapePath(path: string): string {
         return JSON.stringify(path);
     } else {
         // Linux/macOS Bash
-        return `'${JSON.stringify(path)}'`;
+        return `'${path}'`;
     }
 }
 
