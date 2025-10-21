@@ -17,7 +17,7 @@ class FilterLineByInputString extends FilterLineBase{
         }
     }
 
-    protected async awaitUserInput(): Promise<string> {
+    protected override async awaitUserInput(): Promise<string> {
         let title = "filter to lines machting(string)"
         if(this.isInverseMatchMode) {
             title = "filter to lines not machting(string)"
@@ -29,22 +29,22 @@ class FilterLineByInputString extends FilterLineBase{
         return usrChoice;
     }
 
-    protected async awaitUserInputEnd(text: string): Promise<any> {
-        if (text === undefined || text === '') {
+    protected override async prepareLoadDataEnv(userInputText: string): Promise<any> {
+        if (userInputText === undefined || userInputText === '') {
             console.log('No input');
             return;
         }
-        console.log('input : ' + text);
+        console.log('input : ' + userInputText);
         this.isRipgrepMode = checkRipgrep()
-        if (this.isRipgrepMode && !checkRegexByRipgrep(text)) {
-            this.showError('checkRegexByRipgrep incorrect: ' + text);
+        if (this.isRipgrepMode && !checkRegexByRipgrep(userInputText)) {
+            this.showError('checkRegexByRipgrep incorrect: ' + userInputText);
             return;
         }
-        this._inputstring = text;
-        await this.historyCommand.addToHistory(this.HIST_KEY, text);
+        this._inputstring = userInputText;
+        await this.historyCommand.addToHistory(this.HIST_KEY, userInputText);
     }
     
-    protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
+    protected override matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
         const result = searchStringByRipgrep(
             inputPath,
             outputPath,
@@ -60,7 +60,7 @@ class FilterLineByInputString extends FilterLineBase{
         return result;
     }
 
-    protected matchLineByFs(line: string): string | undefined{
+    protected override matchLineByFs(line: string): string | undefined{
         if(this._inputstring === undefined){
             return undefined;
         }

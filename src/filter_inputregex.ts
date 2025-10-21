@@ -19,7 +19,7 @@ class FilterLineByInputRegex extends FilterLineBase{
         }
     }
 
-    protected async awaitUserInput(): Promise<string> {
+    protected override async awaitUserInput(): Promise<string> {
         // Match the regular expression pattern itself
         this.isEnableStringMatchInRegexMode = this.isEnableStringMatchInRegex()
         console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
@@ -35,30 +35,31 @@ class FilterLineByInputRegex extends FilterLineBase{
         return usrChoice;
     }
 
-    protected async awaitUserInputEnd(text: string): Promise<void> {
-        if (text === undefined || text === '') {
+    
+    protected override async prepareLoadDataEnv(userInputText: string): Promise<void> {
+        if (userInputText === undefined || userInputText === '') {
             // console.log('No input');
             return;
         }
         // console.log('input : ' + text);
         this.isRipgrepMode = checkRipgrep();
         if (this.isRipgrepMode) {
-            if (!checkRegexByRipgrep(text, { matchSelf: this.isEnableStringMatchInRegexMode })) {
-                this.showError('checkRegexByRipgrep incorrect: ' + text);
+            if (!checkRegexByRipgrep(userInputText, { matchSelf: this.isEnableStringMatchInRegexMode })) {
+                this.showError('checkRegexByRipgrep incorrect: ' + userInputText);
                 return;
             }
         } else {
-            if (!this.checkRegexByFs(text)) {
-                this.showError('checkRegexByFs incorrect: ' + text);
+            if (!this.checkRegexByFs(userInputText)) {
+                this.showError('checkRegexByFs incorrect: ' + userInputText);
                 return;
             }
-            this.makeRegexByFs(text);
+            this.makeRegexByFs(userInputText);
         }
-        await this.historyCommand.addToHistory(this.HIST_KEY, text);
+        await this.historyCommand.addToHistory(this.HIST_KEY, userInputText);
         return
     }
 
-    protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
+    protected override matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
         const result = searchRegexByRipgrep(
             inputPath,
             outputPath,
@@ -92,7 +93,7 @@ class FilterLineByInputRegex extends FilterLineBase{
             this._regex = new RegExp(pattern);
         }
     }
-    protected matchLineByFs(line: string): string | undefined{
+    protected override matchLineByFs(line: string): string | undefined{
         if(this._regex === undefined){
             return undefined;
         }

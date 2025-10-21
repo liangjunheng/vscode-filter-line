@@ -160,7 +160,7 @@ class FilterLineBase{
 
                 if (!fs.existsSync(filePath ?? "") && editor?.document) {
                     // Write cache data to a file
-                    filePath = createCacheResultFileUri('TabBuffer.txt')
+                    filePath = createCacheResultFileUri('TabBuffer.txt');
                     const allText = editor.document.getText();
                     fs.mkdirSync(path.dirname(filePath), { recursive: true });
                     fs.writeFileSync(filePath, allText);
@@ -231,7 +231,12 @@ class FilterLineBase{
     protected async filterFile(filePath: string) {
         let inputPath = filePath;
         if (inputPath === undefined || !fs.existsSync(inputPath)) {
-            this.showError('No file selected (Or file is too large. For how to filter large file, please visit README)');
+            const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab
+            if(activeTab?.isDirty === true) {
+                vscode.window.showErrorMessage('The file might have unsaved changes. Save the file to proceed.', "Failure");
+            } else {
+                vscode.window.showErrorMessage('No file selected (Or file is too large. For how to filter large file, please visit README)', "Failure");
+            }
             return
         }
 
@@ -363,14 +368,14 @@ class FilterLineBase{
         return ''
     }
 
-    protected awaitUserInputEnd(input: string): Promise<any> | any {
+    protected prepareLoadDataEnv(userInputText: string): Promise<any> | any {
 
     }
 
     public async filter(filePath?: string) {
         console.log('filter:' + filePath);
-        const userInput = await this.awaitUserInput()
-        if(userInput && userInput !== '') {
+        const userInputText = await this.awaitUserInput()
+        if(userInputText && userInputText !== '') {
             const isFsModeSymbol = !checkRipgrep() ? "(Fs)" : ""
             const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
@@ -380,7 +385,7 @@ class FilterLineBase{
                     cancellable: false,
                 },
                 async (progress) => {
-                    await this.awaitUserInputEnd(userInput)
+                    await this.prepareLoadDataEnv(userInputText)
                     const docPath = await this.getDocumentPathToBeFilter(filePath)
                     await this.filterFile(docPath);
                 }
