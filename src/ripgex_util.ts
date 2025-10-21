@@ -133,7 +133,6 @@ export function searchStringByRipgrep(
     options: { inverseMatch: boolean, smartCase: boolean } = { inverseMatch: false, smartCase: false }
 ): SpawnSyncReturns<Buffer> {
     let args = [
-        '--no-filename',
         escapePath(inputFilePath),
         '>', escapePath(outputFilePath),
     ]
@@ -145,6 +144,11 @@ export function searchStringByRipgrep(
     }
     if (options.inverseMatch) {
         args = ['--invert-match', ...args]
+    }
+    if(fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {
+        args = ['--heading', ...args]
+    } else {
+        args = ['--no-filename', ...args]
     }
     const result = ripgrep(args);
     deleteCachePatternFileUri(patternFilePath)
@@ -163,7 +167,6 @@ export function searchRegexByRipgrep(
 ): SpawnSyncReturns<Buffer> {
     // build args
     let args = [
-        '--no-filename',
         escapePath(inputFilePath),
         '>', escapePath(outputFilePath),
     ]
@@ -177,6 +180,11 @@ export function searchRegexByRipgrep(
     // inverse match
     if (options.inverseMatch) {
         args = ['--invert-match', ...args];
+    }
+    if(fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {
+        args = ['--heading', ...args]
+    } else {
+        args = ['--no-filename', ...args]
     }
     const result = ripgrep(args);
     deleteCachePatternFileUri(patternFilePath)
