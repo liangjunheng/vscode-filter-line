@@ -52,7 +52,9 @@ function getValiadFileName(input: string): string {
         .replace(/"/g, '″')
         .replace(/</g, '＜')
         .replace(/>/g, '＞')
-        .replace(/\|/g, 'ǀ');
+        .replace(/\|/g, 'ǀ')
+        .replace(/\$/g, '＄')
+        .replace(/`/g, 'ˋ');
     return fileName;
 }
 
