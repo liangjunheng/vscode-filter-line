@@ -14,6 +14,7 @@ Filter line for current opening file by strings/regular expressions, generating 
 1. Filter line by input string (or not contain input string).
 2. Filter line by input regular expression (or not match input regular expression).
 3. Filter line by config file `filterline.json`(or `filterline.eoml`) in corresponding `.vscode` directory.
+4. Support large file filter
 
 ### Filter line by input string.
 
@@ -41,13 +42,8 @@ Filter line for current opening file by strings/regular expressions, generating 
 ![byconfigfile](img/byconfigfile.gif)
 
 ### Large file mode
-
-Since [vscode's limitation](https://github.com/microsoft/vscode/issues/31078), when filter large files (e.g. >= 50MB), vscode extension can not get the file name currently opened. But this extension provide an alternative. e.g. if you want to filter large file `~/log/file.log`, do follow steps below :
-
-1. Create an empty file named `filterline` ( `~/log/filterline`) in the same directory with log file.
-2. Try to filter the empty file `filterline`.
-3. Now the extension will list all files in the same directory.
-4. Choose the one (`~/log/file.log`) you want to filter. 
+1. Perfect support large file filter
+Ensure the file is saved before proceeding.
 
 
 #### Config file type
