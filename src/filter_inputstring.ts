@@ -52,6 +52,7 @@ class FilterLineByInputString extends FilterLineBase{
             {
                 inverseMatch: this.isInverseMatchMode,
                 smartCase: this.isEnableSmartCase(),
+                showFilename: this.isDisplayFilenamesWhenFilterDir(),
             }
         );
         if (result.stderr.length > 0) {

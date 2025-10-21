@@ -116,7 +116,13 @@
                     "type": "boolean",
                     "default": false,
                     "scope": "application",
-                    "description": "only show one search box"
+                    "description": "Display only one search box"
+                },
+                "filter-line.displayFilenamesWhenFilterDir": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "Display filenames when filtering a directory"
                 },
                 "filter-line.enableSmartCase": {
                     "type": "boolean",

@@ -23,6 +23,10 @@ class FilterLineBase{
         this.historyCommand = new HistoryCommand(this.ctx);
     }
 
+    protected isDisplayFilenamesWhenFilterDir(): boolean {
+        return vscode.workspace.getConfiguration('filter-line').get('displayFilenamesWhenFilterDir', true);
+    }
+
     protected isEnableSmartCase(): boolean {
         return vscode.workspace.getConfiguration('filter-line').get('enableSmartCase', true);
     }

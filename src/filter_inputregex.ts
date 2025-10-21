@@ -68,6 +68,7 @@ class FilterLineByInputRegex extends FilterLineBase{
                 matchSelf: this.isEnableStringMatchInRegex(),
                 inverseMatch: this.isInverseMatchMode,
                 smartCase: this.isEnableSmartCase(),
+                showFilename: this.isDisplayFilenamesWhenFilterDir(),
             }
         );
         if(result.stderr.length > 0) {
