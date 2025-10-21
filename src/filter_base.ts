@@ -16,7 +16,7 @@ class FilterLineBase{
     protected readonly historyCommand: HistoryCommand;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
     private currentMatchRule: string = ''
-    protected isRipgrepMode = false;
+    protected isRipgrepSeachMode = false;
 
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
@@ -31,8 +31,8 @@ class FilterLineBase{
         return vscode.workspace.getConfiguration('filter-line').get('enableStringMatchInRegex', true);
     }
 
-    protected isEnableOverwriteMode(): boolean {
-        return vscode.workspace.getConfiguration('filter-line').get('enableOverwriteMode', false);
+    protected isSingleSeachBoxMode(): boolean {
+        return vscode.workspace.getConfiguration('filter-line').get('enableSingleSeachBoxMode', false);
     }
 
     protected getHistoryMaxSize(): number {
@@ -240,76 +240,28 @@ class FilterLineBase{
             return
         }
 
-        // special path tail
-        let ext = path.extname(inputPath);
-
-        // overwrite mode ?
-        let isOverwriteMode = this.isEnableOverwriteMode() && (inputPath.indexOf(this.ctx.extension.id) !== -1);
-        console.log("isOverwriteMode: " + isOverwriteMode)
-
         // match mode
         const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
-        let outputPath = '';
-        if (isOverwriteMode) {
-            outputPath = inputPath;
-            // change input path
-            let newInputPath = inputPath + Math.floor(Date.now() / 1000) + ext;
-            try {
-                if (fs.existsSync(newInputPath)) {
-                    fs.unlinkSync(newInputPath);
-                }
-            } catch (e) {
-                this.showError('unlink error : ' + e);
-                return;
-            }
-            try {
-                fs.renameSync(inputPath, newInputPath);
-            } catch (e) {
-                this.showError('rename error : ' + e);
-                return;
-            }
-            console.log('after rename');
-            inputPath = newInputPath;
-        } else {
-            const fileName = getValiadFileName(this.currentMatchRule)
-            outputPath = createCacheResultFileUri(matchModeSymbol + fileName);
-            fs.mkdirSync(path.dirname(outputPath), { recursive: true })
-            if (fs.existsSync(outputPath)) {
-                console.log('output file already exist, force delete when not under overwrite mode');
-                let tmpPath = outputPath + Math.floor(Date.now() / 1000) + ext;
-                try {
-                    fs.renameSync(outputPath, tmpPath);
-                    fs.unlinkSync(tmpPath);
-                } catch (e) {
-                    console.log('remove error: ' + e);
-                }
-            } else {
-                // create file
-                fs.writeFileSync(outputPath, '');
-            }
-        }
+        const fileName = getValiadFileName(this.currentMatchRule);
+        let outputPath = createCacheResultFileUri(matchModeSymbol + fileName);
+        fs.writeFileSync(outputPath, '');
 
-        console.log('overwrite mode: ' + ((isOverwriteMode) ? 'on' : 'off'));
+        console.log('ripgrep mode: ' + ((this.isRipgrepSeachMode) ? 'on' : 'off'));
         console.log('input path: ' + inputPath);
         console.log('output path: ' + outputPath);
 
-        if(this.isRipgrepMode) {
+        if(this.isRipgrepSeachMode) {
            await this.outputMatchLineByRipgrep(inputPath, outputPath)
         } else {
            await this.outputMatchLineByFs(inputPath, outputPath)
         }
-        try {
-            if (isOverwriteMode) {
-                fs.unlinkSync(inputPath);
-            }
-        } catch (e) {
-            console.log(e);
-        }
         if (canOpenFileSafely(outputPath, { safetyFactor: 2 })) {
-            vscode.commands.executeCommand(
+            const isSingleSeachBoxMode = this.isSingleSeachBoxMode()
+            console.log('isSingleSeachBoxMode: ' + this.isSingleSeachBoxMode ? 'on' : 'off');
+            await vscode.commands.executeCommand(
                 'vscode.open',
                 vscode.Uri.parse(encodeURIComponent(outputPath)),
-                { preview: isOverwriteMode }
+                { preview: isSingleSeachBoxMode }
             );
         } else {
             vscode.window.showErrorMessage(

@@ -97,11 +97,11 @@
                     "scope": "application",
                     "description": "Filter patterns history size"
                 },
-                "filter-line.enableOverwriteMode": {
+                "filter-line.enableSingleSeachBoxMode": {
                     "type": "boolean",
                     "default": false,
                     "scope": "application",
-                    "description": "enable reuse the same tab line filter"
+                    "description": "only show one search box"
                 },
                 "filter-line.enableSmartCase": {
                     "type": "boolean",

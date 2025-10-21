@@ -42,8 +42,8 @@ class FilterLineByInputRegex extends FilterLineBase{
             return;
         }
         // console.log('input : ' + text);
-        this.isRipgrepMode = checkRipgrep();
-        if (this.isRipgrepMode) {
+        this.isRipgrepSeachMode = checkRipgrep();
+        if (this.isRipgrepSeachMode) {
             if (!checkRegexByRipgrep(userInputText, { matchSelf: this.isEnableStringMatchInRegexMode })) {
                 this.showError('checkRegexByRipgrep incorrect: ' + userInputText);
                 return;
