@@ -130,7 +130,7 @@ export function searchStringByRipgrep(
     inputFilePath: string,
     outputFilePath: string,
     pattern: string,
-    options: { inverseMatch: boolean, ingoreCase: boolean } = { inverseMatch: false, ingoreCase: false }
+    options: { inverseMatch: boolean, smartCase: boolean } = { inverseMatch: false, smartCase: false }
 ): SpawnSyncReturns<Buffer> {
     let args = [
         '--no-filename',
@@ -140,11 +140,11 @@ export function searchStringByRipgrep(
     const patternFilePath = ceatePatternFile(pattern);
     args = ['--fixed-strings', '-f', escapePath(patternFilePath), ...args];
 
-    if (options.ingoreCase) {
-        args = ['-i', ...args]
+    if (options.smartCase) {
+        args = ['--smart-case', ...args]
     }
     if (options.inverseMatch) {
-        args = ['-v', ...args]
+        args = ['--invert-match', ...args]
     }
     const result = ripgrep(args);
     deleteCachePatternFileUri(patternFilePath)
@@ -159,7 +159,7 @@ export function searchRegexByRipgrep(
     inputFilePath: string,
     outputFilePath: string,
     pattern: string,
-    options: { matchSelf: boolean, inverseMatch: boolean, ingoreCase: boolean } = { matchSelf: false, inverseMatch: false, ingoreCase: true }
+    options: { matchSelf: boolean, inverseMatch: boolean, smartCase: boolean } = { matchSelf: false, inverseMatch: false, smartCase: true }
 ): SpawnSyncReturns<Buffer> {
     // build args
     let args = [
@@ -171,12 +171,12 @@ export function searchRegexByRipgrep(
     args = ['-f', escapePath(patternFilePath), ...args];
 
     // ignorecase
-    if (options.ingoreCase) {
-        args = ['-i', ...args];
+    if (options.smartCase) {
+        args = ['--smart-case', ...args];
     }
     // inverse match
     if (options.inverseMatch) {
-        args = ['-v', ...args];
+        args = ['--invert-match', ...args];
     }
     const result = ripgrep(args);
     deleteCachePatternFileUri(patternFilePath)

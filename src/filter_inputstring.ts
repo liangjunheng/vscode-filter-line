@@ -51,7 +51,7 @@ class FilterLineByInputString extends FilterLineBase{
             pattern,
             {
                 inverseMatch: this.isInverseMatchMode,
-                ingoreCase: this.isEnableSmartCase() && !/[A-Z]/.test(pattern),
+                smartCase: this.isEnableSmartCase(),
             }
         );
         if (result.stderr.length > 0) {
