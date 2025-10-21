@@ -42,9 +42,7 @@ Filter line for current opening file by strings/regular expressions, generating 
 ![byconfigfile](img/byconfigfile.gif)
 
 ### Large file mode
-1. Perfect support large file filter
-Ensure the file is saved before proceeding.
-
+* Perfect support large file filter, but ensure the file is saved before proceeding.
 
 #### Config file type
 
