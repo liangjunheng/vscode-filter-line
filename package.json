@@ -2,7 +2,7 @@
     "name": "filter-line-pro",
     "displayName": "Filter Line Pro",
     "description": "Filter line by strings or regular expressions",
-    "version": "5.0.16",
+    "version": "5.0.17",
     "publisher": "liangjunheng",
     "license": "MIT",
     "engines": {
