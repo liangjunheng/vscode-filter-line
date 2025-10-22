@@ -28,38 +28,18 @@ function getRipGrepPath(): string {
 }
 
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
-    const rgPath = getRipGrepPath()
-    console.log(`ripgrep start: ${rgPath} ${args.join(' ')}`);
-    const result = spawnSync(escapePath(rgPath), args, { shell: true });
+    let commonArgs = ['--pcre2', ...args];
+    const rgPath = getRipGrepPath();
+    console.log(`ripgrep start: ${rgPath} ${commonArgs.join(' ')}`);
+    const result = spawnSync(escapePath(rgPath), commonArgs, { shell: true });
     console.log(`ripgrep end, status: ${result.status}, stderr: ${result.stderr}`);
     return result;
 }
 
-/**
- * 
- */
-function escapeRegex(str: string): string {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function escapePath(path: string): string {
-    if (process.platform === 'win32') {
-        // Windows CMD & PowerShell
-        return JSON.stringify(path);
-    } else {
-        // Linux/macOS Bash
-        return `'${path}'`;
-    }
-}
-
-// function escapeCmd(str: string): string {
-//     return str.replace(/["]/g, '\\$&');
-// }
-
 function isValidRegex(pattern: string) {
-    const result = spawnSync(getRipGrepPath(), [pattern, '--quiet'], {
-        encoding: 'utf-8'
-    });
+    const args = [pattern];
+    const commonArgs = ['--pcre2', '--quiet', ...args];
+    const result = spawnSync(getRipGrepPath(), commonArgs, { encoding: 'utf-8' });
     console.log(`isValidRegex: ${result.stderr.length === 0}, pattern: ${pattern}, status: ${result.status}, stderr: ${result.stderr}`);
     if (result.stderr.length === 0) {
         return true;
@@ -77,6 +57,30 @@ function isValidRegex(pattern: string) {
 //     matchSelfRegex = escapeCmd(matchSelfRegex);
 //     return matchSelfRegex
 // }
+
+// function escapeCmd(str: string): string {
+//     return str.replace(/["]/g, '\\$&');
+// }
+
+/**
+ * escape Regex
+ */
+function escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * escape Path 
+ */
+function escapePath(path: string): string {
+    if (process.platform === 'win32') {
+        // Windows CMD & PowerShell
+        return JSON.stringify(path);
+    } else {
+        // Linux/macOS Bash
+        return `'${path}'`;
+    }
+}
 
 function ceatePatternFile(pattern: string, needMatchPatternSelf: boolean = false): string {
     const patternFilePath = createCachePatternFileUri("pattern.txt");
