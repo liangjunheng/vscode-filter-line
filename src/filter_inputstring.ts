@@ -29,7 +29,7 @@ class FilterLineByInputString extends FilterLineBase{
         return usrChoice;
     }
 
-    protected override async prepareLoadDataEnv(userInputText: string): Promise<any> {
+    protected override async prepareFilterFileEnv(userInputText: string): Promise<any> {
         if (userInputText === undefined || userInputText === '') {
             console.log('No input');
             return;

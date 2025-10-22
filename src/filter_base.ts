@@ -147,6 +147,7 @@ class FilterLineBase{
 
             if (filePath_ === undefined) {
                 const editor = vscode.window.activeTextEditor;
+                const document = vscode.window.activeTextEditor?.document;
                 filePath = vscode.window.activeTextEditor?.document?.uri?.fsPath;
                 // first, save file
                 if(editor?.document.isDirty === true && !editor.document.isUntitled) {
@@ -161,11 +162,10 @@ class FilterLineBase{
                     }
                 }
 
-
-                if (!fs.existsSync(filePath ?? "") && editor?.document) {
+                if (!fs.existsSync(filePath ?? "") && document !== undefined) {
                     // Write cache data to a file
                     filePath = createCacheResultFileUri('TabBuffer.txt');
-                    const allText = editor.document.getText();
+                    const allText = document.getText();
                     fs.mkdirSync(path.dirname(filePath), { recursive: true });
                     fs.writeFileSync(filePath, allText);
                 }
@@ -239,12 +239,7 @@ class FilterLineBase{
     protected async filterFile(filePath: string) {
         let inputPath = filePath;
         if (inputPath === undefined || !fs.existsSync(inputPath)) {
-            const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab
-            if(activeTab?.isDirty === true) {
-                vscode.window.showErrorMessage('The file might have unsaved changes. Save the file to proceed.', "Failure");
-            } else {
-                vscode.window.showErrorMessage('No file selected (Or file is too large. For how to filter large file, please visit README)', "Failure");
-            }
+            vscode.window.showErrorMessage('Please ensure the file is saved and the path is valid.', "Failure");
             return
         }
 
@@ -328,7 +323,7 @@ class FilterLineBase{
         return ''
     }
 
-    protected prepareLoadDataEnv(userInputText: string): Promise<any> | any {
+    protected prepareFilterFileEnv(userInputText: string): Promise<any> | any {
 
     }
 
@@ -345,8 +340,8 @@ class FilterLineBase{
                     cancellable: false,
                 },
                 async (progress) => {
-                    await this.prepareLoadDataEnv(userInputText)
                     const docPath = await this.getDocumentPathToBeFilter(filePath)
+                    await this.prepareFilterFileEnv(userInputText)
                     await this.filterFile(docPath);
                 }
             );

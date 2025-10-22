@@ -36,7 +36,7 @@ class FilterLineByInputRegex extends FilterLineBase{
     }
 
     
-    protected override async prepareLoadDataEnv(userInputText: string): Promise<void> {
+    protected override async prepareFilterFileEnv(userInputText: string): Promise<void> {
         if (userInputText === undefined || userInputText === '') {
             // console.log('No input');
             return;
