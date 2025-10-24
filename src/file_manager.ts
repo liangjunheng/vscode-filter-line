@@ -8,7 +8,7 @@ function getCacheResultDir(): string {
 }
 
 function createCacheResultFileUri(fileName: string): string {
-    const filePath = path.join(getCacheResultDir(), `result-${Date.now()}`, fileName).trimEnd();
+    const filePath = path.join(getCacheResultDir(), `result-${Date.now()}`, fileName + "⠀").trimEnd();
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     return filePath
 }
