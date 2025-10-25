@@ -43,15 +43,16 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
 }
 
 function getValiadFileName(input: string): string {
+    // https://blog.csdn.net/Yu1441/article/details/145701076
     const fileName = input.slice(0, 200)
         .replace(/\*/g, '∗')
-        .replace(/\//g, '⟋')
-        .replace(/\\/g, '⟍')
+        .replace(/\//g, '᜵')
+        .replace(/\\/g, '∖')
         .replace(/:/g, '꞉')
         .replace(/\?/g, 'ʔ')
         .replace(/"/g, '″')
-        .replace(/</g, '＜')
-        .replace(/>/g, '＞')
+        .replace(/</g, '˂')
+        .replace(/>/g, '˃')
         .replace(/`/g, 'ˋ')
         .replace(/\|/g, 'ǀ');
     return fileName;
