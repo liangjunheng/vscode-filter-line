@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
-import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile} from './file_manager';
+import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrep } from './ripgex_util';
 
 export let ctx: vscode.ExtensionContext;
@@ -23,6 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
             console.log("filter-line-pro disable end!")
         }
     });
+
+    // Force files with the '*⠀' suffix to open in FilterLine mode
+    addFileAssociationIfMissing()
 
     // delete invalid RealFile When Tab is Closed
     deleteInvalidRealFileWhenCloseTab()
@@ -144,4 +147,17 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
     clearCacheFiles()
+}
+
+// Force files with the '*⠀' suffix to open in FilterLine mode
+function addFileAssociationIfMissing() {
+    const config = vscode.workspace.getConfiguration();
+    const current = config.get<Record<string, string>>('files.associations') || {};
+    if (!(`*${SEARCH_RESULT_EXT}` in current) || current[`*${SEARCH_RESULT_EXT}`] !== 'FilterLinePro') {
+        const newFileAssociations = {
+            ...current,
+            [`*${SEARCH_RESULT_EXT}`]: 'FilterLinePro'
+        };
+        config.update('files.associations', newFileAssociations, vscode.ConfigurationTarget.Global);
+    }
 }

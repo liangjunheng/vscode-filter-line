@@ -3,22 +3,15 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { ctx } from './extension';
 
-// Force files with the *⠀ suffix to open in plaintext mode
-function addFileAssociationIfMissing() {
-    const config = vscode.workspace.getConfiguration();
-    const current = config.get<Record<string, string>>('files.associations') || {};
-    if (!('*⠀' in current)) {
-        config.update('files.associations', { ...current, '*⠀': 'plaintext' }, vscode.ConfigurationTarget.Global);
-    }
-}
+// SEARCH_RESULT_EXT uses Unicode U+200B (zero-width space) instead of ASCII space (U+0020)
+const SEARCH_RESULT_EXT = "⠀";
 
 function getCacheResultDir(): string {
     return path.join(ctx.globalStorageUri.fsPath, 'cache', 'search-result');
 }
 
 function createCacheResultFileUri(fileName: string): string {
-    const filePath = path.join(getCacheResultDir(), `result-${Date.now()}`, fileName + "⠀").trimEnd();
-    addFileAssociationIfMissing();
+    const filePath = path.join(getCacheResultDir(), `result-${Date.now()}`, fileName + SEARCH_RESULT_EXT).trimEnd();
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     return filePath
 }
@@ -120,5 +113,5 @@ async function clearCacheFiles() {
     // vscode.window.showTextDocument(vscode.Uri.parse(currentActiveTab))
 }
 
-export { deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCachePatternFileUri, deleteCachePatternFileUri, createCacheResultFileUri, deleteCacheResultFileUri, deleteInvalidCacheFile }
+export { SEARCH_RESULT_EXT, deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCachePatternFileUri, deleteCachePatternFileUri, createCacheResultFileUri, deleteCacheResultFileUri, deleteInvalidCacheFile }
 
