@@ -3,12 +3,22 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { ctx } from './extension';
 
+// Force files with the *⠀ suffix to open in plaintext mode
+function addFileAssociationIfMissing() {
+    const config = vscode.workspace.getConfiguration();
+    const current = config.get<Record<string, string>>('files.associations') || {};
+    if (!('*⠀' in current)) {
+        config.update('files.associations', { ...current, '*⠀': 'plaintext' }, vscode.ConfigurationTarget.Global);
+    }
+}
+
 function getCacheResultDir(): string {
     return path.join(ctx.globalStorageUri.fsPath, 'cache', 'search-result');
 }
 
 function createCacheResultFileUri(fileName: string): string {
     const filePath = path.join(getCacheResultDir(), `result-${Date.now()}`, fileName + "⠀").trimEnd();
+    addFileAssociationIfMissing();
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     return filePath
 }
