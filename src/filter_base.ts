@@ -100,7 +100,7 @@ class FilterLineBase{
             this.ctx.globalState.update("lastInputValue", value);
             
             let filterHistoryPacks = picks
-                .filter(h => h.includes(value))
+                .filter(h => h.includes(value) && h !== value)
                 .map(h => ({ label: h, buttons: [itemChooseButton, itemDeleteButton] }));
             if (value) {
                 filterHistoryPacks.unshift({ label: value, buttons: [] });
