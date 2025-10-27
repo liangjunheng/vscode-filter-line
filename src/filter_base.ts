@@ -11,16 +11,25 @@ import {createCacheResultFileUri} from './file_manager';
 import {checkRipgrep} from './ripgex_util';
 
 class FilterLineBase{
-    public isInverseMatchMode: boolean = false;
     protected ctx: vscode.ExtensionContext;
     protected readonly historyCommand: HistoryCommand;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
     private currentMatchRule: string = ''
     protected isRipgrepSeachMode = false;
+    currentButtonOptions: {
+        enableRegexMode: boolean,
+        enableIgnoreCaseMode: boolean,
+        enableInvertMatchMode: boolean,
+    }
 
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
         this.historyCommand = new HistoryCommand(this.ctx);
+        this.currentButtonOptions = {
+            enableIgnoreCaseMode: this.getIgnoreCaseMode(),
+            enableInvertMatchMode: false,
+            enableRegexMode: false,
+        }
     }
 
     protected isDisplayFilenamesWhenFilterDir(): boolean {
@@ -39,11 +48,28 @@ class FilterLineBase{
         return vscode.workspace.getConfiguration('filter-line').get('enableSingleSeachBoxMode', false);
     }
 
+    protected setIgnoreCaseMode(enable: boolean) {
+        this.ctx.globalState.update("enableIgnoreCase", enable);
+    }
+
+    protected getIgnoreCaseMode(): boolean {
+        return this.ctx.globalState.get("enableIgnoreCase", false);
+    }
+
     protected getHistoryMaxSize(): number {
         return this.historyCommand.getHistoryMaxSizeConfig();
     }
     
-    protected async showHistoryPick(key: string, title: string, description: string) : Promise<string> {
+    protected async showHistoryPick(
+        key: string,
+        title: string,
+        description: string,
+        options: {
+            enableRegexMode: boolean,
+            enableIgnoreCaseMode: boolean,
+            enableInvertMatchMode: boolean,
+        }
+    ): Promise<string> {
         let history = this.historyCommand.getHistory(key)
         console.log(`History: ${JSON.stringify(history)}`);
 
@@ -60,11 +86,68 @@ class FilterLineBase{
             iconPath: new vscode.ThemeIcon('close'),
             tooltip: 'Close QuickPick',
         };
-        quickPick.buttons = [closeButton]
+        const enableIngoreCaseButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('preserve-case'),
+            tooltip: 'Disable CaseSensitive mode',
+        };
+        const disableIngoreCaseButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('case-sensitive'),
+            tooltip: 'Enable CaseSensitive mode',
+        };
+        const enableRegexButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('regex'),
+            tooltip: 'Enable Regex mode',
+        };
+        const disableRegexButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('symbol-string'),
+            tooltip: 'disable Regex mode',
+        };
+        const enableInvertMatchButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('issue-draft'),
+            tooltip: 'Enable InvertMatch mode',
+        };
+        const disableInvertMatchButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('target'),
+            tooltip: 'Disable InvertMatch mode',
+        };
+
+        quickPick.buttons = [
+            options.enableInvertMatchMode ? enableInvertMatchButton : disableInvertMatchButton,
+            options.enableIgnoreCaseMode ? enableIngoreCaseButton : disableIngoreCaseButton,
+            options.enableRegexMode ? enableRegexButton : disableRegexButton,
+            closeButton
+        ];
         quickPick.onDidTriggerButton(button => {
+            if (button === enableIngoreCaseButton) {
+                options.enableIgnoreCaseMode = false
+                this.setIgnoreCaseMode(false);
+            }
+            if (button === disableIngoreCaseButton) {
+                options.enableIgnoreCaseMode = true
+                this.setIgnoreCaseMode(true);
+            }
+            if (button === enableRegexButton) {
+                options.enableRegexMode = false;
+            }
+            if (button === disableRegexButton) {
+                options.enableRegexMode = true;
+            }
+            if (button === enableInvertMatchButton) {
+                options.enableInvertMatchMode = false;
+            }
+            if (button === disableInvertMatchButton) {
+                options.enableInvertMatchMode = true;
+            }
             if (button === closeButton) {
                 quickPick.hide();
             }
+            // select buttons
+            quickPick.buttons = [
+                options.enableInvertMatchMode ? enableInvertMatchButton : disableInvertMatchButton,
+                options.enableIgnoreCaseMode ? enableIngoreCaseButton : disableIngoreCaseButton,
+                options.enableRegexMode ? enableRegexButton : disableRegexButton,
+                closeButton
+            ];
         });
 
         // add items and button event
@@ -108,6 +191,9 @@ class FilterLineBase{
             quickPick.items = filterHistoryPacks;
         });
 
+        // get lastInputValue or SelectionValue
+        let defaultInput = this.ctx.globalState.get("lastInputValue", "");
+
         // await input complie
         let usrChoice: string = await new Promise((resolve) => {
             quickPick.onDidAccept(() => {
@@ -125,10 +211,11 @@ class FilterLineBase{
             });
             // show quickPick
             quickPick.show()
-            quickPick.value = this.ctx.globalState.get("lastInputValue", "");
+            quickPick.value = defaultInput;
         });
         
         this.currentMatchRule = (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice
+        this.currentButtonOptions = options
         return this.currentMatchRule;
     }
 
@@ -244,7 +331,7 @@ class FilterLineBase{
         }
 
         // match mode
-        const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
+        const matchModeSymbol = this.currentButtonOptions.enableInvertMatchMode ? "➖" : "➕"
         const fileName = getValiadFileName(this.currentMatchRule);
         let outputPath = createCacheResultFileUri(matchModeSymbol + fileName);
         fs.writeFileSync(outputPath, '');
@@ -332,7 +419,7 @@ class FilterLineBase{
         const userInputText = await this.awaitUserInput()
         if(userInputText && userInputText !== '') {
             const isFsModeSymbol = !checkRipgrep() ? "(Fs)" : ""
-            const matchModeSymbol = this.isInverseMatchMode ? "➖" : "➕"
+            const matchModeSymbol = this.currentButtonOptions.enableInvertMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,

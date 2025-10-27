@@ -105,26 +105,30 @@ export function activate(context: vscode.ExtensionContext) {
 
     let disposable_inputstring = vscode.commands.registerCommand('extension.filterLineByInputString', async (path) => {
         let filter = new FilterLineByInputString(context);
+        filter.currentButtonOptions.enableRegexMode = false;
         await filter.filter(path);
         context.subscriptions.push(filter);
     });
 
     let disposable_inputregex = vscode.commands.registerCommand('extension.filterLineByInputRegex', async (path) => {
         let filter = new FilterLineByInputRegex(context);
+        filter.currentButtonOptions.enableRegexMode = true;
         await filter.filter(path);
         context.subscriptions.push(filter);
     });
 
     let disposable_notcontaininputstring = vscode.commands.registerCommand('extension.filterLineByNotContainInputString', async (path) => {
         let filter = new FilterLineByInputString(context);
-        filter.isInverseMatchMode = true;
+        filter.currentButtonOptions.enableInvertMatchMode = true;
+        filter.currentButtonOptions.enableRegexMode = false;
         await filter.filter(path);
         context.subscriptions.push(filter);
     });
 
     let disposable_notmatchinputregex = vscode.commands.registerCommand('extension.filterLineByNotMatchInputRegex', async (path) => {
         let filter = new FilterLineByInputRegex(context);
-        filter.isInverseMatchMode = true;
+        filter.currentButtonOptions.enableInvertMatchMode = true;
+        filter.currentButtonOptions.enableRegexMode = true;
         await filter.filter(path);
         context.subscriptions.push(filter);
     });

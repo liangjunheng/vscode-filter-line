@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
-import {checkRegexByRipgrep, checkRipgrep, searchRegexByRipgrep} from './ripgex_util';
+import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './ripgex_util';
 
 class FilterLineByInputRegex extends FilterLineBase{
     private _regex?: RegExp;
@@ -25,10 +25,18 @@ class FilterLineByInputRegex extends FilterLineBase{
         console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
 
         let title = "filter to lines machting(regex)"
-        if(this.isInverseMatchMode) {
+        if(this.currentButtonOptions.enableInvertMatchMode) {
             title = "filter to lines not machting(regex)"
         }
-        let usrChoice: string = await this.showHistoryPick(this.HIST_KEY, title, "please input...");
+        let usrChoice: string = await this.showHistoryPick(
+            this.HIST_KEY,
+            title, "please input...",
+            {
+                enableRegexMode: true,
+                enableIgnoreCaseMode: this.getIgnoreCaseMode(),
+                enableInvertMatchMode: this.currentButtonOptions.enableInvertMatchMode,
+            }
+        );
         if (usrChoice === this.NEW_PATTERN_CHOISE) {
             usrChoice = await vscode.window.showInputBox() ?? ''
         }
@@ -60,14 +68,15 @@ class FilterLineByInputRegex extends FilterLineBase{
     }
 
     protected override matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
-        const result = searchRegexByRipgrep(
+        const result = searchByRipgrep(
             inputPath,
             outputPath,
             pattern,
             {
-                matchSelf: this.isEnableStringMatchInRegex(),
-                inverseMatch: this.isInverseMatchMode,
-                smartCase: this.isEnableSmartCase(),
+                matchRegexSelf: this.isEnableStringMatchInRegex(),
+                isRegexMode: this.currentButtonOptions.enableRegexMode,
+                inverseMatch: this.currentButtonOptions.enableInvertMatchMode,
+                ignoreCase: this.currentButtonOptions.enableIgnoreCaseMode,
                 showFilename: this.isDisplayFilenamesWhenFilterDir(),
             }
         );
@@ -98,7 +107,7 @@ class FilterLineByInputRegex extends FilterLineBase{
         if(this._regex === undefined){
             return undefined;
         }
-        if(this.isInverseMatchMode){
+        if(this.currentButtonOptions.enableInvertMatchMode){
             // string match
             if(this.isEnableStringMatchInRegexMode && line.indexOf(this._rawRegexString) !== -1){
                 // matched, return null

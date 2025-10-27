@@ -195,3 +195,54 @@ export function searchRegexByRipgrep(
     console.log(`searchByRegex, cmd-output: ${result.status}`);
     return result;
 }
+
+/***
+ * 
+*/
+export function searchByRipgrep(
+    inputFilePath: string,
+    outputFilePath: string,
+    pattern: string,
+    options: {
+        isRegexMode: boolean,
+        matchRegexSelf: boolean,
+        inverseMatch: boolean,
+        ignoreCase: boolean,
+        showFilename: boolean
+    } = {
+            isRegexMode: false,
+            ignoreCase: false,
+            inverseMatch: false,
+            matchRegexSelf: false,
+            showFilename: false,
+        }
+): SpawnSyncReturns<Buffer> {
+    // build args
+    let args = [
+        escapePath(inputFilePath),
+        '>', escapePath(outputFilePath),
+    ]
+    const patternFilePath = ceatePatternFile(pattern, options.matchRegexSelf);
+    args = ['-f', escapePath(patternFilePath), ...args];
+
+    // ignorecase
+    if (options.ignoreCase) {
+        args = ['--ignore-case', ...args];
+    }
+    // inverse match
+    if (options.inverseMatch) {
+        args = ['--invert-match', ...args];
+    }
+    if (!options.isRegexMode) {
+        args = ['--fixed-strings', ...args]
+    }
+    if(options.showFilename && fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {
+        args = ['--heading', ...args]
+    } else {
+        args = ['--no-filename', ...args]
+    }
+    const result = ripgrep(args);
+    deleteCachePatternFileUri(patternFilePath)
+    console.log(`searchByRegex, cmd-output: ${result.status}`);
+    return result;
+}
