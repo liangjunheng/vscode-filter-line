@@ -122,6 +122,15 @@ function searchRegexByFs(
     )
 }
 
+export function checkRegexByFs(pattern: string): Boolean {
+    try {
+        new RegExp(pattern);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 export function searchByFs(
     inputPath: string,
     outputPath: string,

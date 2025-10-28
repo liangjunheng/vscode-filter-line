@@ -2,8 +2,8 @@
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
 import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './search_ripgex_util';
-import { isEnableStringMatchInRegex, getIgnoreCaseMode, isDisplayFilenamesWhenFilterDir } from './config_manager';
-import { searchByFs } from './search_classic_utils';
+import { isEnableStringMatchInRegex, isDisplayFilenamesWhenFilterDir } from './config_manager';
+import { checkRegexByFs, searchByFs } from './search_classic_utils';
 
 class FilterLineByInputCompat extends FilterLineBase{
     private readonly HIST_KEY = 'inputRegex';
@@ -53,7 +53,7 @@ class FilterLineByInputCompat extends FilterLineBase{
                 return;
             }
         } else {
-            if (!this.checkRegexByFs(userInputText)) {
+            if (this.currentSearchOptions.enableRegexMode && !checkRegexByFs(userInputText)) {
                 this.showError('checkRegexByFs incorrect: ' + userInputText);
                 return;
             }
@@ -63,7 +63,15 @@ class FilterLineByInputCompat extends FilterLineBase{
     }
 
     protected override search(inputFilePath: string, outputFilePath: string, pattern: string) {
-        if(checkRipgrep()) {
+        if(this.currentSearchOptions.enableRegexMode) {
+            this.searchByRegex(inputFilePath, outputFilePath, pattern);
+        } else {
+            this.searchByString(inputFilePath, outputFilePath, pattern);
+        }
+    }
+
+    private searchByRegex(inputFilePath: string, outputFilePath: string, pattern: string) {
+        if (checkRipgrep()) {
             const result = searchByRipgrep(
                 inputFilePath,
                 outputFilePath,
@@ -76,7 +84,7 @@ class FilterLineByInputCompat extends FilterLineBase{
                     showFilename: isDisplayFilenamesWhenFilterDir(),
                 }
             );
-            if(result.stderr.length > 0) {
+            if (result.stderr.length > 0) {
                 vscode.window.showErrorMessage('filter incorrect: ' + result.stderr, 'Failure');
             }
             return result;
@@ -96,36 +104,37 @@ class FilterLineByInputCompat extends FilterLineBase{
         }
     }
 
-    protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
-        const result = searchByRipgrep(
-            inputPath,
-            outputPath,
-            pattern,
-            {
-                matchRegexSelf: isEnableStringMatchInRegex(),
-                regexMode: this.currentSearchOptions.enableRegexMode,
-                invertMatchMode: this.currentSearchOptions.enableInvertMatchMode,
-                ignoreCaseMode: this.currentSearchOptions.enableIgnoreCaseMode,
-                showFilename: isDisplayFilenamesWhenFilterDir(),
+    private searchByString(inputFilePath: string, outputFilePath: string, pattern: string) {
+        if (checkRipgrep()) {
+            const result = searchByRipgrep(
+                inputFilePath,
+                outputFilePath,
+                pattern,
+                {
+                    matchRegexSelf: isEnableStringMatchInRegex(),
+                    regexMode: this.currentSearchOptions.enableRegexMode,
+                    invertMatchMode: this.currentSearchOptions.enableInvertMatchMode,
+                    ignoreCaseMode: this.currentSearchOptions.enableIgnoreCaseMode,
+                    showFilename: isDisplayFilenamesWhenFilterDir(),
+                }
+            );
+            if (result.stderr.length > 0) {
+                vscode.window.showErrorMessage('filter incorrect: ' + result.stderr, 'Failure');
             }
-        );
-        if(result.stderr.length > 0) {
-            vscode.window.showErrorMessage('filter incorrect: ' + result.stderr, 'Failure');
-        }
-        return result;
-    }
-
-    private checkRegexByFs(pattern: string): Boolean {
-        try {
-            if (getIgnoreCaseMode()) {
-                new RegExp(pattern, 'i');
-            } else {
-                new RegExp(pattern);
-            }
-            return true;
-        } catch (e) {
-            this.showError('Regex incorrect :' + e);
-            return false;
+            return result;
+        } else {
+            const result = searchByFs(
+                inputFilePath,
+                outputFilePath,
+                pattern,
+                {
+                    matchRegexSelf: isEnableStringMatchInRegex(),
+                    regexMode: this.currentSearchOptions.enableRegexMode,
+                    invertMatchMode: this.currentSearchOptions.enableInvertMatchMode,
+                    ignoreCaseMode: this.currentSearchOptions.enableIgnoreCaseMode,
+                }
+            )
+            return result;
         }
     }
 

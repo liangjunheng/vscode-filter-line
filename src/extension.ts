@@ -2,8 +2,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {FilterLineByInputString} from './filter_inputstring';
-import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrep } from './search_ripgex_util';
@@ -54,11 +52,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const filters: Array<Filters> = [
-            {label: 'Input Regex', command: 'extension.filterLineByInputRegex'},
-            {label: 'Input String', command: 'extension.filterLineByInputString'},
-            {label: 'Not Match Input Regex', command: 'extension.filterLineByNotMatchInputRegex'},
-            {label: 'Not Contain Input String', command: 'extension.filterLineByNotContainInputString'},
-            {label: 'Config File', command: 'extension.filterLineByConfigFile'}];
+            {label: 'Match Pattern', command: 'extension.filterLineByInput'},
+            {label: 'Not Match Pattern', command: 'extension.filterLineByNotMatchInput'},
+            {label: 'Config File', command: 'extension.filterLineByConfigFile'}
+        ];
 
         const choices: vscode.QuickPickItem[] = filters.map(item => Object.create({label: item.label}));
         let choice: string | vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(choices);
@@ -88,11 +85,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const filters: Array<Filters> = [
-            {label: 'Input Regex', command: 'extension.filterLineByInputRegex'},
-            {label: 'Input String', command: 'extension.filterLineByInputString'},
-            {label: 'Not Match Input Regex', command: 'extension.filterLineByNotMatchInputRegex'},
-            {label: 'Not Contain Input String', command: 'extension.filterLineByNotContainInputString'},
-            {label: 'Config File', command: 'extension.filterLineByConfigFile'}];
+            {label: 'Match Pattern', command: 'extension.filterLineByInput'},
+            {label: 'Not Match Pattern', command: 'extension.filterLineByNotMatchInput'},
+            {label: 'Config File', command: 'extension.filterLineByConfigFile'}
+        ];
 
         const choices: vscode.QuickPickItem[] = filters.map(item => Object.create({label: item.label}));
         let choice: string | vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(choices);
@@ -119,37 +115,6 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(filter);
     });
 
-
-    let disposable_inputstring = vscode.commands.registerCommand('extension.filterLineByInputString', async (path) => {
-        let filter = new FilterLineByInputString(context);
-        filter.currentSearchOptions.enableRegexMode = false;
-        await filter.filter(path);
-        context.subscriptions.push(filter);
-    });
-
-    let disposable_inputregex = vscode.commands.registerCommand('extension.filterLineByInputRegex', async (path) => {
-        let filter = new FilterLineByInputRegex(context);
-        filter.currentSearchOptions.enableRegexMode = true;
-        await filter.filter(path);
-        context.subscriptions.push(filter);
-    });
-
-    let disposable_notcontaininputstring = vscode.commands.registerCommand('extension.filterLineByNotContainInputString', async (path) => {
-        let filter = new FilterLineByInputString(context);
-        filter.currentSearchOptions.enableInvertMatchMode = true;
-        filter.currentSearchOptions.enableRegexMode = false;
-        await filter.filter(path);
-        context.subscriptions.push(filter);
-    });
-
-    let disposable_notmatchinputregex = vscode.commands.registerCommand('extension.filterLineByNotMatchInputRegex', async (path) => {
-        let filter = new FilterLineByInputRegex(context);
-        filter.currentSearchOptions.enableInvertMatchMode = true;
-        filter.currentSearchOptions.enableRegexMode = true;
-        await filter.filter(path);
-        context.subscriptions.push(filter);
-    });
-
     let disposable_configfile = vscode.commands.registerCommand('extension.filterLineByConfigFile', async (path) => {
         let filter = new FilterLineByConfigFile(context);
         await filter.filter(path);
@@ -160,10 +125,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable_filterby);
     context.subscriptions.push(disposable_input);
     context.subscriptions.push(disposable_notmatchinput);
-    context.subscriptions.push(disposable_inputstring);
-    context.subscriptions.push(disposable_inputregex);
-    context.subscriptions.push(disposable_notcontaininputstring);
-    context.subscriptions.push(disposable_notmatchinputregex);
     context.subscriptions.push(disposable_configfile);
 }
 

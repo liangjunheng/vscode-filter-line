@@ -16,15 +16,7 @@
         "onStartupFinished",
         "onFileSystem:filter-line-pro",
         "onLanguage:FilterLinePro",
-        "onLanguage:plaintext",
-        "onCommand:extension.filterLineByInput",
-        "onCommand:extension.filterLineByNotMatchInput",
-        "onCommand:extension.filterLineByInputString",
-        "onCommand:extension.filterLineByInputRegex",
-        "onCommand:extension.filterLineByNotContainInputString",
-        "onCommand:extension.filterLineByNotMatchInputRegex",
-        "onCommand:extension.filterLineByConfigFile",
-        "onCommand:extension.filterLineBy"
+        "onLanguage:plaintext"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -42,22 +34,6 @@
             {
                 "command": "extension.filterLineByNotMatchInput",
                 "title": "Filter Line By Not Match Input"
-            },
-            {
-                "command": "extension.filterLineByInputString",
-                "title": "Filter Line By Input String"
-            },
-            {
-                "command": "extension.filterLineByInputRegex",
-                "title": "Filter Line By Input Regex"
-            },
-            {
-                "command": "extension.filterLineByNotContainInputString",
-                "title": "Filter Line By Not Contain Input String"
-            },
-            {
-                "command": "extension.filterLineByNotMatchInputRegex",
-                "title": "Filter Line By Not Match Input Regex"
             },
             {
                 "command": "extension.filterLineByConfigFile",
