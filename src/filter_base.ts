@@ -8,7 +8,7 @@ import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheResultFileUri} from './file_manager';
 import {checkRipgrep} from './search_ripgex_util';
-import { getIgnoreCaseMode, setIgnoreCaseMode, isSingleSeachBoxMode, setRegexMode, setInvertMatchMode } from './config_manager';
+import { getIgnoreCaseMode, setIgnoreCaseMode, isSingleSeachBoxMode, setRegexMode, setInvertMatchMode, getInvertMatchMode, getRegexMode } from './config_manager';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
@@ -26,8 +26,8 @@ class FilterLineBase{
         this.historyCommand = new HistoryCommand(this.ctx);
         this.currentSearchOptions = {
             enableIgnoreCaseMode: getIgnoreCaseMode(),
-            enableInvertMatchMode: false,
-            enableRegexMode: false,
+            enableInvertMatchMode: getInvertMatchMode(),
+            enableRegexMode: getRegexMode(),
         }
     }
 

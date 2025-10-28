@@ -7,6 +7,7 @@ import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrep } from './search_ripgex_util';
+import { FilterLineByInputCompat } from './filter_inputregex_compat';
 
 export let ctx: vscode.ExtensionContext;
 
@@ -103,6 +104,22 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand(filters.filter(val => val.label === choice)[0].command, path);
     });
 
+    let disposable_input = vscode.commands.registerCommand('extension.filterLineByInput', async (path) => {
+        let filter = new FilterLineByInputCompat(context);
+        filter.currentSearchOptions.enableInvertMatchMode = false;
+        await filter.filter(path);
+        context.subscriptions.push(filter);
+    });
+
+
+    let disposable_notmatchinput = vscode.commands.registerCommand('extension.filterLineByNotMatchInput', async (path) => {
+        let filter = new FilterLineByInputCompat(context);
+        filter.currentSearchOptions.enableInvertMatchMode = true;
+        await filter.filter(path);
+        context.subscriptions.push(filter);
+    });
+
+
     let disposable_inputstring = vscode.commands.registerCommand('extension.filterLineByInputString', async (path) => {
         let filter = new FilterLineByInputString(context);
         filter.currentSearchOptions.enableRegexMode = false;
@@ -141,6 +158,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(disposable_filterFromDirby);
     context.subscriptions.push(disposable_filterby);
+    context.subscriptions.push(disposable_input);
+    context.subscriptions.push(disposable_notmatchinput);
     context.subscriptions.push(disposable_inputstring);
     context.subscriptions.push(disposable_inputregex);
     context.subscriptions.push(disposable_notcontaininputstring);

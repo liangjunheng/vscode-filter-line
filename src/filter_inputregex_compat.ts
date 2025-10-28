@@ -2,10 +2,10 @@
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
 import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './search_ripgex_util';
-import { isEnableStringMatchInRegex, getIgnoreCaseMode, isDisplayFilenamesWhenFilterDir } from './config_manager';
+import { isEnableStringMatchInRegex, getIgnoreCaseMode, isDisplayFilenamesWhenFilterDir, getRegexMode } from './config_manager';
 import { searchByFs } from './search_classic_utils';
 
-class FilterLineByInputRegex extends FilterLineBase{
+class FilterLineByInputCompat extends FilterLineBase{
     private readonly HIST_KEY = 'inputRegex';
     private isEnableStringMatchInRegexMode = false;
 
@@ -23,17 +23,14 @@ class FilterLineByInputRegex extends FilterLineBase{
         // Match the regular expression pattern itself
         this.isEnableStringMatchInRegexMode = isEnableStringMatchInRegex()
         console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
-
-        let title = "filter to lines machting(regex)"
-        if(this.currentSearchOptions.enableInvertMatchMode) {
-            title = "filter to lines not machting(regex)"
-        }
+        let title = "filter to lines machting"
         let usrChoice: string = await this.showHistoryPick(
             this.HIST_KEY,
-            title, "please input...",
+            title, 
+            "please input...",
             {
-                enableRegexMode: true,
-                enableIgnoreCaseMode: getIgnoreCaseMode(),
+                enableRegexMode: this.currentSearchOptions.enableRegexMode,
+                enableIgnoreCaseMode: this.currentSearchOptions.enableIgnoreCaseMode,
                 enableInvertMatchMode: this.currentSearchOptions.enableInvertMatchMode,
             }
         );
@@ -136,4 +133,4 @@ class FilterLineByInputRegex extends FilterLineBase{
     }
 }
 
-export { FilterLineByInputRegex};
+export { FilterLineByInputCompat };

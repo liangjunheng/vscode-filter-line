@@ -5,10 +5,6 @@ export function isDisplayFilenamesWhenFilterDir(): boolean {
     return vscode.workspace.getConfiguration('filter-line').get('displayFilenamesWhenFilterDir', true);
 }
 
-export function isEnableSmartCase(): boolean {
-    return vscode.workspace.getConfiguration('filter-line').get('enableSmartCase', true);
-}
-
 export function isEnableStringMatchInRegex(): boolean {
     return vscode.workspace.getConfiguration('filter-line').get('enableStringMatchInRegex', true);
 }

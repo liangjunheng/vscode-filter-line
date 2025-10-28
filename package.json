@@ -17,6 +17,8 @@
         "onFileSystem:filter-line-pro",
         "onLanguage:FilterLinePro",
         "onLanguage:plaintext",
+        "onCommand:extension.filterLineByInput",
+        "onCommand:extension.filterLineByNotMatchInput",
         "onCommand:extension.filterLineByInputString",
         "onCommand:extension.filterLineByInputRegex",
         "onCommand:extension.filterLineByNotContainInputString",
@@ -33,6 +35,14 @@
             }
         ],
         "commands": [
+            {
+                "command": "extension.filterLineByInput",
+                "title": "Filter Line By Input"
+            },
+            {
+                "command": "extension.filterLineByNotMatchInput",
+                "title": "Filter Line By Not Match Input"
+            },
             {
                 "command": "extension.filterLineByInputString",
                 "title": "Filter Line By Input String"
@@ -64,13 +74,13 @@
         ],    
         "keybindings": [
             {
-                "command": "extension.filterLineByInputRegex",
+                "command": "extension.filterLineByInput",
                 "key": "alt+f",
                 "mac": "alt+f",
                 "when": "editorTextFocus"
             },
             {
-                "command": "extension.filterLineByNotMatchInputRegex",
+                "command": "extension.filterLineByNotMatchInput",
                 "key": "alt+shift+f",
                 "mac": "alt+shift+f",
                 "when": "editorTextFocus"
@@ -131,12 +141,6 @@
                     "default": true,
                     "scope": "application",
                     "description": "Display filenames when filtering a directory"
-                },
-                "filter-line.enableSmartCase": {
-                    "type": "boolean",
-                    "default": true,
-                    "scope": "application",
-                    "description": "ignore case when all lowercase"
                 },
                 "filter-line.enableStringMatchInRegex": {
                     "type": "boolean",
