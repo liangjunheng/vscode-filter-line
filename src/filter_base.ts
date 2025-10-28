@@ -4,11 +4,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import {getValiadFileName, canOpenFileSafely} from './util';
+import * as commonUtil from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheResultFileUri} from './file_manager';
 import {checkRipgrep} from './search_ripgex_util';
-import { getIgnoreCaseMode, setIgnoreCaseMode, isSingleSeachBoxMode, setRegexMode, setInvertMatchMode, getInvertMatchMode, getRegexMode } from './config_manager';
+import * as configManager from './config_manager';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
@@ -25,9 +25,9 @@ class FilterLineBase{
         this.ctx = context;
         this.historyCommand = new HistoryCommand(this.ctx);
         this.currentSearchOptions = {
-            enableIgnoreCaseMode: getIgnoreCaseMode(),
-            enableInvertMatchMode: getInvertMatchMode(),
-            enableRegexMode: getRegexMode(),
+            enableIgnoreCaseMode: configManager.getIgnoreCaseMode(),
+            enableInvertMatchMode: configManager.getInvertMatchMode(),
+            enableRegexMode: configManager.getRegexMode(),
         }
     }
 
@@ -91,27 +91,27 @@ class FilterLineBase{
         quickPick.onDidTriggerButton(button => {
             if (button === enableIngoreCaseButton) {
                 options.enableIgnoreCaseMode = false
-                setIgnoreCaseMode(false);
+                configManager.setIgnoreCaseMode(false);
             }
             if (button === disableIngoreCaseButton) {
                 options.enableIgnoreCaseMode = true
-                setIgnoreCaseMode(true);
+                configManager.setIgnoreCaseMode(true);
             }
             if (button === enableRegexButton) {
                 options.enableRegexMode = false;
-                setRegexMode(false);
+                configManager.setRegexMode(false);
             }
             if (button === disableRegexButton) {
                 options.enableRegexMode = true;
-                setRegexMode(true);
+                configManager.setRegexMode(true);
             }
             if (button === enableInvertMatchButton) {
                 options.enableInvertMatchMode = false;
-                setInvertMatchMode(false);
+                configManager.setInvertMatchMode(false);
             }
             if (button === disableInvertMatchButton) {
                 options.enableInvertMatchMode = true;
-                setInvertMatchMode(true);
+                configManager.setInvertMatchMode(true);
             }
             if (button === closeButton) {
                 quickPick.hide();
@@ -310,7 +310,7 @@ class FilterLineBase{
 
         // match mode
         const matchModeSymbol = this.currentSearchOptions.enableInvertMatchMode ? "➖" : "➕"
-        const fileName = getValiadFileName(this.currentMatchPattern);
+        const fileName = commonUtil.getValiadFileName(this.currentMatchPattern);
         let outputPath = createCacheResultFileUri(matchModeSymbol + fileName);
         fs.writeFileSync(outputPath, '');
 
@@ -321,12 +321,12 @@ class FilterLineBase{
         await this.search(inputPath, outputPath, this.currentMatchPattern)
 
         // open filter result
-        if (canOpenFileSafely(outputPath, { safetyFactor: 2 })) {
-            console.log('isSingleSeachBoxMode: ' + isSingleSeachBoxMode ? 'on' : 'off');
+        if (commonUtil.canOpenFileSafely(outputPath, { safetyFactor: 2 })) {
+            console.log('isSingleSeachBoxMode: ' + configManager.isSingleSeachBoxMode() ? 'on' : 'off');
             await vscode.commands.executeCommand(
                 'vscode.open',
                 vscode.Uri.parse(encodeURIComponent(outputPath)),
-                { preview: isSingleSeachBoxMode() }
+                { preview: configManager.isSingleSeachBoxMode() }
             );
         } else {
             vscode.window.showErrorMessage(
