@@ -9,6 +9,7 @@ import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheResultFileUri} from './file_manager';
 import {checkRipgrep} from './ripgex_util';
+import { getIgnoreCaseMode, setIgnoreCaseMode, isSingleSeachBoxMode } from './config_manager';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
@@ -26,40 +27,12 @@ class FilterLineBase{
         this.ctx = context;
         this.historyCommand = new HistoryCommand(this.ctx);
         this.currentButtonOptions = {
-            enableIgnoreCaseMode: this.getIgnoreCaseMode(),
+            enableIgnoreCaseMode: getIgnoreCaseMode(),
             enableInvertMatchMode: false,
             enableRegexMode: false,
         }
     }
 
-    protected isDisplayFilenamesWhenFilterDir(): boolean {
-        return vscode.workspace.getConfiguration('filter-line').get('displayFilenamesWhenFilterDir', true);
-    }
-
-    protected isEnableSmartCase(): boolean {
-        return vscode.workspace.getConfiguration('filter-line').get('enableSmartCase', true);
-    }
-
-    protected isEnableStringMatchInRegex(): boolean {
-        return vscode.workspace.getConfiguration('filter-line').get('enableStringMatchInRegex', true);
-    }
-
-    protected isSingleSeachBoxMode(): boolean {
-        return vscode.workspace.getConfiguration('filter-line').get('enableSingleSeachBoxMode', false);
-    }
-
-    protected setIgnoreCaseMode(enable: boolean) {
-        this.ctx.globalState.update("enableIgnoreCase", enable);
-    }
-
-    protected getIgnoreCaseMode(): boolean {
-        return this.ctx.globalState.get("enableIgnoreCase", false);
-    }
-
-    protected getHistoryMaxSize(): number {
-        return this.historyCommand.getHistoryMaxSizeConfig();
-    }
-    
     protected async showHistoryPick(
         key: string,
         title: string,
@@ -120,11 +93,11 @@ class FilterLineBase{
         quickPick.onDidTriggerButton(button => {
             if (button === enableIngoreCaseButton) {
                 options.enableIgnoreCaseMode = false
-                this.setIgnoreCaseMode(false);
+                setIgnoreCaseMode(false);
             }
             if (button === disableIngoreCaseButton) {
                 options.enableIgnoreCaseMode = true
-                this.setIgnoreCaseMode(true);
+                setIgnoreCaseMode(true);
             }
             if (button === enableRegexButton) {
                 options.enableRegexMode = false;
@@ -346,12 +319,11 @@ class FilterLineBase{
            await this.outputMatchLineByFs(inputPath, outputPath)
         }
         if (canOpenFileSafely(outputPath, { safetyFactor: 2 })) {
-            const isSingleSeachBoxMode = this.isSingleSeachBoxMode()
-            console.log('isSingleSeachBoxMode: ' + this.isSingleSeachBoxMode ? 'on' : 'off');
+            console.log('isSingleSeachBoxMode: ' + isSingleSeachBoxMode ? 'on' : 'off');
             await vscode.commands.executeCommand(
                 'vscode.open',
                 vscode.Uri.parse(encodeURIComponent(outputPath)),
-                { preview: isSingleSeachBoxMode }
+                { preview: isSingleSeachBoxMode() }
             );
         } else {
             vscode.window.showErrorMessage(

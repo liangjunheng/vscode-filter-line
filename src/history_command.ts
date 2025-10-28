@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { getHistoryMaxSizeConfig } from './config_manager';
 
 class HistoryCommand {
     private mHistory: any;
@@ -7,10 +8,6 @@ class HistoryCommand {
     constructor(ctx: vscode.ExtensionContext) {
         this.ctx = ctx
         this.mHistory = ctx.globalState.get('history', {});
-    }
-
-    getHistoryMaxSizeConfig(): number {
-        return vscode.workspace.getConfiguration('filter-line').get('historySize', 30);
     }
 
     getHistory(key: string): string[] {
@@ -33,7 +30,7 @@ class HistoryCommand {
             return
         }
 
-        const maxSz = this.getHistoryMaxSizeConfig();
+        const maxSz = getHistoryMaxSizeConfig();
         if (this.mHistory[key].length >= maxSz) {
             for (let i = this.mHistory[key].length; i > maxSz - 1; i--) {
                 this.mHistory[key].pop();

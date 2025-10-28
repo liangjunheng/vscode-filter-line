@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
 import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './ripgex_util';
+import { isEnableStringMatchInRegex, getIgnoreCaseMode, isDisplayFilenamesWhenFilterDir, isEnableSmartCase } from './config_manager';
 
 class FilterLineByInputRegex extends FilterLineBase{
     private _regex?: RegExp;
@@ -21,7 +22,7 @@ class FilterLineByInputRegex extends FilterLineBase{
 
     protected override async awaitUserInput(): Promise<string> {
         // Match the regular expression pattern itself
-        this.isEnableStringMatchInRegexMode = this.isEnableStringMatchInRegex()
+        this.isEnableStringMatchInRegexMode = isEnableStringMatchInRegex()
         console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
 
         let title = "filter to lines machting(regex)"
@@ -33,7 +34,7 @@ class FilterLineByInputRegex extends FilterLineBase{
             title, "please input...",
             {
                 enableRegexMode: true,
-                enableIgnoreCaseMode: this.getIgnoreCaseMode(),
+                enableIgnoreCaseMode: getIgnoreCaseMode(),
                 enableInvertMatchMode: this.currentButtonOptions.enableInvertMatchMode,
             }
         );
@@ -73,11 +74,11 @@ class FilterLineByInputRegex extends FilterLineBase{
             outputPath,
             pattern,
             {
-                matchRegexSelf: this.isEnableStringMatchInRegex(),
+                matchRegexSelf: isEnableStringMatchInRegex(),
                 isRegexMode: this.currentButtonOptions.enableRegexMode,
                 inverseMatch: this.currentButtonOptions.enableInvertMatchMode,
                 ignoreCase: this.currentButtonOptions.enableIgnoreCaseMode,
-                showFilename: this.isDisplayFilenamesWhenFilterDir(),
+                showFilename: isDisplayFilenamesWhenFilterDir(),
             }
         );
         if(result.stderr.length > 0) {
@@ -97,7 +98,7 @@ class FilterLineByInputRegex extends FilterLineBase{
     }
     private makeRegexByFs(pattern: string) {
         this._rawRegexString = pattern
-        if (this.isEnableSmartCase() && !/[A-Z]/.test(pattern)) {
+        if (isEnableSmartCase() && !/[A-Z]/.test(pattern)) {
             this._regex = new RegExp(pattern, 'i');
         } else {
             this._regex = new RegExp(pattern);

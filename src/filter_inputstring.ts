@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import { FilterLineBase } from './filter_base';
 import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './ripgex_util';
+import { isDisplayFilenamesWhenFilterDir } from './config_manager';
 
 class FilterLineByInputString extends FilterLineBase{
     private _inputstring?: string;
@@ -62,7 +63,7 @@ class FilterLineByInputString extends FilterLineBase{
                 matchRegexSelf: false,
                 inverseMatch: this.currentButtonOptions.enableInvertMatchMode,
                 ignoreCase: this.currentButtonOptions.enableIgnoreCaseMode,
-                showFilename: this.isDisplayFilenamesWhenFilterDir(),
+                showFilename: isDisplayFilenamesWhenFilterDir(),
             }
         );
         if (result.stderr.length > 0) {
