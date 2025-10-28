@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheResultFileUri} from './file_manager';
-import {checkRipgrep} from './ripgex_util';
+import {checkRipgrep} from './search_ripgex_util';
 import { getIgnoreCaseMode, setIgnoreCaseMode, isSingleSeachBoxMode } from './config_manager';
 
 class FilterLineBase{

@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
-import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './ripgex_util';
+import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './search_ripgex_util';
 import { isEnableStringMatchInRegex, getIgnoreCaseMode, isDisplayFilenamesWhenFilterDir, isEnableSmartCase } from './config_manager';
 
 class FilterLineByInputRegex extends FilterLineBase{

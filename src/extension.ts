@@ -6,7 +6,7 @@ import {FilterLineByInputString} from './filter_inputstring';
 import {FilterLineByInputRegex} from './filter_inputregex';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
-import { checkRipgrep } from './ripgex_util';
+import { checkRipgrep } from './search_ripgex_util';
 
 export let ctx: vscode.ExtensionContext;
 
