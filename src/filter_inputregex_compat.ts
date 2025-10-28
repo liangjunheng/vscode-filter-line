@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
 import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './search_ripgex_util';
-import { isEnableStringMatchInRegex, getIgnoreCaseMode, isDisplayFilenamesWhenFilterDir, getRegexMode } from './config_manager';
+import { isEnableStringMatchInRegex, getIgnoreCaseMode, isDisplayFilenamesWhenFilterDir } from './config_manager';
 import { searchByFs } from './search_classic_utils';
 
 class FilterLineByInputCompat extends FilterLineBase{
