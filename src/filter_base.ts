@@ -168,7 +168,10 @@ class FilterLineBase{
 
         // get lastInputValue or SelectionValue
         let defaultInput = this.ctx.globalState.get("lastInputValue", "");
-
+        // if (defaultInput === "") {
+        //     defaultInput = await copySelectionText();
+        // }
+        
         // await input complie
         let usrChoice: string = await new Promise((resolve) => {
             quickPick.onDidAccept(() => {

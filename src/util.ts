@@ -3,30 +3,53 @@
 import * as v8 from 'v8';
 import * as fs from 'fs';
 import * as os from 'os';
+import * as vscode from 'vscode';
 
-function padWithBlank(str:string, length:number){
-    if(str.length > length){
+async function copySelectionText() {
+    const config = vscode.workspace.getConfiguration('editor');
+    const currentClipboardConfig = config.get('emptySelectionClipboard', false);
+    await config.update('emptySelectionClipboard', false, vscode.ConfigurationTarget.Global);
+    const currentClipboardText = await vscode.env.clipboard.readText();
+    await vscode.env.clipboard.writeText("");
+    await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
+    const clipboardText = await vscode.env.clipboard.readText();
+    await config.update('emptySelectionClipboard', currentClipboardConfig, vscode.ConfigurationTarget.Global);
+    await vscode.env.clipboard.writeText(currentClipboardText);
+    return clipboardText
+}
+
+async function copyCurrentLine() {
+    const currentClipboardText = await vscode.env.clipboard.readText();
+    await vscode.commands.executeCommand('expandLineSelection');
+    await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
+    const clipboardText = await vscode.env.clipboard.readText();
+    await vscode.env.clipboard.writeText(currentClipboardText);
+    return clipboardText
+}
+
+function padWithBlank(str: string, length: number) {
+    if (str.length > length) {
         return str;
     }
-    let pad:string = '';
-    for(let i=0;i<length - str.length;i++){
-        pad+=' ';
+    let pad: string = '';
+    for (let i = 0; i < length - str.length; i++) {
+        pad += ' ';
     }
-    
+
     return pad + str;
 }
 
-function readJsonFile(filePath: string): any | undefined{
+function readJsonFile(filePath: string): any | undefined {
     var fs = require('fs');
     var content = fs.readFileSync(filePath);
     // console.log('content : ' + content);
-    if(!content){
+    if (!content) {
         return undefined;
     }
-    try{
+    try {
         var json = JSON.parse(content);
         return json;
-    }catch(e){
+    } catch (e) {
         console.log('json parse error : ' + e);
     }
     return undefined;
@@ -84,4 +107,4 @@ function canOpenFileSafely(
 }
 
 
-export {padWithBlank, readJsonFile, debounce, getValiadFileName, canOpenFileSafely};
+export { padWithBlank, readJsonFile, debounce, getValiadFileName, canOpenFileSafely, copySelectionText, copyCurrentLine };
