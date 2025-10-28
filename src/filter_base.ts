@@ -61,27 +61,27 @@ class FilterLineBase{
         };
         const enableIngoreCaseButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('preserve-case'),
-            tooltip: 'Disable CaseSensitive mode',
+            tooltip: 'CaseSensitive Mode',
         };
         const disableIngoreCaseButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('case-sensitive'),
-            tooltip: 'Enable CaseSensitive mode',
+            tooltip: 'IgnoreCase Mode',
         };
         const enableRegexButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('regex'),
-            tooltip: 'Enable Regex mode',
+            tooltip: 'Regex Mode',
         };
         const disableRegexButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('symbol-string'),
-            tooltip: 'disable Regex mode',
+            tooltip: 'String Mode',
         };
         const enableInvertMatchButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('issue-draft'),
-            tooltip: 'Enable InvertMatch mode',
+            tooltip: 'InvertMatch Mode',
         };
         const disableInvertMatchButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('target'),
-            tooltip: 'Disable InvertMatch mode',
+            tooltip: 'NormalMatch Mode',
         };
 
         quickPick.buttons = [
