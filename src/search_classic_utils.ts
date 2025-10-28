@@ -38,24 +38,24 @@ function outputMatchLineByFs(inputPath: string, outputPath: string, onFilterLine
 function searchStringByFs(
     inputPath: string,
     outputPath: string,
-    matchString: string,
+    pattern: string,
     options: {
         ignoreCaseMode: boolean,
         invertMatchMode: boolean,
     }
 ) {
-    if (matchString === undefined) {
+    if (pattern === undefined) {
         return undefined;
     }
-    let newMatchString = options.ignoreCaseMode ? matchString.toLowerCase() : matchString
+    let newPattern = options.ignoreCaseMode ? pattern.toLowerCase() : pattern
     const onFilterLineOp = (line: string) => {
         let newLine = options.ignoreCaseMode ? line.toLowerCase() : line
         if (options.invertMatchMode) {
-            if (newLine.indexOf(newMatchString) === -1) {
+            if (newLine.indexOf(newPattern) === -1) {
                 return line;
             }
         } else {
-            if (newLine.indexOf(newMatchString) !== -1) {
+            if (newLine.indexOf(newPattern) !== -1) {
                 return line;
             }
         }
@@ -125,7 +125,7 @@ function searchRegexByFs(
 export function searchByFs(
     inputPath: string,
     outputPath: string,
-    regex: string,
+    pattern: string,
     options: {
         regexMode: boolean,
         matchRegexSelf: boolean,
@@ -137,7 +137,7 @@ export function searchByFs(
         searchRegexByFs(
             inputPath,
             outputPath,
-            regex,
+            pattern,
             {
                 matchRegexSelf: options.matchRegexSelf,
                 ignoreCaseMode: options.ignoreCaseMode,
@@ -148,7 +148,7 @@ export function searchByFs(
         searchStringByFs(
             inputPath,
             outputPath,
-            regex,
+            pattern,
             {
                 ignoreCaseMode: options.ignoreCaseMode,
                 invertMatchMode: options.invertMatchMode,

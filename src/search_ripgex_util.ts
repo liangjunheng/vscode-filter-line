@@ -134,7 +134,11 @@ export function searchStringByRipgrep(
     inputFilePath: string,
     outputFilePath: string,
     pattern: string,
-    options: { inverseMatch: boolean, smartCase: boolean, showFilename: boolean } = { inverseMatch: false, smartCase: false, showFilename: false }
+    options: { 
+        invertMatchMode: boolean,
+        ignoreCaseMode: boolean,
+        showFilename: boolean,
+    }
 ): SpawnSyncReturns<Buffer> {
     let args = [
         escapePath(inputFilePath),
@@ -143,10 +147,10 @@ export function searchStringByRipgrep(
     const patternFilePath = ceatePatternFile(pattern);
     args = ['--fixed-strings', '-f', escapePath(patternFilePath), ...args];
 
-    if (options.smartCase) {
-        args = ['--smart-case', ...args]
+    if (options.ignoreCaseMode) {
+        args = ['--ignore-case', ...args]
     }
-    if (options.inverseMatch) {
+    if (options.invertMatchMode) {
         args = ['--invert-match', ...args]
     }
     if(options.showFilename && fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {
@@ -167,22 +171,27 @@ export function searchRegexByRipgrep(
     inputFilePath: string,
     outputFilePath: string,
     pattern: string,
-    options: { matchSelf: boolean, inverseMatch: boolean, smartCase: boolean, showFilename: boolean } = { matchSelf: false, inverseMatch: false, smartCase: false, showFilename: false }
+    options: { 
+        matchRegexSelf: boolean,
+        invertMatchMode: boolean,
+        ignoreCaseMode: boolean,
+        showFilename: boolean,
+    }
 ): SpawnSyncReturns<Buffer> {
     // build args
     let args = [
         escapePath(inputFilePath),
         '>', escapePath(outputFilePath),
     ]
-    const patternFilePath = ceatePatternFile(pattern, options.matchSelf);
+    const patternFilePath = ceatePatternFile(pattern, options.matchRegexSelf);
     args = ['-f', escapePath(patternFilePath), ...args];
 
     // ignorecase
-    if (options.smartCase) {
-        args = ['--smart-case', ...args];
+    if (options.ignoreCaseMode) {
+        args = ['--ignore-case', ...args];
     }
     // inverse match
-    if (options.inverseMatch) {
+    if (options.invertMatchMode) {
         args = ['--invert-match', ...args];
     }
     if(options.showFilename && fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {
@@ -204,15 +213,15 @@ export function searchByRipgrep(
     outputFilePath: string,
     pattern: string,
     options: {
-        isRegexMode: boolean,
+        regexMode: boolean,
         matchRegexSelf: boolean,
-        inverseMatch: boolean,
-        ignoreCase: boolean,
+        invertMatchMode: boolean,
+        ignoreCaseMode: boolean,
         showFilename: boolean
     } = {
-            isRegexMode: false,
-            ignoreCase: false,
-            inverseMatch: false,
+            regexMode: false,
+            ignoreCaseMode: false,
+            invertMatchMode: false,
             matchRegexSelf: false,
             showFilename: false,
         }
@@ -226,14 +235,14 @@ export function searchByRipgrep(
     args = ['-f', escapePath(patternFilePath), ...args];
 
     // ignorecase
-    if (options.ignoreCase) {
+    if (options.ignoreCaseMode) {
         args = ['--ignore-case', ...args];
     }
     // inverse match
-    if (options.inverseMatch) {
+    if (options.invertMatchMode) {
         args = ['--invert-match', ...args];
     }
-    if (!options.isRegexMode) {
+    if (!options.regexMode) {
         args = ['--fixed-strings', ...args]
     }
     if(options.showFilename && fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {

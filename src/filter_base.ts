@@ -2,22 +2,20 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as readline from 'readline';
 import * as path from 'path';
 import * as fs from 'fs';
 import {getValiadFileName, canOpenFileSafely} from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheResultFileUri} from './file_manager';
 import {checkRipgrep} from './search_ripgex_util';
-import { getIgnoreCaseMode, setIgnoreCaseMode, isSingleSeachBoxMode } from './config_manager';
+import { getIgnoreCaseMode, setIgnoreCaseMode, isSingleSeachBoxMode, setRegexMode, setInvertMatchMode } from './config_manager';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
     protected readonly historyCommand: HistoryCommand;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
-    private currentMatchRule: string = ''
-    protected isRipgrepSeachMode = false;
-    currentButtonOptions: {
+    private currentMatchPattern: string = ''
+    currentSearchOptions: {
         enableRegexMode: boolean,
         enableIgnoreCaseMode: boolean,
         enableInvertMatchMode: boolean,
@@ -26,7 +24,7 @@ class FilterLineBase{
     constructor(context: vscode.ExtensionContext) {
         this.ctx = context;
         this.historyCommand = new HistoryCommand(this.ctx);
-        this.currentButtonOptions = {
+        this.currentSearchOptions = {
             enableIgnoreCaseMode: getIgnoreCaseMode(),
             enableInvertMatchMode: false,
             enableRegexMode: false,
@@ -60,12 +58,12 @@ class FilterLineBase{
             tooltip: 'Close QuickPick',
         };
         const enableIngoreCaseButton: vscode.QuickInputButton = {
-            iconPath: new vscode.ThemeIcon('preserve-case'),
-            tooltip: 'CaseSensitive Mode',
-        };
-        const disableIngoreCaseButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('case-sensitive'),
             tooltip: 'IgnoreCase Mode',
+        };
+        const disableIngoreCaseButton: vscode.QuickInputButton = {
+            iconPath: new vscode.ThemeIcon('preserve-case'),
+            tooltip: 'CaseSensitive Mode',
         };
         const enableRegexButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('regex'),
@@ -101,15 +99,19 @@ class FilterLineBase{
             }
             if (button === enableRegexButton) {
                 options.enableRegexMode = false;
+                setRegexMode(false);
             }
             if (button === disableRegexButton) {
                 options.enableRegexMode = true;
+                setRegexMode(true);
             }
             if (button === enableInvertMatchButton) {
                 options.enableInvertMatchMode = false;
+                setInvertMatchMode(false);
             }
             if (button === disableInvertMatchButton) {
                 options.enableInvertMatchMode = true;
+                setInvertMatchMode(true);
             }
             if (button === closeButton) {
                 quickPick.hide();
@@ -187,9 +189,9 @@ class FilterLineBase{
             quickPick.value = defaultInput;
         });
         
-        this.currentMatchRule = (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice
-        this.currentButtonOptions = options
-        return this.currentMatchRule;
+        this.currentMatchPattern = (usrChoice === undefined) ? this.NEW_PATTERN_CHOISE : usrChoice
+        this.currentSearchOptions = options
+        return this.currentMatchPattern;
     }
 
     protected showInfo(text: string){
@@ -304,20 +306,18 @@ class FilterLineBase{
         }
 
         // match mode
-        const matchModeSymbol = this.currentButtonOptions.enableInvertMatchMode ? "➖" : "➕"
-        const fileName = getValiadFileName(this.currentMatchRule);
+        const matchModeSymbol = this.currentSearchOptions.enableInvertMatchMode ? "➖" : "➕"
+        const fileName = getValiadFileName(this.currentMatchPattern);
         let outputPath = createCacheResultFileUri(matchModeSymbol + fileName);
         fs.writeFileSync(outputPath, '');
 
-        console.log('ripgrep mode: ' + ((this.isRipgrepSeachMode) ? 'on' : 'off'));
         console.log('input path: ' + inputPath);
         console.log('output path: ' + outputPath);
 
-        if(this.isRipgrepSeachMode) {
-           await this.outputMatchLineByRipgrep(inputPath, outputPath)
-        } else {
-           await this.outputMatchLineByFs(inputPath, outputPath)
-        }
+        // start filter line
+        await this.search(inputPath, outputPath, this.currentMatchPattern)
+
+        // open filter result
         if (canOpenFileSafely(outputPath, { safetyFactor: 2 })) {
             console.log('isSingleSeachBoxMode: ' + isSingleSeachBoxMode ? 'on' : 'off');
             await vscode.commands.executeCommand(
@@ -327,55 +327,14 @@ class FilterLineBase{
             );
         } else {
             vscode.window.showErrorMessage(
-                `error: Filter line failed due to low system memory. Tip: Add more filter rules, current rule: ${this.currentMatchRule}`,
+                `error: Filter line failed due to low system memory. Tip: Add more filter rules, current rule: ${this.currentMatchPattern}`,
                 `Failure`,
                 `Reason: Low memory`,
             );
         }
     }
 
-    private outputMatchLineByRipgrep(inputPath: string, outputPath: string): Promise<any> | any {
-       return this.matchLineByRipgrep(inputPath, outputPath, this.currentMatchRule)
-    }
-
-    protected matchLineByRipgrep(inputPath: string, outputPath: string, pattern: string): Promise<any> | any {
-    }
-
-    // matchlines, fallback plan
-    private outputMatchLineByFs(inputPath: string, outputPath: string): Promise<any> | any {
-        return new Promise<Boolean>((resolve) => {
-            // open write stream
-            const writeStream = fs.createWriteStream(outputPath);
-            // start match line
-            writeStream.on('open', () => {
-                console.log('write stream opened');
-                // open read stream
-                const readLineSteam = readline.createInterface({
-                    input: fs.createReadStream(inputPath)
-                });
-                // filter line by line
-                readLineSteam.on('line', (line: string) => {
-                    // console.log('line ', line);
-                    let fixedline = this.matchLineByFs(line);
-                    if (fixedline !== undefined) {
-                        writeStream.write(fixedline + '\n');
-                    }
-                }).on('close', () => {
-                    writeStream.end();
-                });
-            }).on('error', (e: Error) => {
-                console.log('can not open write stream : ' + e);
-                writeStream.destroy()
-                resolve(false);
-            }).on('close', () => {
-                console.log('closed');
-                resolve(true);
-            });
-        });
-    }
-
-    protected matchLineByFs(line: string): string | undefined{
-        return undefined;
+    protected search(inputFilePath: string, outputFilePath: string, pattern: string): Promise<any> | any {
     }
 
     protected awaitUserInput(): Promise<string> | string {
@@ -391,11 +350,11 @@ class FilterLineBase{
         const userInputText = await this.awaitUserInput()
         if(userInputText && userInputText !== '') {
             const isFsModeSymbol = !checkRipgrep() ? "(Fs)" : ""
-            const matchModeSymbol = this.currentButtonOptions.enableInvertMatchMode ? "➖" : "➕"
+            const matchModeSymbol = this.currentSearchOptions.enableInvertMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
-                    title: `Filtering by rule${isFsModeSymbol}: ${matchModeSymbol + this.currentMatchRule}`,
+                    title: `Filtering by rule${isFsModeSymbol}: ${matchModeSymbol + this.currentMatchPattern}`,
                     cancellable: false,
                 },
                 async (progress) => {
