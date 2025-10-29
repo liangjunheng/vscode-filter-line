@@ -19,25 +19,32 @@ export function getHistoryMaxSizeConfig(): number {
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
+export function setLastUserInput(text: string): Thenable<void> {
+   return ctx.globalState.update("lastInputValue", text);
+}
 
-export function setIgnoreCaseMode(enable: boolean) {
-    ctx.globalState.update("enableIgnoreCase", enable);
+export function getLastUserInput(): string {
+    return ctx.globalState.get("lastInputValue", '');
+}
+
+export function setIgnoreCaseMode(enable: boolean): Thenable<void> {
+    return ctx.globalState.update("enableIgnoreCase", enable);
 }
 
 export function getIgnoreCaseMode(): boolean {
     return ctx.globalState.get("enableIgnoreCase", false);
 }
 
-export function setRegexMode(enable: boolean) {
-    ctx.globalState.update("enableRegexMode", enable);
+export function setRegexMode(enable: boolean): Thenable<void> {
+    return ctx.globalState.update("enableRegexMode", enable);
 }
 
 export function getRegexMode(): boolean {
     return ctx.globalState.get("enableRegexMode", false);
 }
 
-export function setInvertMatchMode(enable: boolean) {
-    ctx.globalState.update("enableInvertMatchMode", enable);
+export function setInvertMatchMode(enable: boolean): Thenable<void> {
+    return ctx.globalState.update("enableInvertMatchMode", enable);
 }
 
 export function getInvertMatchMode(): boolean {

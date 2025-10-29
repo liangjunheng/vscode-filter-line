@@ -158,7 +158,7 @@ class FilterLineBase{
         // When the user inputs new content into the QuickPick input box
         quickPick.onDidChangeValue((value: string) => {
             console.log("onDidChangeValue, user inputing:", value);
-            this.ctx.globalState.update("lastInputValue", value);
+            configManager.setLastUserInput(value);
             
             let filterHistoryPacks = picks
                 .filter(h => h.includes(value) && h !== value)
@@ -170,7 +170,7 @@ class FilterLineBase{
         });
 
         // get lastInputValue or SelectionValue
-        let defaultInput = this.ctx.globalState.get("lastInputValue", "");
+        let defaultInput = configManager.getLastUserInput();
         // if (defaultInput === "") {
         //     defaultInput = await copySelectionText();
         // }
@@ -178,7 +178,7 @@ class FilterLineBase{
         // await input complie
         let usrChoice: string = await new Promise((resolve) => {
             quickPick.onDidAccept(() => {
-                this.ctx.globalState.update("lastInputValue", "");
+                configManager.setLastUserInput("");
                 const selection = quickPick.selectedItems[0];
                 const finalValue = selection ? selection.label : quickPick.value;
                 console.log("user input result:", finalValue);
