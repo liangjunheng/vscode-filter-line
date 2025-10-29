@@ -6,6 +6,7 @@ import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrep } from './search_ripgex_util';
 import { FilterLineByInputCompat } from './filter_inputregex_compat';
+import { copyCurrentLine } from './util';
 
 export let ctx: vscode.ExtensionContext;
 
@@ -121,11 +122,19 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(filter);
     });
 
+    let disposable_jumptosource = vscode.commands.registerCommand('extension.jumpToSource', async (path) => {
+        const currentLine = await copyCurrentLine();
+        console.log(`currentLine: ${currentLine}`);
+        let filter = new FilterLineByConfigFile(context);
+        context.subscriptions.push(filter);
+    });
+
     context.subscriptions.push(disposable_filterFromDirby);
     context.subscriptions.push(disposable_filterby);
     context.subscriptions.push(disposable_input);
     context.subscriptions.push(disposable_notmatchinput);
     context.subscriptions.push(disposable_configfile);
+    context.subscriptions.push(disposable_jumptosource);
 }
 
 // this method is called when your extension is deactivated

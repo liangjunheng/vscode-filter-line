@@ -28,27 +28,43 @@
         ],
         "commands": [
             {
+                "command": "extension.jumpToSource",
+                "title": "Jump to Source",
+                "category": "FilterLinePro"
+            },
+            {
                 "command": "extension.filterLineByInput",
-                "title": "Filter Line By Input"
+                "title": "Filter Line By Input",
+                "category": "FilterLinePro"
             },
             {
                 "command": "extension.filterLineByNotMatchInput",
-                "title": "Filter Line By Not Match Input"
+                "title": "Filter Line By Not Match Input",
+                "category": "FilterLinePro"
             },
             {
                 "command": "extension.filterLineByConfigFile",
-                "title": "Filter Line By Config File"
+                "title": "Filter Line By Config File",
+                "category": "FilterLinePro"
             },
             {
                 "command": "extension.filterLineBy",
-                "title": "📄Filter Line By..."
+                "title": "📄Filter Line By...",
+                "category": "FilterLinePro"
             },
             {
                 "command": "extension.filterLineFromDirBy",
-                "title": "📁Filter Line By..."
+                "title": "📁Filter Line By...",
+                "category": "FilterLinePro"
             }
         ],    
         "keybindings": [
+            {
+                "command": "extension.jumpToSource",
+                "key": "f12",
+                "mac": "f12",
+                "when": "editorTextFocus && editorLangId=='FilterLinePro'"
+            },
             {
                 "command": "extension.filterLineByInput",
                 "key": "alt+f",
