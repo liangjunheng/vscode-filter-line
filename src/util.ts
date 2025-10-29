@@ -6,24 +6,28 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 
 async function copySelectionText() {
+    const startMillis = Date.now();
+    const currentClipboardText = await vscode.env.clipboard.readText();
+    await vscode.env.clipboard.writeText("");
     const config = vscode.workspace.getConfiguration('editor');
     const currentClipboardConfig = config.get('emptySelectionClipboard', false);
     await config.update('emptySelectionClipboard', false, vscode.ConfigurationTarget.Global);
-    const currentClipboardText = await vscode.env.clipboard.readText();
-    await vscode.env.clipboard.writeText("");
     await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
-    const clipboardText = await vscode.env.clipboard.readText();
     await config.update('emptySelectionClipboard', currentClipboardConfig, vscode.ConfigurationTarget.Global);
+    const clipboardText = await vscode.env.clipboard.readText();
     await vscode.env.clipboard.writeText(currentClipboardText);
+    console.log(`copySelectionText, spend: ${Date.now() - startMillis}, text: ${clipboardText}`);
     return clipboardText
 }
 
 async function copyCurrentLine() {
+    const startMillis = Date.now();
     const currentClipboardText = await vscode.env.clipboard.readText();
     await vscode.commands.executeCommand('expandLineSelection');
     await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
     const clipboardText = await vscode.env.clipboard.readText();
     await vscode.env.clipboard.writeText(currentClipboardText);
+    console.log(`copyCurrentLine, spend: ${Date.now() - startMillis}, text: ${clipboardText}`);
     return clipboardText
 }
 
