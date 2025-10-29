@@ -41,12 +41,8 @@ class FilterLineBase{
             enableInvertMatchMode: boolean,
         }
     ): Promise<string> {
-        let history = this.historyCommand.getHistory(key)
-        console.log(`History: ${JSON.stringify(history)}`);
-
         // create QuickPick
         const quickPick = vscode.window.createQuickPick();
-        let picks: Array<string> = [...history];
         // quickPick.ignoreFocusOut = true;
         quickPick.title = title;
         quickPick.placeholder = description;
@@ -125,7 +121,12 @@ class FilterLineBase{
             ];
         });
 
-        // add items and button event
+        // get histroy
+        let history = this.historyCommand.getHistory(key);
+        let picks: Array<string> = [...history];
+        console.log(`History: ${JSON.stringify(history)}`);
+
+        // create items button event
         const itemChooseButton: vscode.QuickInputButton = {
             iconPath: new vscode.ThemeIcon('reply'),
             tooltip: 'Choose',
@@ -134,6 +135,8 @@ class FilterLineBase{
             iconPath: new vscode.ThemeIcon('trash'),
             tooltip: 'Delete',
         };
+        
+        // onItemClickEvent
         quickPick.onDidTriggerItemButton(e => {
             console.log("onDidTriggerItemButton:", `click: ${e.button.tooltip}：${e.item.label}`);
             if (e.button.tooltip === "Choose") {
