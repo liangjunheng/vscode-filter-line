@@ -7,28 +7,19 @@ import * as vscode from 'vscode';
 
 async function copySelectionText() {
     const startMillis = Date.now();
-    const currentClipboardText = await vscode.env.clipboard.readText();
-    await vscode.env.clipboard.writeText("");
-    const config = vscode.workspace.getConfiguration('editor');
-    const currentClipboardConfig = config.get('emptySelectionClipboard', false);
-    await config.update('emptySelectionClipboard', false, vscode.ConfigurationTarget.Global);
     await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
-    await config.update('emptySelectionClipboard', currentClipboardConfig, vscode.ConfigurationTarget.Global);
     const clipboardText = await vscode.env.clipboard.readText();
-    await vscode.env.clipboard.writeText(currentClipboardText);
     console.log(`copySelectionText, spend: ${Date.now() - startMillis}, text: ${clipboardText}`);
     return clipboardText
 }
 
-async function copyCurrentLine() {
+async function copyCurrentLine(canncelSelection: boolean = false) {
     const startMillis = Date.now();
-    const currentClipboardText = await vscode.env.clipboard.readText();
+    await vscode.commands.executeCommand('cancelSelection');
+    await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
     await vscode.commands.executeCommand('cursorEnd');
     await vscode.commands.executeCommand('cursorHomeSelect');
-    await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
-    await vscode.commands.executeCommand('cancelSelection');
-    const clipboardText = await vscode.env.clipboard.readText();
-    await vscode.env.clipboard.writeText(currentClipboardText);
+    const clipboardText = (await vscode.env.clipboard.readText()).replace(/(\r?\n)$/, '');
     console.log(`copyCurrentLine, spend: ${Date.now() - startMillis}, text: ${clipboardText}`);
     return clipboardText
 }

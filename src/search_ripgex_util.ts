@@ -224,7 +224,8 @@ export function searchByRipgrep(
             invertMatchMode: false,
             matchRegexSelf: false,
             showFilename: false,
-        }
+        },
+    contextLine: number = 0,
 ): SpawnSyncReturns<Buffer> {
     // build args
     let args = [
@@ -249,6 +250,9 @@ export function searchByRipgrep(
         args = ['--heading', ...args]
     } else {
         args = ['--no-filename', ...args]
+    }
+    if(contextLine > 0) {
+        args = [`-C ${contextLine}`, ...args]
     }
     const result = ripgrep(args);
     deleteCachePatternFileUri(patternFilePath)

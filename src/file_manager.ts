@@ -20,6 +20,20 @@ function deleteCacheResultFileUri(resultFilePath: string) {
     vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(resultFilePath)), { recursive: true });
 }
 
+function getCacheResultContextDir(): string {
+    return path.join(ctx.globalStorageUri.fsPath, 'cache', 'context-search-result');
+}
+
+function createCacheResultContextFileUri(fileName: string): string {
+    const filePath = path.join(getCacheResultContextDir(), `context-${Date.now()}`, fileName + SEARCH_RESULT_EXT).trimEnd();
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    return filePath
+}
+
+function deleteCacheResultContextFileUri(resultFilePath: string) {
+    vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(resultFilePath)), { recursive: true });
+}
+
 function getCachePatternDir(): string {
     return path.join(ctx.globalStorageUri.fsPath, 'cache', 'riggrep-pattern');
 }
@@ -82,11 +96,12 @@ async function deleteInvalidCacheFile() {
  * remove .filterline files when a tab is closed.
  */
 async function deleteInvalidRealFileWhenCloseTab() {
+    const resultDir = vscode.Uri.parse(getCacheResultDir()).fsPath;
     vscode.window.tabGroups.onDidChangeTabs(({ closed }) => {
         closed.forEach(tab => {
             const uri = (tab.input as any)?.uri;
             console.log("deleteInvalidRealFileWhenCloseTab, uri: " + uri);
-            if (uri.toString().indexOf(ctx.extension.id) !== -1) {
+            if (uri.fsPath.indexOf(resultDir) !== -1) {
                 const realFilePath = uri.fsPath;
                 console.log("deleteInvalidRealFileWhenCloseTab, deleteRealFilePath: " + realFilePath);
                 vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(realFilePath)), { recursive: true });
@@ -113,5 +128,5 @@ async function clearCacheFiles() {
     // vscode.window.showTextDocument(vscode.Uri.parse(currentActiveTab))
 }
 
-export { SEARCH_RESULT_EXT, deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCachePatternFileUri, deleteCachePatternFileUri, createCacheResultFileUri, deleteCacheResultFileUri, deleteInvalidCacheFile }
+export { SEARCH_RESULT_EXT, deleteInvalidRealFileWhenCloseTab, clearCacheFiles, createCachePatternFileUri, deleteCachePatternFileUri, createCacheResultFileUri, deleteCacheResultFileUri, deleteInvalidCacheFile, createCacheResultContextFileUri, getCacheResultContextDir, deleteCacheResultContextFileUri }
 

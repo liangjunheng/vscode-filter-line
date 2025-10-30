@@ -2,11 +2,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrep } from './search_ripgex_util';
 import { FilterLineByInputCompat } from './filter_inputregex_compat';
-import { copyCurrentLine } from './util';
+import { closeResultContextPannel, ResultContextFinder } from './filter_result_context';
 
 export let ctx: vscode.ExtensionContext;
 
@@ -28,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
     addFileAssociationIfMissing()
 
     // delete invalid RealFile When Tab is Closed
+    closeResultContextPannel()
     deleteInvalidRealFileWhenCloseTab()
     deleteInvalidCacheFile()
 
@@ -122,11 +125,15 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(filter);
     });
 
-    let disposable_jumptosource = vscode.commands.registerCommand('extension.jumpToSource', async (path) => {
-        const currentLine = await copyCurrentLine();
-        console.log(`currentLine: ${currentLine}`);
-        let filter = new FilterLineByConfigFile(context);
-        context.subscriptions.push(filter);
+
+    let disposable_jumptosource = vscode.commands.registerCommand('extension.jumpToSource', async () => {
+        const resultContextFinder = new ResultContextFinder();
+        const tabUri = (vscode.window.tabGroups.activeTabGroup.activeTab?.input as any)?.uri
+        if (tabUri === undefined) {
+            return
+        }
+        await resultContextFinder.showContext(tabUri);
+        context.subscriptions.push(resultContextFinder);
     });
 
     context.subscriptions.push(disposable_filterFromDirby);
@@ -154,3 +161,4 @@ function addFileAssociationIfMissing() {
         config.update('files.associations', newFileAssociations, vscode.ConfigurationTarget.Global);
     }
 }
+

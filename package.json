@@ -29,7 +29,7 @@
         "commands": [
             {
                 "command": "extension.jumpToSource",
-                "title": "Jump to Source",
+                "title": "📄Jump to Source",
                 "category": "FilterLinePro"
             },
             {
@@ -94,6 +94,11 @@
                 {
                     "when": "!explorerResourceIsFolder",
                     "command": "extension.filterLineBy",
+                    "group": "4_filterLine@1"
+                },
+                {
+                    "when": "editorLangId=='FilterLinePro'",
+                    "command": "extension.jumpToSource",
                     "group": "4_filterLine@1"
                 }
             ],

@@ -315,6 +315,10 @@ class FilterLineBase{
         const matchModeSymbol = this.currentSearchOptions.enableInvertMatchMode ? "➖" : "➕"
         const fileName = commonUtil.getValiadFileName(this.currentMatchPattern);
         let outputPath = createCacheResultFileUri(matchModeSymbol + fileName);
+        let inputPathCacheFile = path.join(path.dirname(outputPath), `inputPath`);
+        console.error(`inputPathCacheFile: ${inputPathCacheFile}`)
+
+        fs.writeFileSync(inputPathCacheFile, inputPath);
         fs.writeFileSync(outputPath, '');
 
         console.log('input path: ' + inputPath);
