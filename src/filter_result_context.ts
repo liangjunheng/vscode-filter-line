@@ -17,7 +17,7 @@ setInterval(async () => {
     if (activeTab?.input instanceof vscode.TabInputText) {
         currentUri = activeTab.input.uri.toString();
     }
-    if (currentUri !== undefined && currentDocUri !== currentUri && bottomDocUri !== currentUri) {
+    if (currentUri !== undefined && bottomDocUri !== currentUri) {
         await closeResultContextPannel();
         currentDocUri = undefined;
         bottomDocUri = undefined;
@@ -60,7 +60,7 @@ export class ResultContextFinder {
         // close last pannel
         await closeResultContextPannel();
         // create context result file
-        const outputFile = createCacheResultContextFileUri("ResultContext");
+        const outputFile = createCacheResultContextFileUri("TargetContext");
         searchByRipgrep(
             sourcePath,
             outputFile,
@@ -95,7 +95,8 @@ export class ResultContextFinder {
         }
                 
         const highlightDecoration = vscode.window.createTextEditorDecorationType({
-            backgroundColor: 'rgba(255,255,0,0.3)',
+            color: 'red',
+            fontWeight: 'bold',
             isWholeLine: true
         });
         ctx.subscriptions.push(highlightDecoration);
