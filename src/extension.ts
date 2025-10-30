@@ -2,8 +2,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrep } from './search_ripgex_util';
