@@ -45,8 +45,8 @@ function getCurrentUri(): vscode.Uri | undefined {
     return currentDocUri
 }
 
-export class ResultContextFinder {
-    async showContext(tabUri: vscode.Uri) {
+export class TargetContextFinder {
+    async showTargetContext(tabUri: vscode.Uri) {
         const inputFilePath = path.join(path.dirname(tabUri.fsPath), "inputPath");
         console.log(`jumpToSource, inputFilePath: ${inputFilePath}`)
         const sourcePath = fs.readFileSync(inputFilePath, { encoding: 'utf8' })
@@ -106,7 +106,7 @@ export class ResultContextFinder {
         await vscode.commands.executeCommand('workbench.action.moveEditorToBelowGroup');
         await vscode.commands.executeCommand('workbench.action.focusBelowGroup');
         // 30% height
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 3; i++) {
             await vscode.commands.executeCommand('workbench.action.decreaseViewHeight');
         }
     }

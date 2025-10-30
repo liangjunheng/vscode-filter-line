@@ -48,17 +48,15 @@ function deleteCachePatternFileUri(patternFilePath: string) {
     vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(patternFilePath)), { recursive: true });
 }
 
-async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {
-    const fileList: string[] = [];
+async function getAllSubFolder(folderUri: vscode.Uri): Promise<string[]> {
+    const subDirList: string[] = [];
     async function walk(uri: vscode.Uri) {
         try {
             const entries = await vscode.workspace.fs.readDirectory(uri);
             for (const [name, fileType] of entries) {
                 const fullPath = vscode.Uri.joinPath(uri, name);
-                if (fileType === vscode.FileType.File) {
-                    fileList.push(fullPath.fsPath);
-                } else if (fileType === vscode.FileType.Directory) {
-                    await walk(fullPath);
+                if (fileType === vscode.FileType.Directory) {
+                    subDirList.push(fullPath.fsPath);
                 }
             }
         } catch (err) {
@@ -66,7 +64,7 @@ async function traverseFolder(folderUri: vscode.Uri): Promise<string[]> {
         }
     }
     await walk(folderUri);
-    return fileList;
+    return subDirList;
 }
 
 async function deleteInvalidCacheFile() {
@@ -78,16 +76,16 @@ async function deleteInvalidCacheFile() {
         for (const tab of group.tabs) {
             const input = tab.input;
             if (input instanceof vscode.TabInputText && input.uri.toString().indexOf(ctx.extension.id) !== -1) {
-                fsTabPathSet.add(input.uri.fsPath);
+                fsTabPathSet.add(path.dirname(input.uri.fsPath));
             }
         }
     }
 
-    const tmpFilePaths = await traverseFolder(vscode.Uri.file(getCacheResultDir()));
+    const tmpFilePaths = await getAllSubFolder(vscode.Uri.file(getCacheResultDir()));
     tmpFilePaths.forEach(filePath => {
         console.log(`tmpFilePaths path: ${filePath}, has: ${fsTabPathSet.has(filePath)}`);
         if (!fsTabPathSet.has(filePath)) {
-            vscode.workspace.fs.delete(vscode.Uri.file(path.dirname(filePath)), { recursive: true });
+            vscode.workspace.fs.delete(vscode.Uri.file(filePath), { recursive: true });
         }
     });
 }

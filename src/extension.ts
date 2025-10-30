@@ -6,7 +6,7 @@ import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrep } from './search_ripgex_util';
 import { FilterLineByInputCompat } from './filter_inputregex_compat';
-import { closeResultContextPannel, ResultContextFinder } from './filter_result_context';
+import { closeResultContextPannel, TargetContextFinder } from './filter_target_context';
 
 export let ctx: vscode.ExtensionContext;
 
@@ -125,13 +125,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     let disposable_jumptosource = vscode.commands.registerCommand('extension.jumpToSource', async () => {
-        const resultContextFinder = new ResultContextFinder();
+        const targetContextFinder = new TargetContextFinder();
         const tabUri = (vscode.window.tabGroups.activeTabGroup.activeTab?.input as any)?.uri
         if (tabUri === undefined) {
             return
         }
-        await resultContextFinder.showContext(tabUri);
-        context.subscriptions.push(resultContextFinder);
+        await targetContextFinder.showTargetContext(tabUri);
+        context.subscriptions.push(targetContextFinder);
     });
 
     context.subscriptions.push(disposable_filterFromDirby);
