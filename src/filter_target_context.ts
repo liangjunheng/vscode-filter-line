@@ -54,6 +54,10 @@ export class TargetContextFinder {
 
         // get current line
         const currentLine = await copyCurrentLine();
+        if(copyCurrentLine === undefined || currentLine.trim() === "") {
+            vscode.window.showErrorMessage(`Current line is empty. Unable to proceed.`, 'Failure')
+            return
+        }
         console.log(`sourcePath: ${sourcePath}, currentLine: ${currentLine}`);
 
         await vscode.workspace.fs.delete(vscode.Uri.file(getCacheResultContextDir()), { recursive: true });
