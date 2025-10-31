@@ -13,13 +13,16 @@ async function copySelectionText() {
     return clipboardText
 }
 
-async function copyCurrentLine(canncelSelection: boolean = false) {
+async function copyCurrentLine(needSelection: boolean = true) {
     const startMillis = Date.now();
     await vscode.commands.executeCommand('cancelSelection');
     await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
-    await vscode.commands.executeCommand('cursorEnd');
-    await vscode.commands.executeCommand('cursorHomeSelect');
+    if(needSelection) {
+        await vscode.commands.executeCommand('cursorEnd');
+        await vscode.commands.executeCommand('cursorHomeSelect');
+    }
     const clipboardText = (await vscode.env.clipboard.readText()).replace(/(\r?\n)$/, '');
+    await vscode.env.clipboard.writeText("");
     console.log(`copyCurrentLine, spend: ${Date.now() - startMillis}, text: ${clipboardText}`);
     return clipboardText
 }
