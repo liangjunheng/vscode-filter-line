@@ -65,7 +65,9 @@ export class TargetContextFinder {
         // close last pannel
         await closeResultContextPannel();
         // create context result file
-        const outputFile = createCacheResultContextFileUri("TargetContextLines");
+        const segments = path.dirname(sourcePath).split(path.sep); // 按路径分隔符切割成数组
+        const lastThire = segments.slice(-2).join('＞');
+        const outputFile = createCacheResultContextFileUri(`TargetContextLines@：${ "...＞" + lastThire + "＞" + path.basename(sourcePath)}`);
         searchByRipgrep(
             sourcePath,
             outputFile,

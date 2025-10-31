@@ -18,7 +18,7 @@ export function getHistoryMaxSizeConfig(): number {
 }
 
 export function getNumberOfTargetContextLines(): number {
-    return vscode.workspace.getConfiguration('filter-line').get('numberOfTargetContextLines', 300);
+    return vscode.workspace.getConfiguration('filter-line').get('numberOfTargetContextLines', 1000);
 }
 
 //////////////////////////////////////////////////////////////////////////
