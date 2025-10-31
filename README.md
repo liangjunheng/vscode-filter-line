@@ -3,35 +3,44 @@
 Filter line for current opening file by strings/regular expressions, generating the result in a new file.
 
 ## Usage
-1. Alt + F: filter to lines machting(regex)
-2. Alt + Shift + F： filter to lines not machting(regex)
+1. Alt + F: filter to lines machting
+2. Alt + Shift + F： filter to lines not machting
+2. F12：display surrounding lines of the selected target line
 3. More：
 
 ![list](img/commandlist.png)
 
 ## Features
 
-1. Filter line by input string (or not contain input string).
-2. Filter line by input regular expression (or not match input regular expression).
-3. Filter line by config file `filterline.json`(or `filterline.eoml`) in corresponding `.vscode` directory.
-4. Support large file filter
+1. Support large file filter
+2. Support folder filte line
+3. Filter line by input string (or not contain input string).
+4. Filter line by input regular expression (or not match input regular expression).
+5. Support showing context lines in the filter line view
+
+### Large file mode
+* Perfect support large file filter, but ensure the file is saved before proceeding.
+
+### Support folder filte line.
+![searchdir](img/searchdir.gif)
 
 ### Filter line by input string.
-
-1. Open command palette (⇧⌘p) and type `filterline`, select `Filter Line By Input String` in the list.
+1. Alt + F: filter to lines machting
 2. Type a string and hit `<Enter>`.
-3. The extension will output matching lines in a new file with postfix `.filterline.$(ext)` (e.g. `1.log` will generate file `1.log.filterline.log`).
 
 ![bystring](img/bystring.gif)
 
-
 ### Filter line by input regex.
-
-1. Open Command Palette (⇧⌘P) and type `FilterLine`, select `Filter Line By Input Regex` in the list.
+1. Alt + F: filter to lines machting
 2. Type a regular expression and hit `<Enter>`.
-3. The extension will output matching lines in a new file with postfix `.filterline.$(ext)` (e.g. `1.log` will generate file `1.log.filterline.log`).
 
 ![byregex](img/byregex.gif)
+
+### Support showing context lines in the filter line view.
+1. Line currently targeted for selection
+2. F12: Display surrounding lines of the selected target line
+
+![contextlines](img/contextlines.gif)
 
 ### Filter line by config file
 
@@ -40,9 +49,6 @@ Filter line for current opening file by strings/regular expressions, generating 
 3. Open command palette (⇧⌘p) and type `filterline`, select `Filter Line By Config File` in the list.
 
 ![byconfigfile](img/byconfigfile.gif)
-
-### Large file mode
-* Perfect support large file filter, but ensure the file is saved before proceeding.
 
 #### Config file type
 
