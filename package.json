@@ -84,8 +84,9 @@
                     "when": "!explorerResourceIsFolder",
                     "command": "extension.filterLineBy",
                     "group": "4_filterLine@1"
-                },{
-                    "when": "!explorerResourceIsFile",
+                },
+                {
+                    "when": "explorerResourceIsFolder",
                     "command": "extension.filterLineFromDirBy",
                     "group": "4_filterLine@1"
                 }
