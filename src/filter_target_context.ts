@@ -8,21 +8,20 @@ import { getNumberOfTargetContextLines } from './config_manager';
 
 let bottomDocUri: string | undefined;
 let currentDocUri: string | undefined;
-setInterval(async () => {
+vscode.window.onDidChangeActiveTextEditor(async (editor) => {
     if (currentDocUri === null || bottomDocUri === undefined) {
         return
     }
-    let currentUri: string | undefined;
     const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
-    if (activeTab?.input instanceof vscode.TabInputText) {
-        currentUri = activeTab.input.uri.toString();
-    }
+    const currentUri = (activeTab?.input as any)?.uri?.toString?.();
+    console.log(`onDidChangeActiveTextEditor, ${editor}， currentUri: ${currentUri}`)
     if (currentUri !== undefined && bottomDocUri !== currentUri) {
         await closeResultContextPannel();
         currentDocUri = undefined;
         bottomDocUri = undefined;
+        await vscode.commands.executeCommand('workbench.action.moveEditorToPreviousGroup');
     }
-}, 300);
+});
 
 export async function closeResultContextPannel() {
     const resultContextFsPath = vscode.Uri.parse(getCacheResultContextDir()).fsPath;
