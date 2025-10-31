@@ -28,8 +28,8 @@
         ],
         "commands": [
             {
-                "command": "extension.jumpToSource",
-                "title": "📄Jump to Source",
+                "command": "extension.showContextLines",
+                "title": "📄Show Context Lines",
                 "category": "FilterLinePro"
             },
             {
@@ -60,7 +60,7 @@
         ],    
         "keybindings": [
             {
-                "command": "extension.jumpToSource",
+                "command": "extension.showContextLines",
                 "key": "f12",
                 "mac": "f12",
                 "when": "editorTextFocus && editorLangId=='FilterLinePro'"
@@ -98,7 +98,7 @@
                 },
                 {
                     "when": "editorLangId=='FilterLinePro'",
-                    "command": "extension.jumpToSource",
+                    "command": "extension.showContextLines",
                     "group": "4_filterLine@1"
                 }
             ],

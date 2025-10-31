@@ -64,7 +64,7 @@ export class TargetContextFinder {
         // close last pannel
         await closeResultContextPannel();
         // create context result file
-        const outputFile = createCacheResultContextFileUri("TargetContext");
+        const outputFile = createCacheResultContextFileUri("TargetContextLines");
         searchByRipgrep(
             sourcePath,
             outputFile,
@@ -75,10 +75,15 @@ export class TargetContextFinder {
                 invertMatchMode: false,
                 showFilename: true,
                 ignoreCaseMode: false,
+                contextLineCount: 500,
             },
-            500,
         )
         console.log(`showContext, closeResultContextPannel end`)
+
+        if (fs.statSync(outputFile).size >= 50 * 1024 * 1024) {
+            vscode.window.showErrorMessage(`Too many target lines. Unable to proceed.`, 'Failure')
+            return
+        }
 
         // open context result
         currentDocUri = getCurrentUri()?.toString();

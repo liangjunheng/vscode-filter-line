@@ -124,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
 
-    let disposable_jumptosource = vscode.commands.registerCommand('extension.jumpToSource', async () => {
+    let disposable_showContextLines = vscode.commands.registerCommand('extension.showContextLines', async () => {
         const targetContextFinder = new TargetContextFinder();
         const tabUri = (vscode.window.tabGroups.activeTabGroup.activeTab?.input as any)?.uri
         if (tabUri === undefined) {
@@ -139,7 +139,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable_input);
     context.subscriptions.push(disposable_notmatchinput);
     context.subscriptions.push(disposable_configfile);
-    context.subscriptions.push(disposable_jumptosource);
+    context.subscriptions.push(disposable_showContextLines);
 }
 
 // this method is called when your extension is deactivated

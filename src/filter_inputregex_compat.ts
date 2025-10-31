@@ -82,6 +82,7 @@ class FilterLineByInputCompat extends FilterLineBase{
                     invertMatchMode: this.currentSearchOptions.enableInvertMatchMode,
                     ignoreCaseMode: this.currentSearchOptions.enableIgnoreCaseMode,
                     showFilename: isDisplayFilenamesWhenFilterDir(),
+                    contextLineCount: 0,
                 }
             );
             if (result.stderr.length > 0) {
@@ -116,6 +117,7 @@ class FilterLineByInputCompat extends FilterLineBase{
                     invertMatchMode: this.currentSearchOptions.enableInvertMatchMode,
                     ignoreCaseMode: this.currentSearchOptions.enableIgnoreCaseMode,
                     showFilename: isDisplayFilenamesWhenFilterDir(),
+                    contextLineCount: 0,
                 }
             );
             if (result.stderr.length > 0) {
