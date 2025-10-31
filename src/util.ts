@@ -22,7 +22,6 @@ async function copyCurrentLine(needSelection: boolean = true) {
         await vscode.commands.executeCommand('cursorHomeSelect');
     }
     const clipboardText = (await vscode.env.clipboard.readText()).replace(/(\r?\n)$/, '');
-    await vscode.env.clipboard.writeText("");
     console.log(`copyCurrentLine, spend: ${Date.now() - startMillis}, text: ${clipboardText}`);
     return clipboardText
 }
