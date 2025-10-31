@@ -95,25 +95,15 @@ export class TargetContextFinder {
         bottomDocUri = getCurrentUri()?.toString();
 
         const text = editor.document.getText();
-        const ranges: vscode.Range[] = [];
         let index = 0;
         while ((index = text.indexOf(currentLine, index)) !== -1) {
             const startPos = editor.document.positionAt(index);
             const line = editor.document.lineAt(startPos.line);
             editor.selection = new vscode.Selection(line.range.start, line.range.end);
             editor.revealRange(line.range, vscode.TextEditorRevealType.AtTop);
-            ranges.push(new vscode.Range(line.range.start, line.range.end));
             index += currentLine.length;
         }
-                
-        const highlightDecoration = vscode.window.createTextEditorDecorationType({
-            color: 'red',
-            fontWeight: 'bold',
-            isWholeLine: true
-        });
-        ctx.subscriptions.push(highlightDecoration);
-        editor.setDecorations(highlightDecoration, ranges);
-
+        
         // split bottom
         await vscode.commands.executeCommand('workbench.action.moveEditorToBelowGroup');
         await vscode.commands.executeCommand('workbench.action.focusBelowGroup');
@@ -121,6 +111,7 @@ export class TargetContextFinder {
         for (let i = 0; i < 3; i++) {
             await vscode.commands.executeCommand('workbench.action.decreaseViewHeight');
         }
+        await vscode.commands.executeCommand('actions.find');
     }
 
 
