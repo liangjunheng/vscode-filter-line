@@ -22,7 +22,7 @@ setInterval(async () => {
         currentDocUri = undefined;
         bottomDocUri = undefined;
     }
-}, 500);
+}, 300);
 
 export async function closeResultContextPannel() {
     const resultContextFsPath = vscode.Uri.parse(getCacheResultContextDir()).fsPath;
