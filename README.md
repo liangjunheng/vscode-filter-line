@@ -1,6 +1,7 @@
 # VSCode Extension Filter Line
 
 Filter line for current opening file by strings/regular expressions, generating the result in a new file.
+Commonly used for log analysis.
 
 ## Usage
 1. Alt + F: filter to lines machting
