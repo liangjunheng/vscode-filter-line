@@ -36,7 +36,7 @@ export function setIgnoreCaseMode(enable: boolean): Thenable<void> {
 }
 
 export function getIgnoreCaseMode(): boolean {
-    return ctx.globalState.get("enableIgnoreCase", false);
+    return ctx.globalState.get("enableIgnoreCase", true);
 }
 
 export function setRegexMode(enable: boolean): Thenable<void> {
@@ -44,7 +44,7 @@ export function setRegexMode(enable: boolean): Thenable<void> {
 }
 
 export function getRegexMode(): boolean {
-    return ctx.globalState.get("enableRegexMode", false);
+    return ctx.globalState.get("enableRegexMode", true);
 }
 
 export function setInvertMatchMode(enable: boolean): Thenable<void> {
