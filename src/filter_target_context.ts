@@ -4,7 +4,6 @@ import * as path from 'path';
 import { createCacheResultContextFileUri, getCacheResultContextDir } from './file_manager';
 import { copyCurrentLine } from './util';
 import { searchByRipgrep } from './search_ripgex_util';
-import { ctx } from './extension';
 import { getNumberOfTargetContextLines } from './config_manager';
 
 let bottomDocUri: string | undefined;
@@ -46,6 +45,12 @@ function getCurrentUri(): vscode.Uri | undefined {
     return currentDocUri
 }
 
+const highlightDecoration = vscode.window.createTextEditorDecorationType({
+    color: "yellow",
+    overviewRulerColor: "yellow",
+    overviewRulerLane: vscode.OverviewRulerLane.Full,
+    isWholeLine: true
+});
 export class TargetContextFinder {
     async showTargetContext(tabUri: vscode.Uri) {
         const inputFilePath = path.join(path.dirname(tabUri.fsPath), "inputPath");
@@ -91,19 +96,8 @@ export class TargetContextFinder {
         // open context result
         currentDocUri = getCurrentUri()?.toString();
         const doc = await vscode.workspace.openTextDocument(outputFile);
-        const editor = await vscode.window.showTextDocument(doc, vscode.ViewColumn.Active);
+        await vscode.window.showTextDocument(doc, vscode.ViewColumn.Active);
         bottomDocUri = getCurrentUri()?.toString();
-
-        const text = editor.document.getText();
-        let index = 0;
-        while ((index = text.indexOf(currentLine, index)) !== -1) {
-            const startPos = editor.document.positionAt(index);
-            const line = editor.document.lineAt(startPos.line);
-            editor.selection = new vscode.Selection(line.range.start, line.range.end);
-            editor.revealRange(line.range, vscode.TextEditorRevealType.AtTop);
-            index += currentLine.length;
-        }
-        
         // split bottom
         await vscode.commands.executeCommand('workbench.action.moveEditorToBelowGroup');
         await vscode.commands.executeCommand('workbench.action.focusBelowGroup');
@@ -111,7 +105,26 @@ export class TargetContextFinder {
         for (let i = 0; i < 3; i++) {
             await vscode.commands.executeCommand('workbench.action.decreaseViewHeight');
         }
+
+        const activeTextEditor = vscode.window.activeTextEditor;
+        if(activeTextEditor === undefined || activeTextEditor?.document.uri.fsPath.indexOf(vscode.Uri.parse(outputFile).fsPath) === -1) {
+            return
+        }
+        const ranges: vscode.Range[] = [];
+        for (let index = 0; index < activeTextEditor.document.lineCount; index++) {
+            const line = activeTextEditor.document.lineAt(index);
+            if(line.text !== currentLine) {
+                continue;
+            }
+            if(ranges.length == 0) {
+                activeTextEditor.selection = new vscode.Selection(line.range.start, line.range.end);
+                activeTextEditor.revealRange(line.range, vscode.TextEditorRevealType.AtTop);
+            }
+            ranges.push(new vscode.Range(line.range.start, line.range.end));
+        }
+        activeTextEditor.setDecorations(highlightDecoration, ranges);
         await vscode.commands.executeCommand('actions.find');
+        await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
     }
 
 
