@@ -144,6 +144,14 @@
                     "default": true,
                     "scope": "application",
                     "description": "matches the input string in regex mode"
+                },
+                "filter-line.numberOfTargetContextLines": {
+                    "type": "integer",
+                    "default": 300,
+                    "minimum": 1,
+                    "maximum": 5000,
+                    "scope": "application",
+                    "description": "The number of surrounding target context lines to use when creating new Search Editors."
                 }
             }
         }

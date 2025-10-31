@@ -17,6 +17,10 @@ export function getHistoryMaxSizeConfig(): number {
     return vscode.workspace.getConfiguration('filter-line').get('historySize', 30);
 }
 
+export function getNumberOfTargetContextLines(): number {
+    return vscode.workspace.getConfiguration('filter-line').get('numberOfTargetContextLines', 300);
+}
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 export function setLastUserInput(text: string): Thenable<void> {

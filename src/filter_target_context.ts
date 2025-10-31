@@ -5,6 +5,7 @@ import { createCacheResultContextFileUri, getCacheResultContextDir } from './fil
 import { copyCurrentLine } from './util';
 import { searchByRipgrep } from './search_ripgex_util';
 import { ctx } from './extension';
+import { getNumberOfTargetContextLines } from './config_manager';
 
 let bottomDocUri: string | undefined;
 let currentDocUri: string | undefined;
@@ -75,7 +76,7 @@ export class TargetContextFinder {
                 invertMatchMode: false,
                 showFilename: true,
                 ignoreCaseMode: false,
-                contextLineCount: 500,
+                contextLineCount: getNumberOfTargetContextLines(),
             },
         )
         console.log(`showContext, closeResultContextPannel end`)
