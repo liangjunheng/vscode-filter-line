@@ -3,6 +3,9 @@
 Filter line for current opening file by strings/regular expressions, generating the result in a new file.
 Commonly used for log analysis.
 
+### Dependencies
+- Add [ripgrep](https://github.com/BurntSushi/ripgrep) to your system PATH
+
 ## Usage
 1. Alt + F: filter to lines machting
 2. Alt + Shift + F： filter to lines not machting
