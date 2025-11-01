@@ -8,14 +8,14 @@ import { getNumberOfTargetContextLines } from './config_manager';
 
 let bottomDocUri: string | undefined;
 let currentDocUri: string | undefined;
-vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+vscode.window.tabGroups.onDidChangeTabs(async (event) => {
     if (currentDocUri === null || bottomDocUri === undefined) {
         return
     }
     const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
     const currentUri = (activeTab?.input as any)?.uri?.toString?.();
-    console.log(`onDidChangeActiveTextEditor, ${editor}， currentUri: ${currentUri}`)
-    if (currentUri !== undefined && bottomDocUri !== currentUri) {
+    console.log(`onDidChangeTabs currentUri: ${currentUri}`)
+    if (currentUri !== undefined && bottomDocUri !== currentUri && currentDocUri != currentUri) {
         await closeResultContextPannel();
         currentDocUri = undefined;
         bottomDocUri = undefined;
@@ -100,8 +100,9 @@ export class TargetContextFinder {
         // split bottom
         await vscode.commands.executeCommand('workbench.action.moveEditorToBelowGroup');
         await vscode.commands.executeCommand('workbench.action.focusBelowGroup');
-        // 30% height
-        for (let i = 0; i < 3; i++) {
+        // default: 50% height, now: 30% height
+        for (let i = 0; i < 2; i++) {
+            // decreaseViewHeight by 10% height on each iteration
             await vscode.commands.executeCommand('workbench.action.decreaseViewHeight');
         }
 
