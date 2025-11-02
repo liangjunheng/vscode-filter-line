@@ -8,14 +8,14 @@ import { getNumberOfTargetContextLines } from './config_manager';
 
 let bottomDocUri: string | undefined;
 let currentDocUri: string | undefined;
-vscode.window.tabGroups.onDidChangeTabs(async (event) => {
+vscode.window.onDidChangeActiveTextEditor(async (editor) => {
     if (currentDocUri === null || bottomDocUri === undefined) {
         return
     }
     const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
     const currentUri = (activeTab?.input as any)?.uri?.toString?.();
     console.log(`onDidChangeTabs currentUri: ${currentUri}`)
-    if (currentUri !== undefined && bottomDocUri !== currentUri && currentDocUri != currentUri) {
+    if (currentUri !== undefined && bottomDocUri !== currentUri) {
         await closeResultContextPannel();
         currentDocUri = undefined;
         bottomDocUri = undefined;
