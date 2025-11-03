@@ -68,10 +68,22 @@ export class TargetContextFinder {
         await vscode.workspace.fs.delete(vscode.Uri.file(getCacheResultContextDir()), { recursive: true });
         // close last pannel
         await closeResultContextPannel();
+
         // create context result file
         const segments = path.dirname(sourcePath).split(path.sep); // 按路径分隔符切割成数组
-        const lastThire = segments.slice(-2).join('＞');
-        const outputFile = createCacheResultContextFileUri(`TargetContextLines@：${ "...＞" + lastThire + "＞" + path.basename(sourcePath)}`);
+        // outDirPath
+        let outDirPath = segments.slice(-1)
+        .map((s) => {
+            return s.length > 25 ? s.slice(0, 25) + "..." : s
+        })
+        .join('＞') + "＞";
+        // outputFileName
+        let outputFileName = path.basename(sourcePath);
+        if(outputFileName.length > 50) {
+            outDirPath = ""
+        }
+        outputFileName = outputFileName.length > 75 ? outputFileName.slice(0, 75) + "..." : outputFileName;
+        const outputFile = createCacheResultContextFileUri(`TargetContextLines@[${ "...＞" + outDirPath + outputFileName}]`);
         searchByRipgrep(
             sourcePath,
             outputFile,
