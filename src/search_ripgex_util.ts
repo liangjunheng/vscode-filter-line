@@ -1,31 +1,8 @@
 import { spawnSync, SpawnSyncReturns } from 'child_process';
 import * as fs from 'fs';
-import * as path from 'path';
 import * as os from 'os';
-import * as vscode from 'vscode';
 import { createCachePatternFileUri, deleteCachePatternFileUri } from './file_manager';
-
-/**
- * 
- */
-let ripgrepPath = path.join(
-    vscode.env.appRoot,
-    'node_modules',
-    '@vscode',
-    'ripgrep',
-    'bin',
-    process.platform === 'win32' ? 'rg.exe' : 'rg'
-);
-if(vscode.workspace.getConfiguration('filter-line').get('ripgrepPath', '') === '') {
-    vscode.workspace.getConfiguration('filter-line').update('ripgrepPath', ripgrepPath, vscode.ConfigurationTarget.Global)
-}
-function getRipGrepPath(): string {
-    if (fs.existsSync(ripgrepPath)) {
-        return ripgrepPath;
-    }
-    ripgrepPath = vscode.workspace.getConfiguration('filter-line').get('ripgrepPath', ripgrepPath);
-    return ripgrepPath;
-}
+import { getRipGrepPath } from './config_manager';
 
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
     let commonArgs = ['--pcre2', ...args];

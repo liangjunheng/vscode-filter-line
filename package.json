@@ -131,11 +131,11 @@
         "configuration": {
             "title": "Filter Line",
             "properties": {
-                "filter-line.ripgrepPath": {
+                "filter-line.attachRipgrepPath": {
                     "type": "string",
                     "default": "",
                     "scope": "application",
-                    "description": "RipGrep Path"
+                    "description": "Ripgrep Path"
                 },
                 "filter-line.historySize": {
                     "type": "integer",

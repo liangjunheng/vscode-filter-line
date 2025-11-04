@@ -3,7 +3,8 @@
 Filter line for current opening file by strings/regular expressions, generating the result in a new file.
 Commonly used for log analysis.
 
-*Tip: Some features depend on [ripgrep](https://github.com/BurntSushi/ripgrep). Add [ripgrep](https://github.com/BurntSushi/ripgrep) to your system PATH only if those features aren't working.*
+*Tip: Some features depend on [ripgrep](https://github.com/BurntSushi/ripgrep). Add [ripgrep](https://github.com/BurntSushi/ripgrep) to Ripgrep Path only if those features aren't working.*
+![ripgrep](img/ripgrep.png)
 
 ## Usage
 1. Alt + F: filter to lines machting

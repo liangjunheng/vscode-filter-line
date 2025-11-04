@@ -1,5 +1,31 @@
 import { ctx } from "./extension";
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+
+/**
+ * 
+ */
+let ripgrepPath = '';
+getRipGrepPath();
+export function getRipGrepPath(): string {
+    if (fs.existsSync(ripgrepPath)) {
+        return ripgrepPath;
+    }
+    ripgrepPath = vscode.workspace.getConfiguration('filter-line').get('attachRipgrepPath', ripgrepPath);
+    if(ripgrepPath === '') {
+        ripgrepPath = path.join(
+            vscode.env.appRoot,
+            'node_modules',
+            '@vscode',
+            'ripgrep',
+            'bin',
+            process.platform === 'win32' ? 'rg.exe' : 'rg'
+        );
+        vscode.workspace.getConfiguration('filter-line').update('attachRipgrepPath', ripgrepPath, vscode.ConfigurationTarget.Global)
+    }
+    return ripgrepPath;
+}
 
 export function isDisplayFilenamesWhenFilterDir(): boolean {
     return vscode.workspace.getConfiguration('filter-line').get('displayFilenamesWhenFilterDir', true);
