@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { createCachePatternFileUri, deleteCachePatternFileUri } from './file_manager';
 import { getRipGrepPath } from './config_manager';
+import { escapePath } from './util';
 
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
     let commonArgs = ['--pcre2', ...args];
@@ -44,19 +45,6 @@ function isValidRegex(pattern: string) {
  */
 function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/**
- * escape Path 
- */
-function escapePath(path: string): string {
-    if (process.platform === 'win32') {
-        // Windows CMD & PowerShell
-        return JSON.stringify(path);
-    } else {
-        // Linux/macOS Bash
-        return `'${path}'`;
-    }
 }
 
 function ceatePatternFile(pattern: string, needMatchPatternSelf: boolean = false): string {
@@ -102,84 +90,6 @@ export function checkRegexByRipgrep(
         return true
     }
     return false;
-}
-
-/**
- * 
-*/
-export function searchStringByRipgrep(
-    inputFilePath: string,
-    outputFilePath: string,
-    pattern: string,
-    options: { 
-        invertMatchMode: boolean,
-        ignoreCaseMode: boolean,
-        showFilename: boolean,
-    }
-): SpawnSyncReturns<Buffer> {
-    let args = [
-        escapePath(inputFilePath),
-        '>', escapePath(outputFilePath),
-    ]
-    const patternFilePath = ceatePatternFile(pattern);
-    args = ['--fixed-strings', '-f', escapePath(patternFilePath), ...args];
-
-    if (options.ignoreCaseMode) {
-        args = ['--ignore-case', ...args]
-    }
-    if (options.invertMatchMode) {
-        args = ['--invert-match', ...args]
-    }
-    if(options.showFilename && fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {
-        args = ['--heading', ...args]
-    } else {
-        args = ['--no-filename', ...args]
-    }
-    const result = ripgrep(args);
-    deleteCachePatternFileUri(patternFilePath)
-    console.log(`searchByString, cmd-output: ${result.status}`);
-    return result;
-}
-
-/***
- * 
-*/
-export function searchRegexByRipgrep(
-    inputFilePath: string,
-    outputFilePath: string,
-    pattern: string,
-    options: { 
-        matchRegexSelf: boolean,
-        invertMatchMode: boolean,
-        ignoreCaseMode: boolean,
-        showFilename: boolean,
-    }
-): SpawnSyncReturns<Buffer> {
-    // build args
-    let args = [
-        escapePath(inputFilePath),
-        '>', escapePath(outputFilePath),
-    ]
-    const patternFilePath = ceatePatternFile(pattern, options.matchRegexSelf);
-    args = ['-f', escapePath(patternFilePath), ...args];
-
-    // ignorecase
-    if (options.ignoreCaseMode) {
-        args = ['--ignore-case', ...args];
-    }
-    // inverse match
-    if (options.invertMatchMode) {
-        args = ['--invert-match', ...args];
-    }
-    if(options.showFilename && fs.existsSync(inputFilePath) && fs.statSync(inputFilePath).isDirectory()) {
-        args = ['--heading', ...args]
-    } else {
-        args = ['--no-filename', ...args]
-    }
-    const result = ripgrep(args);
-    deleteCachePatternFileUri(patternFilePath)
-    console.log(`searchByRegex, cmd-output: ${result.status}`);
-    return result;
 }
 
 /***

@@ -64,6 +64,19 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
     };
 }
 
+/**
+ * escape Path 
+ */
+function escapePath(path: string): string {
+    if (process.platform === 'win32') {
+        // Windows CMD & PowerShell
+        return JSON.stringify(path);
+    } else {
+        // Linux/macOS Bash
+        return `'${path}'`;
+    }
+}
+
 function getValiadFileName(input: string): string {
     // https://blog.csdn.net/Yu1441/article/details/145701076
     const fileName = input.slice(0, 200)
@@ -106,4 +119,4 @@ function canOpenFileSafely(
 }
 
 
-export { padWithBlank, readJsonFile, debounce, getValiadFileName, canOpenFileSafely, copySelectionText, copyCurrentLine };
+export { padWithBlank, readJsonFile, debounce, getValiadFileName, escapePath, canOpenFileSafely, copySelectionText, copyCurrentLine };

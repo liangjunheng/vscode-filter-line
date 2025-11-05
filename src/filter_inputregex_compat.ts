@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
 import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './search_ripgex_util';
 import { isEnableStringMatchInRegex, isDisplayFilenamesWhenFilterDir } from './config_manager';
-import { checkRegexByFs, searchByFs } from './search_classic_utils';
+import { checkRegexByFs, searchByFs } from './search_classic_util';
 
 class FilterLineByInputCompat extends FilterLineBase{
     private readonly HIST_KEY = 'inputRegex';
