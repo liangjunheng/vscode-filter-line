@@ -1,18 +1,12 @@
 import { ctx } from "./extension";
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as path from 'path';
 
 /**
  * 
  */
-let ripgrepPath = '';
-getRipGrepPath();
 export function getRipGrepPath(): string {
-    if (fs.existsSync(ripgrepPath)) {
-        return ripgrepPath;
-    }
-    ripgrepPath = vscode.workspace.getConfiguration('filter-line').get('attachRipgrepPath', ripgrepPath);
+    let ripgrepPath = vscode.workspace.getConfiguration('filter-line').get('attachRipgrepPath', '');
     if(ripgrepPath === '') {
         ripgrepPath = path.join(
             vscode.env.appRoot,

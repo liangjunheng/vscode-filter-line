@@ -8,7 +8,9 @@ import { escapePath } from './util';
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
     let commonArgs = ['--pcre2', ...args];
     const rgPath = getRipGrepPath();
-    console.log(`ripgrep start: ${rgPath} ${commonArgs.join(' ')}`);
+    console.log(`########################### ripgrep command start ################################`);
+    console.log(`ripgrep start, ripgrep command: ${rgPath} ${commonArgs.join(' ')}`);
+    console.log(`############################ ripgrep command end #################################`);
     const result = spawnSync(escapePath(rgPath), commonArgs, { shell: true });
     console.log(`ripgrep end, status: ${result.status}, stderr: ${result.stderr}`);
     return result;
@@ -67,7 +69,8 @@ function ceatePatternFile(pattern: string, needMatchPatternSelf: boolean = false
  * 
 */
 export function checkRipgrep() {
-    if (fs.existsSync(getRipGrepPath())) {
+    const rgPath = getRipGrepPath()
+    if (rgPath !== '' && spawnSync(rgPath, ['--version']).stderr.length === 0) {
         return true;
     }
     return false;
