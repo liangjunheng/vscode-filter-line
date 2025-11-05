@@ -64,13 +64,13 @@ class FilterLineByInputCompat extends FilterLineBase{
 
     protected override search(inputFilePath: string, outputFilePath: string, pattern: string) {
         if(this.currentSearchOptions.enableRegexMode) {
-            this.searchByRegex(inputFilePath, outputFilePath, pattern);
+            return this.searchByRegex(inputFilePath, outputFilePath, pattern);
         } else {
-            this.searchByString(inputFilePath, outputFilePath, pattern);
+            return this.searchByString(inputFilePath, outputFilePath, pattern);
         }
     }
 
-    private searchByRegex(inputFilePath: string, outputFilePath: string, pattern: string) {
+    private async searchByRegex(inputFilePath: string, outputFilePath: string, pattern: string) {
         if (checkRipgrep()) {
             const result = searchByRipgrep(
                 inputFilePath,
@@ -90,7 +90,7 @@ class FilterLineByInputCompat extends FilterLineBase{
             }
             return result;
         } else {
-            const result = searchByFs(
+            const result = await searchByFs(
                 inputFilePath,
                 outputFilePath,
                 pattern,
@@ -105,7 +105,7 @@ class FilterLineByInputCompat extends FilterLineBase{
         }
     }
 
-    private searchByString(inputFilePath: string, outputFilePath: string, pattern: string) {
+    private async searchByString(inputFilePath: string, outputFilePath: string, pattern: string) {
         if (checkRipgrep()) {
             const result = searchByRipgrep(
                 inputFilePath,
@@ -125,7 +125,7 @@ class FilterLineByInputCompat extends FilterLineBase{
             }
             return result;
         } else {
-            const result = searchByFs(
+            const result = await searchByFs(
                 inputFilePath,
                 outputFilePath,
                 pattern,

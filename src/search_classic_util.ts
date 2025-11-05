@@ -43,7 +43,7 @@ function searchStringByFs(
         ignoreCaseMode: boolean,
         invertMatchMode: boolean,
     }
-) {
+): Promise<any> | any {
     if (pattern === undefined) {
         return undefined;
     }
@@ -61,7 +61,7 @@ function searchStringByFs(
         }
         return undefined
     }
-    outputMatchLineByFs(
+    return outputMatchLineByFs(
         inputPath,
         outputPath,
         onFilterLineOp
@@ -77,7 +77,7 @@ function searchRegexByFs(
         ignoreCaseMode: boolean,
         invertMatchMode: boolean,
     }
-) {
+): Promise<any> | any {
     if (regex === undefined) {
         return undefined;
     }
@@ -115,7 +115,7 @@ function searchRegexByFs(
         }
         return undefined
     }
-    outputMatchLineByFs(
+    return outputMatchLineByFs(
         inputPath,
         outputPath,
         onFilterLineOp
@@ -141,9 +141,9 @@ export function searchByFs(
         ignoreCaseMode: boolean,
         invertMatchMode: boolean,
     }
-) {
+): Promise<any> | any {
     if (options.regexMode) {
-        searchRegexByFs(
+        return searchRegexByFs(
             inputPath,
             outputPath,
             pattern,
@@ -154,7 +154,7 @@ export function searchByFs(
             }
         );
     } else {
-        searchStringByFs(
+        return searchStringByFs(
             inputPath,
             outputPath,
             pattern,
