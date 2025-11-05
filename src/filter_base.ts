@@ -373,9 +373,13 @@ class FilterLineBase{
                     cancellable: false,
                 },
                 async (progress) => {
+                    const startMillis = Date.now()
                     const docPath = await this.getDocumentPathToBeFilter(filePath)
+                    console.log(`filter=>getDocumentPathToBeFilter=>spend: ${ Date.now() - startMillis}`);
                     await this.prepareFilterFileEnv(userInputText)
+                    console.log(`filter=>prepareFilterFileEnv=>spend: ${ Date.now() - startMillis}`);
                     await this.filterFile(docPath);
+                    console.log(`filter=>filterFile=>spend: ${ Date.now() - startMillis}`);
                 }
             );
         }

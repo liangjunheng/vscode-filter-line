@@ -58,8 +58,9 @@ function ceatePatternFile(pattern: string, needMatchPatternSelf: boolean = false
         isPatternValid = true;
     }
 
-    if (needMatchPatternSelf && isValidRegex(escapeRegex(pattern))) {
-        fs.writeFileSync(patternFilePath, `${ isPatternValid ? os.EOL : '' }${escapeRegex(pattern)}`, { encoding: "utf8", flag: 'a' });
+    const escapePattern = escapeRegex(pattern);
+    if (needMatchPatternSelf && escapePattern !== '') {
+        fs.writeFileSync(patternFilePath, `${ isPatternValid ? os.EOL : '' }${escapePattern}`, { encoding: "utf8", flag: 'a' });
     }
     return patternFilePath
 }
@@ -86,11 +87,11 @@ export function checkRegexByRipgrep(
     pattern: string,
     options: { matchSelf: boolean } = { matchSelf: false }
 ): Boolean {
+    if (options.matchSelf) {
+        return true
+    }
     if (isValidRegex(pattern)) {
         return true;
-    }
-    if (options.matchSelf && isValidRegex(escapeRegex(pattern))) {
-        return true
     }
     return false;
 }
@@ -118,6 +119,7 @@ export function searchByRipgrep(
             contextLineCount: 0,
         },
 ): SpawnSyncReturns<Buffer> {
+    const startMillis = Date.now()
     // build args
     let args = [
         escapePath(inputFilePath),
@@ -125,7 +127,8 @@ export function searchByRipgrep(
     ]
     const patternFilePath = ceatePatternFile(pattern, options.matchRegexSelf);
     args = ['-f', escapePath(patternFilePath), ...args];
-
+    console.log(`searchByRipgrep=>ceatePatternFile=>spend: ${ Date.now() - startMillis}`);
+    
     // ignorecase
     if (options.ignoreCaseMode) {
         args = ['--ignore-case', ...args];
@@ -150,6 +153,7 @@ export function searchByRipgrep(
     }
     const result = ripgrep(args);
     deleteCachePatternFileUri(patternFilePath)
+    console.log(`searchByRipgrep=>ripgrep=>end=>spend: ${ Date.now() - startMillis}`);
     console.log(`searchByRegex, cmd-output: ${result.status}`);
     return result;
 }
