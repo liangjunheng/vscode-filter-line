@@ -6,11 +6,12 @@ Commonly used for log analysis.
 *Tip: Some features depend on [ripgrep](https://github.com/BurntSushi/ripgrep). Add [ripgrep](https://github.com/BurntSushi/ripgrep) to Ripgrep Path only if those features aren't working.*
 ![ripgrep](img/ripgrep.png)
 
+
 ## Usage
 1. Alt + F: filter to lines machting
 2. Alt + Shift + F： filter to lines not machting
-2. F12：display surrounding lines of the selected target line
-3. More：
+3. F12：display surrounding lines of the selected target line
+4. More：
 
 ![list](img/commandlist.png)
 
@@ -21,6 +22,7 @@ Commonly used for log analysis.
 3. Filter line by input string (or not contain input string).
 4. Filter line by input regular expression (or not match input regular expression).
 5. Support showing context lines in the filter line view
+6. Supports multiline matching when regex expressions include keyword like '(?s)', '\R', '\n'
 
 ### Large file mode
 * Perfect support large file filter, but ensure the file is saved before proceeding.

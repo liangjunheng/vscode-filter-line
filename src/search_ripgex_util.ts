@@ -5,7 +5,7 @@ import { createCachePatternFileUri, deleteCachePatternFileUri } from './file_man
 import { getRipGrepPath } from './config_manager';
 
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
-    let commonArgs = ['--pcre2', '--multiline', ...args];
+    let commonArgs = ['--pcre2', ...args];
     const rgPath = getRipGrepPath();
     console.log(`ripgrep start: ${rgPath} ${commonArgs.join(' ')}`);
     const result = spawnSync(escapePath(rgPath), commonArgs, { shell: true });
@@ -231,6 +231,9 @@ export function searchByRipgrep(
     }
     if(options.contextLineCount > 0) {
         args = [`--context ${options.contextLineCount}`, ...args]
+    }
+    if(pattern.includes('\\n') || pattern.includes('\\R') || pattern.includes('(?s)')) {
+        args = ['--multiline', ...args]
     }
     const result = ripgrep(args);
     deleteCachePatternFileUri(patternFilePath)
