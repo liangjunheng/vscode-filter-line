@@ -142,7 +142,7 @@ export function searchByRipgrep(
     if(options.contextLineCount > 0) {
         args = [`--context ${options.contextLineCount}`, ...args]
     }
-    if(pattern.includes('\\n') || pattern.includes('\\R') || pattern.includes('(?s)')) {
+    if(pattern.includes('(?s)')) {
         args = ['--multiline', ...args]
     }
     const result = ripgrep(args);

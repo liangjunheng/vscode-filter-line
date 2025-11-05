@@ -22,7 +22,7 @@ Commonly used for log analysis.
 3. Filter line by input string (or not contain input string).
 4. Filter line by input regular expression (or not match input regular expression).
 5. Support showing context lines in the filter line view
-6. Supports multiline matching when regex expressions include keyword like '(?s)', '\R', '\n'
+6. Supports multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*\R.*END
 
 ### Large file mode
 * Perfect support large file filter, but ensure the file is saved before proceeding.
