@@ -4,6 +4,7 @@ All notable changes to the "filter-line" extension will be documented in this fi
 ## [5.2.x]
 - Refactor UI
 - Support Show Context Lines
+- Support Multiline Match
 
 ## [5.1.x]
 - Support filter directory
