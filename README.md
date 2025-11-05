@@ -6,6 +6,14 @@ Commonly used for log analysis.
 *Tip: Some features depend on [ripgrep](https://github.com/BurntSushi/ripgrep). Add [ripgrep](https://github.com/BurntSushi/ripgrep) to Ripgrep Path only if those features aren't working.*
 ![ripgrep](img/ripgrep.png)
 
+## [*]Features
+1. Support large file filter
+2. Support folder filte line
+3. Filter line by input string (or not contain input string).
+4. Filter line by input regular expression (or not match input regular expression).
+5. Support showing context lines in the filter line view
+6. Supports multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*\R.*END
+
 
 ## Usage
 1. Alt + F: filter to lines machting
@@ -15,14 +23,6 @@ Commonly used for log analysis.
 
 ![list](img/commandlist.png)
 
-## Features
-
-1. Support large file filter
-2. Support folder filte line
-3. Filter line by input string (or not contain input string).
-4. Filter line by input regular expression (or not match input regular expression).
-5. Support showing context lines in the filter line view
-6. Supports multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*\R.*END
 
 ### Large file mode
 * Perfect support large file filter, but ensure the file is saved before proceeding.
