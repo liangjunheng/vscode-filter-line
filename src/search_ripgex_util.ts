@@ -68,7 +68,7 @@ function ceatePatternFile(pattern: string, needMatchPatternSelf: boolean = false
  * Check if the ripgrep is available
  * 
 */
-export function checkRipgrep() {
+export function checkRipgrepExec() {
     const rgPath = getRipGrepPath()
     if (rgPath !== '' && spawnSync(rgPath, ['--version']).stderr.length === 0) {
         return true;

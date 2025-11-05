@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import {FilterLineBase} from './filter_base';
-import {checkRegexByRipgrep, checkRipgrep, searchByRipgrep} from './search_ripgex_util';
+import {checkRegexByRipgrep, searchByRipgrep} from './search_ripgex_util';
 import { isEnableStringMatchInRegex, isDisplayFilenamesWhenFilterDir } from './config_manager';
 import { checkRegexByFs, searchByFs } from './search_classic_util';
 
@@ -47,7 +47,7 @@ class FilterLineByInputCompat extends FilterLineBase{
             return;
         }
         // console.log('input : ' + text);
-        if (checkRipgrep()) {
+        if (this.isRipgrepExecVaild) {
             if (!checkRegexByRipgrep(userInputText, { matchSelf: this.isEnableStringMatchInRegexMode })) {
                 this.showError('checkRegexByRipgrep incorrect: ' + userInputText);
                 return;
@@ -71,7 +71,7 @@ class FilterLineByInputCompat extends FilterLineBase{
     }
 
     private async searchByRegex(inputFilePath: string, outputFilePath: string, pattern: string) {
-        if (checkRipgrep()) {
+        if (this.isRipgrepExecVaild) {
             const result = searchByRipgrep(
                 inputFilePath,
                 outputFilePath,
@@ -106,7 +106,7 @@ class FilterLineByInputCompat extends FilterLineBase{
     }
 
     private async searchByString(inputFilePath: string, outputFilePath: string, pattern: string) {
-        if (checkRipgrep()) {
+        if (this.isRipgrepExecVaild) {
             const result = searchByRipgrep(
                 inputFilePath,
                 outputFilePath,

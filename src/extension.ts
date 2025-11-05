@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
-import { checkRipgrep } from './search_ripgex_util';
+import { checkRipgrepExec } from './search_ripgex_util';
 import { FilterLineByInputCompat } from './filter_inputregex_compat';
 import { closeResultContextPannel, TargetContextFinder } from './filter_target_context';
 
@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
     let disposable_filterFromDirby = vscode.commands.registerCommand('extension.filterLineFromDirBy', async (dirUri) => {
-        if(!checkRipgrep()) {
+        if(!checkRipgrepExec()) {
             vscode.window.showErrorMessage('Ripgrep executable not found. Folder filtering is unavailable', "Failure");
             return;
         }

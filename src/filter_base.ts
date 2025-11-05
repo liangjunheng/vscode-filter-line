@@ -7,14 +7,15 @@ import * as fs from 'fs';
 import * as commonUtil from './util';
 import {HistoryCommand} from './history_command';
 import {createCacheResultFileUri} from './file_manager';
-import {checkRipgrep} from './search_ripgex_util';
+import {checkRipgrepExec} from './search_ripgex_util';
 import * as configManager from './config_manager';
 
 class FilterLineBase{
     protected ctx: vscode.ExtensionContext;
     protected readonly historyCommand: HistoryCommand;
     protected readonly NEW_PATTERN_CHOISE = 'New pattern...';
-    private currentMatchPattern: string = ''
+    protected isRipgrepExecVaild = false;
+    private currentMatchPattern: string = '';
     currentSearchOptions: {
         enableRegexMode: boolean,
         enableIgnoreCaseMode: boolean,
@@ -248,7 +249,7 @@ class FilterLineBase{
             }
 
             let stats = fs.statSync(filePath);
-            if(stats.isDirectory() && checkRipgrep()) {
+            if(stats.isDirectory() && this.isRipgrepExecVaild) {
                 resolve(filePath);
                 return;
             }
@@ -355,9 +356,15 @@ class FilterLineBase{
 
     public async filter(filePath?: string) {
         console.log('filter:' + filePath);
-        const userInputText = await this.awaitUserInput()
+
+        const checkRipgrepExecJob = new Promise<boolean>((resolve) => {
+            resolve(checkRipgrepExec())
+        });
+        const userInputText = await this.awaitUserInput();
+        this.isRipgrepExecVaild = await checkRipgrepExecJob
+
         if(userInputText && userInputText !== '') {
-            const isFsModeSymbol = !checkRipgrep() ? "(Fs)" : ""
+            const isFsModeSymbol = !this.isRipgrepExecVaild ? "(slow)" : ""
             const matchModeSymbol = this.currentSearchOptions.enableInvertMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
                 {
