@@ -123,7 +123,7 @@ class FilterLineBase{
         });
 
         // get histroy
-        let history = this.historyCommand.getHistory(key);
+        let history = this.historyCommand.getHistory();
         let picks: Array<string> = [...history];
         console.log(`History: ${JSON.stringify(history)}`);
 
@@ -145,7 +145,7 @@ class FilterLineBase{
             }
             if (e.button.tooltip === "Delete") {
                 history = history.filter(item => item !== e.item.label);
-                this.historyCommand.updateHistory(key, history)
+                this.historyCommand.updateHistory(history)
                 quickPick.items = quickPick.items.filter(item => item.label !== e.item.label);
             }
         });

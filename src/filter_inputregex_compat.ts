@@ -15,10 +15,10 @@ class FilterLineByInputCompat extends FilterLineBase{
         // Match the regular expression pattern itself
         this.isEnableStringMatchInRegexMode = isEnableStringMatchInRegex()
 
-        let history = this.historyCommand.getHistory(this.HIST_KEY);
+        let history = this.historyCommand.getHistory();
         if (history === undefined) {
             history = [];
-            this.historyCommand.updateHistory(this.HIST_KEY, history);
+            this.historyCommand.updateHistory(history);
         }
     }
 
@@ -59,7 +59,7 @@ class FilterLineByInputCompat extends FilterLineBase{
                 return;
             }
         }
-        await this.historyCommand.addToHistory(this.HIST_KEY, userInputText);
+        await this.historyCommand.addToHistory(userInputText);
         return
     }
 
