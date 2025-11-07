@@ -164,6 +164,45 @@
                     "maximum": 10000,
                     "scope": "application",
                     "description": "The number of surrounding target context lines to use when creating new Search Editors."
+                },
+                "filter-line.presetFilters": {
+                    "type": "array",
+                    "description": "Preset Filters",
+                    "default": [
+                        { "name": "example", "pattern": "(?s)BEGIN.*?END", "ignoreCase": true, "regexMode": true, "invertMatch": false }
+                    ],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "name"
+                            },
+                            "pattern": {
+                                "type": "string",
+                                "description": "pattern"
+                            },
+                            "ignoreCase": {
+                                "type": "boolean",
+                                "default": true,
+                                "description": "ignoreCase"
+                            },
+                            "regexMode": {
+                                "type": "boolean",
+                                "default": true,
+                                "description": "Type of the value"
+                            },
+                            "invertMatch": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": "Extra description for this item"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "pattern"
+                        ]
+                    }
                 }
             }
         }
