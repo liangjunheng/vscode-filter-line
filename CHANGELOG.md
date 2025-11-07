@@ -1,10 +1,14 @@
 # Change Log
 All notable changes to the "filter-line" extension will be documented in this file.
 
+## [5.3.x]
+- Support preset filter Rule
+- Support input history cloud sync
+- 
 ## [5.2.x]
 - Refactor UI
-- Support Show Context Lines
-- Support Multiline Match
+- Support show Context Lines
+- Support multiline match
 
 ## [5.1.x]
 - Support filter directory
