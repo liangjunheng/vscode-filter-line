@@ -168,9 +168,7 @@
                 "filter-line.presetFilters": {
                     "type": "array",
                     "description": "Preset Filters",
-                    "default": [
-                        { "name": "example", "pattern": "(?s)BEGIN.*?END", "ignoreCase": true, "regexMode": true, "invertMatch": false }
-                    ],
+                    "default": [],
                     "items": {
                         "type": "object",
                         "properties": {

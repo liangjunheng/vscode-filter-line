@@ -1,7 +1,7 @@
 import { ctx } from "./extension";
 import * as vscode from 'vscode';
 
-type PresetFilterItem = { "name": string, "pattern": string, "ignoreCase": boolean, "regexMode": boolean, "invertMatch": boolean };
+export type PresetFilterItem = { "name": string, "pattern": string, "ignoreCase": boolean, "regexMode": boolean, "invertMatch": boolean };
 export function getPresetFilters(): PresetFilterItem[] {
     return vscode.workspace.getConfiguration('filter-line').get<PresetFilterItem[]>('presetFilters', []);
 }

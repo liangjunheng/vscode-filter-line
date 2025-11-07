@@ -361,6 +361,7 @@ class FilterLineBase{
             resolve(checkRipgrepExec())
         });
         const userInputText = await this.awaitUserInput();
+        this.currentMatchPattern = userInputText;
         this.isRipgrepExecVaild = await checkRipgrepExecJob
 
         if(userInputText && userInputText !== '') {

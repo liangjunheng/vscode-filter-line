@@ -5,40 +5,18 @@ import {checkRegexByRipgrep, searchByRipgrep} from './search_ripgex_util';
 import { isEnableStringMatchInRegex, isDisplayFilenamesWhenFilterDir } from './config_manager';
 import { checkRegexByFs, searchByFs } from './search_classic_util';
 
-class FilterLineByInputCompat extends FilterLineBase{
-    private readonly HIST_KEY = 'inputRegex';
+class FilterLineByPresetPattern extends FilterLineBase{
     private isEnableStringMatchInRegexMode = false;
+    regexPattern: string = '';
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
-        
         // Match the regular expression pattern itself
         this.isEnableStringMatchInRegexMode = isEnableStringMatchInRegex()
-
-        let history = this.historyCommand.getHistory(this.HIST_KEY);
-        if (history === undefined) {
-            history = [];
-            this.historyCommand.updateHistory(this.HIST_KEY, history);
-        }
     }
 
-    protected override async awaitUserInput(): Promise<string> {
-        console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
-        let title = "filter to lines machting"
-        let usrChoice: string = await this.showHistoryPick(
-            this.HIST_KEY,
-            title, 
-            "please input...",
-            {
-                enableRegexMode: this.currentSearchOptions.enableRegexMode,
-                enableIgnoreCaseMode: this.currentSearchOptions.enableIgnoreCaseMode,
-                enableInvertMatchMode: this.currentSearchOptions.enableInvertMatchMode,
-            }
-        );
-        if (usrChoice === this.NEW_PATTERN_CHOISE) {
-            usrChoice = await vscode.window.showInputBox() ?? ''
-        }
-        return usrChoice;
+    protected override awaitUserInput(): string {
+        return this.regexPattern;
     }
 
     
@@ -59,7 +37,6 @@ class FilterLineByInputCompat extends FilterLineBase{
                 return;
             }
         }
-        await this.historyCommand.addToHistory(this.HIST_KEY, userInputText);
         return
     }
 
@@ -145,4 +122,4 @@ class FilterLineByInputCompat extends FilterLineBase{
     }
 }
 
-export { FilterLineByInputCompat };
+export { FilterLineByPresetPattern };

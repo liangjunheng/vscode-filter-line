@@ -6,7 +6,9 @@ import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrepExec } from './search_ripgex_util';
 import { FilterLineByInputCompat } from './filter_inputregex_compat';
+import { FilterLineByPresetPattern } from './filter_preset_pattern';
 import { closeResultContextPannel, TargetContextFinder } from './filter_target_context';
+import { getPresetFilters, PresetFilterItem } from './config_manager';
 
 export let ctx: vscode.ExtensionContext;
 
@@ -54,10 +56,15 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const filters: Array<Filters> = [
-            {label: 'Match Pattern', command: 'extension.filterLineByInput'},
-            {label: 'Not Match Pattern', command: 'extension.filterLineByNotMatchInput'},
-            {label: 'Config File', command: 'extension.filterLineByConfigFile'}
+            {label: '✨Match Pattern', command: 'extension.filterLineByInput'},
+            {label: '✨Not Match Pattern', command: 'extension.filterLineByNotMatchInput'},
         ];
+        getPresetFilters().forEach((presetFilterItem) => {
+            filters.push({
+                label: presetFilterItem.name,
+                command: 'extension.filterLineByPresetFilters'
+            });
+        })
 
         const choices: vscode.QuickPickItem[] = filters.map(item => Object.create({label: item.label}));
         let choice: string | vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(choices);
@@ -66,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
             choice = choice.label;
         }
-        await vscode.commands.executeCommand(filters.filter(val => val.label === choice)[0].command, path);
+        await vscode.commands.executeCommand(filters.filter(val => val.label === choice)[0].command, path, choice);
     });
 
 
@@ -87,10 +94,15 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const filters: Array<Filters> = [
-            {label: 'Match Pattern', command: 'extension.filterLineByInput'},
-            {label: 'Not Match Pattern', command: 'extension.filterLineByNotMatchInput'},
-            {label: 'Config File', command: 'extension.filterLineByConfigFile'}
+            {label: '✨Match Pattern', command: 'extension.filterLineByInput'},
+            {label: '✨Not Match Pattern', command: 'extension.filterLineByNotMatchInput'},
         ];
+        getPresetFilters().forEach((presetFilterItem) => {
+            filters.push({
+                label: presetFilterItem.name,
+                command: 'extension.filterLineByPresetFilters'
+            });
+        })
 
         const choices: vscode.QuickPickItem[] = filters.map(item => Object.create({label: item.label}));
         let choice: string | vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(choices);
@@ -99,7 +111,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
             choice = choice.label;
         }
-        await vscode.commands.executeCommand(filters.filter(val => val.label === choice)[0].command, path);
+        await vscode.commands.executeCommand(filters.filter(val => val.label === choice)[0].command, path, choice);
     });
 
     let disposable_input = vscode.commands.registerCommand('extension.filterLineByInput', async (path) => {
@@ -109,6 +121,26 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(filter);
     });
 
+
+    let disposable_presetFilters = vscode.commands.registerCommand('extension.filterLineByPresetFilters', async (path, label) => {
+        let filter = new FilterLineByPresetPattern(context);
+        let presetFilterItem: PresetFilterItem | undefined;
+        getPresetFilters().forEach((item)=> {
+            if(item.name === label) {
+                presetFilterItem = item
+            }
+        })
+        if(presetFilterItem === undefined) {
+            return
+        }
+        console.log(`presetFilterItem: ${presetFilterItem.pattern}`)
+        filter.currentSearchOptions.enableIgnoreCaseMode = presetFilterItem.ignoreCase
+        filter.currentSearchOptions.enableInvertMatchMode = presetFilterItem.invertMatch
+        filter.currentSearchOptions.enableRegexMode = presetFilterItem.regexMode
+        filter.regexPattern = presetFilterItem.pattern
+        await filter.filter(path);
+        context.subscriptions.push(filter);
+    });
 
     let disposable_notmatchinput = vscode.commands.registerCommand('extension.filterLineByNotMatchInput', async (path) => {
         let filter = new FilterLineByInputCompat(context);
@@ -136,6 +168,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(disposable_filterFromDirby);
     context.subscriptions.push(disposable_filterby);
+    context.subscriptions.push(disposable_presetFilters);
     context.subscriptions.push(disposable_input);
     context.subscriptions.push(disposable_notmatchinput);
     context.subscriptions.push(disposable_configfile);
