@@ -364,7 +364,7 @@ class FilterLineBase{
         this.isRipgrepExecVaild = await checkRipgrepExecJob
 
         if(userInputText && userInputText !== '') {
-            const isFsModeSymbol = !this.isRipgrepExecVaild ? "(slow)" : ""
+            const isFsModeSymbol = !this.isRipgrepExecVaild ? "(Ripgrep not found)" : ""
             const matchModeSymbol = this.currentSearchOptions.enableInvertMatchMode ? "➖" : "➕"
             vscode.window.withProgress(
                 {

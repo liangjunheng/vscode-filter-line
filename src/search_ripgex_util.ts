@@ -1,13 +1,54 @@
 import { spawnSync, SpawnSyncReturns } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
+import * as vscode from 'vscode';
 import { createCachePatternFileUri, deleteCachePatternFileUri } from './file_manager';
-import { getRipGrepPath } from './config_manager';
 import { escapePath } from './util';
+import path = require('path');
+
+
+/**
+ * ripgrep path
+ */
+let ripgrepExecPath: string = path.join(vscode.env.appRoot, 'node_modules', '@vscode', 'ripgrep', 'bin', process.platform === 'win32' ? 'rg.exe' : 'rg')
+if(!fs.existsSync(ripgrepExecPath)) {
+    ripgrepExecPath = process.platform === 'win32' ? 'rg.exe' : 'rg'
+}
+
+// tip: Ripgrep is not installed
+let isAlreadyTip = false 
+async function tipRipgrepNotInstall() {
+    if (!isAlreadyTip) {
+        vscode.window.showWarningMessage(
+            'Ripgrep is not installed. See the README.md for installation instructions.',
+            'Open README'
+        ).then(selection => {
+            if (selection === 'Open README') {
+                // 用默认浏览器打开链接
+                vscode.env.openExternal(
+                    vscode.Uri.parse('https://marketplace.visualstudio.com/items?itemName=liangjunheng.filter-line-pro')
+                );
+            }
+        });
+        isAlreadyTip = true
+    }
+}
+
+/**
+ * Check if the ripgrep is available
+ * 
+*/
+export function checkRipgrepExec() {
+    if (spawnSync(ripgrepExecPath, ['--version'])?.stderr?.length === 0) {
+        return true;
+    }
+    tipRipgrepNotInstall()
+    return false;
+}
 
 function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
     let commonArgs = ['--pcre2', ...args];
-    const rgPath = getRipGrepPath();
+    const rgPath = ripgrepExecPath;
     console.log(`########################### ripgrep command start ################################`);
     console.log(`ripgrep start, ripgrep command: ${rgPath} ${commonArgs.join(' ')}`);
     console.log(`############################ ripgrep command end #################################`);
@@ -19,7 +60,7 @@ function ripgrep(args: string[]): SpawnSyncReturns<Buffer> {
 function isValidRegex(pattern: string) {
     const args = [pattern];
     const commonArgs = ['--pcre2', '--quiet', ...args];
-    const result = spawnSync(getRipGrepPath(), commonArgs, { encoding: 'utf-8' });
+    const result = spawnSync(ripgrepExecPath, commonArgs, { encoding: 'utf-8' });
     console.log(`isValidRegex: ${result.stderr.length === 0}, pattern: ${pattern}, status: ${result.status}, stderr: ${result.stderr}`);
     if (result.stderr.length === 0) {
         return true;
@@ -63,18 +104,6 @@ function ceatePatternFile(pattern: string, needMatchPatternSelf: boolean = false
         fs.writeFileSync(patternFilePath, `${ isPatternValid ? os.EOL : '' }${escapePattern}`, { encoding: "utf8", flag: 'a' });
     }
     return patternFilePath
-}
-
-/**
- * Check if the ripgrep is available
- * 
-*/
-export function checkRipgrepExec() {
-    const rgPath = getRipGrepPath()
-    if (rgPath !== '' && spawnSync(rgPath, ['--version']).stderr.length === 0) {
-        return true;
-    }
-    return false;
 }
 
 /**
