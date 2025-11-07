@@ -2,7 +2,7 @@
     "name": "filter-line-pro",
     "displayName": "Filter Line Pro",
     "description": "Filter log line by strings or regex expressions, Designed for log and logcat analysis, grep, search, filter, trace, match, view, viewer.",
-    "version": "5.2.17",
+    "version": "5.2.18",
     "publisher": "liangjunheng",
     "license": "MIT",
     "engines": {
