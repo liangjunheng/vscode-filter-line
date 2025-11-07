@@ -2,7 +2,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {FilterLineByConfigFile} from './filter_configfile';
 import {deleteInvalidRealFileWhenCloseTab, clearCacheFiles, deleteInvalidCacheFile, SEARCH_RESULT_EXT} from './file_manager';
 import { checkRipgrepExec } from './search_ripgex_util';
 import { FilterLineByInputCompat } from './filter_inputregex_compat';
@@ -149,12 +148,6 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(filter);
     });
 
-    let disposable_configfile = vscode.commands.registerCommand('extension.filterLineByConfigFile', async (path) => {
-        let filter = new FilterLineByConfigFile(context);
-        await filter.filter(path);
-        context.subscriptions.push(filter);
-    });
-
 
     let disposable_showContextLines = vscode.commands.registerCommand('extension.showContextLines', async () => {
         const targetContextFinder = new TargetContextFinder();
@@ -171,7 +164,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable_presetFilters);
     context.subscriptions.push(disposable_input);
     context.subscriptions.push(disposable_notmatchinput);
-    context.subscriptions.push(disposable_configfile);
     context.subscriptions.push(disposable_showContextLines);
 }
 

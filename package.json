@@ -60,11 +60,6 @@
                 "category": "FilterLinePro"
             },
             {
-                "command": "extension.filterLineByConfigFile",
-                "title": "Filter Line By Config File",
-                "category": "FilterLinePro"
-            },
-            {
                 "command": "extension.filterLineBy",
                 "title": "📄Filter Line By...",
                 "category": "FilterLinePro"
@@ -228,8 +223,5 @@
         "type": "git",
         "url": "https://github.com/liangjunheng/vscode-filter-line.git"
     },
-    "homepage": "https://github.com/liangjunheng/vscode-filter-line",
-    "dependencies": {
-        "eoml": "^1.0.2"
-    }
+    "homepage": "https://github.com/liangjunheng/vscode-filter-line"
 }
