@@ -22,32 +22,32 @@ Commonly used for log analysis.
 3. F12：display surrounding lines of the selected target line
 ![list](img/commandlist.png)
 
-
 ### 1. Large file mode
 * Perfect support large file filter, but ensure the file is saved before proceeding.
 
 ### 2. Support folder filte line.
+1. show context menu
 ![searchdir](img/searchdir.gif)
 
 ### 3. Filter line by input string.
 1. Alt + F: filter to lines machting
 2. Type a string and hit `<Enter>`.
-
 ![bystring](img/bystring.gif)
 
 ### 4. Filter line by input regex.
 1. Alt + F: filter to lines machting
 2. Type a regular expression and hit `<Enter>`.
-
 ![byregex](img/byregex.gif)
 
 ### 5. Support showing context lines in the filter line view.
 1. Line currently targeted for selection
 2. F12: Display surrounding lines of the selected target line
-
 ![contextlines](img/contextlines.gif)
 
+### 6. Support multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*?END
+1. regex expressions include '(?s)'
+![filetmultiline](filetmultiline.gif)
 
-
-### 6. Support preset filter rules 
+### 7. Support preset filter rules 
+1. show context menu
 ![presetfilters](img/presetfilters.gif)
