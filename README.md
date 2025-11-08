@@ -7,13 +7,13 @@ Commonly used for log analysis.
 
 ## **Features**
 1. Filter line by input string (or not contain input string).
-4. Filter line by input regular expression (or not match input regular expression).
-5. Support large file filter
-6. Support folder filte line
-7. Support showing context lines in the filter line view
-8. Support multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*?END
-9. Support input history cloud sync
-10. Support preset filter rules 
+2. Filter line by input regular expression (or not match input regular expression).
+3. Support large file filter
+4. Support folder filte line
+5. Support showing context lines in the filter line view
+6. Support multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*?END
+7. Support input history cloud sync
+8. Support preset filter rules 
 ---
 
 ## Usage
