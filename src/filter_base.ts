@@ -33,7 +33,6 @@ class FilterLineBase{
     }
 
     protected async showHistoryPick(
-        key: string,
         title: string,
         description: string,
         options: {
@@ -80,12 +79,17 @@ class FilterLineBase{
         };
 
         quickPick.buttons = [
+            vscode.QuickInputButtons.Back,
             options.enableInvertMatchMode ? enableInvertMatchButton : disableInvertMatchButton,
             options.enableIgnoreCaseMode ? enableIngoreCaseButton : disableIngoreCaseButton,
             options.enableRegexMode ? enableRegexButton : disableRegexButton,
             closeButton
         ];
         quickPick.onDidTriggerButton(button => {
+            if (button === vscode.QuickInputButtons.Back) {
+                quickPick.hide()
+                vscode.commands.executeCommand("extension.filterLineBy");
+            }
             if (button === enableIngoreCaseButton) {
                 options.enableIgnoreCaseMode = false
                 configManager.setIgnoreCaseMode(false);
@@ -115,6 +119,7 @@ class FilterLineBase{
             }
             // select buttons
             quickPick.buttons = [
+                vscode.QuickInputButtons.Back,
                 options.enableInvertMatchMode ? enableInvertMatchButton : disableInvertMatchButton,
                 options.enableIgnoreCaseMode ? enableIngoreCaseButton : disableIngoreCaseButton,
                 options.enableRegexMode ? enableRegexButton : disableRegexButton,

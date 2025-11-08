@@ -6,7 +6,6 @@ import { isEnableStringMatchInRegex, isDisplayFilenamesWhenFilterDir } from './c
 import { checkRegexByFs, searchByFs } from './search_classic_util';
 
 class FilterLineByInputCompat extends FilterLineBase{
-    private readonly HIST_KEY = 'inputRegex';
     private isEnableStringMatchInRegexMode = false;
 
     constructor(context: vscode.ExtensionContext) {
@@ -14,19 +13,12 @@ class FilterLineByInputCompat extends FilterLineBase{
         
         // Match the regular expression pattern itself
         this.isEnableStringMatchInRegexMode = isEnableStringMatchInRegex()
-
-        let history = this.historyCommand.getHistory();
-        if (history === undefined) {
-            history = [];
-            this.historyCommand.updateHistory(history);
-        }
     }
 
     protected override async awaitUserInput(): Promise<string> {
         console.log('prepare, isEnableStringMatchInRegexMode: ' + this.isEnableStringMatchInRegexMode);
         let title = "filter to lines machting"
         let usrChoice: string = await this.showHistoryPick(
-            this.HIST_KEY,
             title, 
             "please input...",
             {
@@ -47,7 +39,7 @@ class FilterLineByInputCompat extends FilterLineBase{
             // console.log('No input');
             return;
         }
-        // console.log('input : ' + text);
+        console.log('input : ' + userInputText);
         if (this.isRipgrepExecVaild) {
             if (!checkRegexByRipgrep(userInputText, { matchSelf: this.isEnableStringMatchInRegexMode })) {
                 this.showError('checkRegexByRipgrep incorrect: ' + userInputText);
