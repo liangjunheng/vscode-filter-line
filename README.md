@@ -6,13 +6,15 @@ Commonly used for log analysis.
 *🌟Warning: Some features depend on **[ripgrep](https://github.com/BurntSushi/ripgrep)**. Add **[ripgrep](https://github.com/BurntSushi/ripgrep)** to **SYSTEM PATH** only if those features aren't working.*
 
 ## **Features**
-1. Support large file filter
-2. Support folder filte line
-3. Filter line by input string (or not contain input string).
+1. Filter line by input string (or not contain input string).
 4. Filter line by input regular expression (or not match input regular expression).
-5. Support showing context lines in the filter line view
-6. Supports multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*?END
-
+5. Support large file filter
+6. Support folder filte line
+7. Support showing context lines in the filter line view
+8. Support multiline matching when regex expressions include '(?s)', for example: (?s)BEGIN.*?END
+9. Support input history cloud sync
+10. Support preset filter rules 
+---
 
 ## Usage
 1. Alt + F: filter to lines machting
@@ -47,3 +49,5 @@ Commonly used for log analysis.
 
 
 
+### 6. Support preset filter rules 
+![presetfilters](img/presetfilters.gif)
