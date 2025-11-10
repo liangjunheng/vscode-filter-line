@@ -80,15 +80,16 @@ function escapePath(path: string): string {
 function getValiadFileName(input: string): string {
     // https://blog.csdn.net/Yu1441/article/details/145701076
     const fileName = input.slice(0, 200)
+        .replace(/\t/g, '\\t')
         .replace(/\*/g, '∗')
         .replace(/\//g, '᜵')
         .replace(/\\/g, '∖')
-        .replace(/:/g, '꞉')
+        .replace(/\:/g, '꞉')
         .replace(/\?/g, 'ʔ')
-        .replace(/"/g, '″')
-        .replace(/</g, '＜')
-        .replace(/>/g, '＞')
-        .replace(/`/g, 'ˋ')
+        .replace(/\"/g, '″')
+        .replace(/\</g, '＜')
+        .replace(/\>/g, '＞')
+        .replace(/\`/g, 'ˋ')
         .replace(/\./g, '․')
         .replace(/\|/g, 'ǀ');
     return fileName;
