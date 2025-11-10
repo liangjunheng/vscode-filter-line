@@ -19,7 +19,7 @@ export function isSingleSeachBoxMode(): boolean {
 }
 
 export function getHistoryMaxSizeConfig(): number {
-    return vscode.workspace.getConfiguration('filter-line').get('historySize', 30);
+    return vscode.workspace.getConfiguration('filter-line').get('historySize', 300);
 }
 
 export function getNumberOfTargetContextLines(): number {
